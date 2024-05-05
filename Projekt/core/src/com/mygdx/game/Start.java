@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class Start extends Game {
 
     public SpriteBatch batch;
+    public static float volume;
 
     @Override
     public void create() {

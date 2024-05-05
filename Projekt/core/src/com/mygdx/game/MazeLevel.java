@@ -28,6 +28,8 @@ public class MazeLevel implements Screen {
 
     Music song;
 
+    float volume;
+
     public boolean canMove = false;
 
     public MazeLevel(final Start game) {
@@ -46,6 +48,7 @@ public class MazeLevel implements Screen {
     @Override
     public void show() {
         setIsPaused(false);
+        song.setVolume(Start.volume);
         song.play();
         conductor.start();
     }
