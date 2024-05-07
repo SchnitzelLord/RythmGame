@@ -57,22 +57,24 @@ public class MazeLevel implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(Color.RED);
 
+        //begin drawing objets
         game.batch.begin();
         player.draw(game.batch);
         if (!isPaused) {
             camera.update();
             game.batch.setProjectionMatrix(camera.combined);
-            //conductor.songPosition = song.getPosition();
             update();
         }
         game.batch.end();
 
+        //pause game and switch to pause menu
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             setIsPaused(true);
             song.pause();
             game.setScreen(new PauseScreen(game, this));
         }
 
+        //player move inputs
         if(Gdx.input.isKeyPressed(Input.Keys.D) && canMove) {
             player.setX(player.getX() + 100);
         }
@@ -92,6 +94,7 @@ public class MazeLevel implements Screen {
     }
 
     public void update() {
+        //update current song position and check if on beat
         if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() <= conductor.lastBeat + conductor.crochet + 0.3f) {
             canMove = true;
             conductor.lastBeat += conductor.crochet;

@@ -6,10 +6,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -44,18 +46,21 @@ public class OptionsMenuOne implements Screen {
 
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont());
         TextButton backButton = new TextButton("Back", style);
+        TextField volumeField = new TextField("", skin);
 
 
         table.row().pad(20, 0, 20, 0);
-        /* table.add("Volume", "Aerial", Color.BLUE);
-
+        /* table.add("Volume", "Aerial", Color.BLUE); */
+        table.add(volumeField).width(100);
         table.row();
+        /*
         table.add("Keybindings", "Aerial", Color.BLUE);
 
         table.row();
          */
         table.add(backButton);
 
+        volumeField.addListener(new InputListener());
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
