@@ -51,11 +51,15 @@ public class JumpAndRun implements Screen {
 
     boolean canSpawn;
     int jumps = 2;
+
+    Texture heartTexture;
+    Array<Sprite> hearts;
     BitmapFont font = new BitmapFont();
 
     public JumpAndRun(final Start game) {
         this.game = game;
         playerTexture = new Texture("characterSprite\\playerSprite.png");
+        heartTexture = new Texture("characterSprite\\heartsprite_test.png");
         player = new Sprite(playerTexture, 64, 64);
         player.setX(1920 / 2);
         player.setY(1080 / 2);
@@ -75,6 +79,14 @@ public class JumpAndRun implements Screen {
         conductor.start();
 
         rectangles =  new Array<Rectangle>();
+        hearts = new Array<Sprite>();
+        for (int i = 0;i < 10; i++) {
+            hearts.add(new Sprite(heartTexture,64,64));
+        }
+
+        for (Sprite heart : hearts) {
+
+        }
     }
 
     public void setIsPaused(boolean isPaused) {
