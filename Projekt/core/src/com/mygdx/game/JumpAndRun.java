@@ -107,13 +107,13 @@ public class JumpAndRun implements Screen {
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-            move = player.getX() - 200 * Gdx.graphics.getDeltaTime();
-            if (move < 0) move = player.getX();
+            move = player.getX() - 300 * Gdx.graphics.getDeltaTime();
+            if (move <= 0) move = 0;
             player.setX(move);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-            move = player.getX() + 200 * Gdx.graphics.getDeltaTime();
-            if (move > MAX_WIDTH - player.getWidth()) move = player.getX();
+            move = player.getX() + 300 * Gdx.graphics.getDeltaTime();
+            if (move + player.getWidth()> MAX_WIDTH) move = MAX_WIDTH - player.getWidth(); // minus player.getwidth so that set places the sprite with the rigth lower corner at the rigth limit
             player.setX(move);
         }
 
@@ -128,7 +128,7 @@ public class JumpAndRun implements Screen {
             move = player.getY() - 600 * Gdx.graphics.getDeltaTime();
             if (move < 0) move = 0;
             player.setY(move);
-            jumps = 2;
+            if (player.getY() == 0)jumps = 2; // when the player has hit the ground he can jump again
 
         } else {
             jumpTime -= 1;
@@ -179,9 +179,12 @@ public class JumpAndRun implements Screen {
     }
 
     private void spawnRectangle() {
+        double random = Math.random();
         Rectangle rectangle = new Rectangle();
         rectangle.x = MAX_WIDTH;
-        rectangle.y = 0;
+        if (random < 0.33) rectangle.y = 0;
+        else if (random < 0.66)rectangle.y = (int) (200 +  100*Math.random()) ;
+        else rectangle.y = (int) (450 +  100*Math.random());
         rectangle.width = (int) player.getWidth();
         rectangle.height = (int) player.getHeight();
         rectangles.add(rectangle);
