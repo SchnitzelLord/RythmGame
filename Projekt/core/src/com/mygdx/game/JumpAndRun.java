@@ -36,6 +36,8 @@ public class JumpAndRun implements Screen {
 
     private boolean isPaused;
 
+    private int jumpTime;
+
     OrthographicCamera camera;
 
     Conductor conductor;
@@ -44,9 +46,11 @@ public class JumpAndRun implements Screen {
 
     float volume;
 
-    public boolean canMove = false;
+
     float move;
 
+    boolean canSpawn;
+    int jumps = 2;
     BitmapFont font = new BitmapFont();
 
     public JumpAndRun(final Start game) {
@@ -95,7 +99,7 @@ public class JumpAndRun implements Screen {
                 game.batch.draw(playerTexture, rectangle.x, rectangle.y);
             }
 
-            font.draw(game.batch, "Lives : " + lives, MAX_WIDTH / 2, 900);
+            font.draw(game.batch, "Lives : " + lives + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY(), MAX_WIDTH / 2, 900);
         }
 
 
@@ -119,16 +123,30 @@ public class JumpAndRun implements Screen {
 
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE )) {
-            move = player.getY() + 200 * Gdx.graphics.getDeltaTime();
-            if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
 
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jumps > 0 ) { // just pressed so that the player has to press space again to double jump
+            move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
+            if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
+            jumpTime = 20;
+            jumps -= 1;
+
+        } else if (jumpTime <= 0) {
+            move = player.getY() - 600 * Gdx.graphics.getDeltaTime();
+            if (move < 0) move = 0;
+            player.setY(move);
+            jumpTime -= 1;
+            if (player.getY() <= 5)jumps = 2;   // smaller then 5 because the player is not exactly at zero
+
+
         } else {
-            move = player.getY() - 400 * Gdx.graphics.getDeltaTime();
-            if (move < 0) move = player.getY();
+            jumpTime -= 1;
+            move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
+            if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
         }
+
 
         for (Iterator<Rectangle> iter = rectangles.iterator(); iter.hasNext(); ) {
             Rectangle rectangle = iter.next();
@@ -138,14 +156,24 @@ public class JumpAndRun implements Screen {
             if(overlap(rectangle)) {
                 iter.remove();
                 lives -= 1;
+
             }
         }
 
 
-        if(TimeUtils.nanoTime() - lastRectangleTime > 1000000000) spawnRectangle();
+        if(TimeUtils.nanoTime() - lastRectangleTime > 1000000000 && canSpawn) spawnRectangle();
 
         if (lives <= 0) Gdx.app.exit();
 
+    }
+
+    public void update() {
+        if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() <= conductor.lastBeat + conductor.crochet + 0.3f) {
+            canSpawn = true;
+            conductor.lastBeat += conductor.crochet;
+        } else {
+            canSpawn = false;
+        }
     }
 
     private boolean overlap (Rectangle rec) {
@@ -192,15 +220,4 @@ public class JumpAndRun implements Screen {
         playerTexture.dispose();
         song.dispose();
     }
-
-    public void update() {
-        if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() <= conductor.lastBeat + conductor.crochet + 0.3f) {
-            canMove = true;
-            conductor.lastBeat += conductor.crochet;
-        } else {
-            canMove = false;
-        }
-    }
-
-
 }
