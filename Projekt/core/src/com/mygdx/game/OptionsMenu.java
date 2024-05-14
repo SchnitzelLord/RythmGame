@@ -107,11 +107,12 @@ public class OptionsMenu implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
+        volumeLevel = String.valueOf(Start.volume);
         //draw stage
         stage.act();
         stage.draw();
 
-        volumeLevel = String.valueOf(Start.volume);
+
 
     }
 
