@@ -67,7 +67,7 @@ public class MainMenuScreen implements Screen {
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MazeLevel(game));
+                game.setScreen(new JumpAndRun(game));
             }
         });
 

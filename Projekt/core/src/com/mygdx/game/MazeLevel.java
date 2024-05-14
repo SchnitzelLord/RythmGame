@@ -3,17 +3,21 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import javax.sound.sampled.AudioInputStream;
-
 public class MazeLevel implements Screen {
+
+    private static final int MAX_HEIGTH = 1080;
+    private static final int MAX_WIDTH = 1920;
+
+
 
     final Start game;
     Sprite player;
@@ -74,16 +78,16 @@ public class MazeLevel implements Screen {
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.D) && canMove) {
-            player.setX(player.getX() + 100);
+            if (! (player.getX() + player.getWidth() + 100 > MAX_WIDTH)) player.setX(player.getX() + 100);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.A) && canMove) {
-            player.setX(player.getX() - 100);
+            if (! (player.getX() - 100 < 0)) player.setX(player.getX() - 100);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.W) && canMove) {
-            player.setY(player.getY() + 100);
+            if (! (player.getY() + player.getHeight() + 100 > MAX_HEIGTH)) player.setY(player.getY() + 100);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.S) && canMove) {
-            player.setY(player.getY() - 100);
+            if (! (player.getY() - 100 < 0))player.setY(player.getY() - 100);
         }
     }
 
