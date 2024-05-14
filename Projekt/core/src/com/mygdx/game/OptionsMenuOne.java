@@ -7,10 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -26,9 +23,13 @@ public class OptionsMenuOne implements Screen {
     Texture buttonBackground;
     Texture minusButtonTexture;
     Texture plusButtonTexture;
+    Label.LabelStyle textStyle;
+    BitmapFont font;
+    String volumeLevel;
 
     public OptionsMenuOne(final Start game) {
         this.game = game;
+        volumeLevel = String.valueOf(Start.volume);
 
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -40,11 +41,15 @@ public class OptionsMenuOne implements Screen {
         skin.add("button", buttonBackground);
         skin.add("minus", minusButtonTexture);
         skin.add("plus", plusButtonTexture);
+        textStyle = new Label.LabelStyle(new BitmapFont(), Color.WHITE);
+        skin.add("font", textStyle);
+
     }
 
     @Override
     public void show() {
         Table table = new Table();
+        table.setSkin(skin);
         table.setFillParent(true);
         table.setDebug(true);
         stage.addActor(table);
@@ -57,9 +62,9 @@ public class OptionsMenuOne implements Screen {
         ImageButton minusButton = new ImageButton(minusStyle);
 
         table.bottom().left();
-        table.add().width(100);
+        table.add("Volume", "font").width(100);
         table.add(minusButton).expandY();
-        table.add().width(100);
+        table.add(volumeLevel, "font").width(100);
         table.add(plusButton);
         table.row().pad(20, 0, 20, 0);
         table.add(backButton);
@@ -92,6 +97,7 @@ public class OptionsMenuOne implements Screen {
         stage.act();
         stage.draw();
 
+        volumeLevel = String.valueOf(Start.volume);
 
     }
 
@@ -120,5 +126,7 @@ public class OptionsMenuOne implements Screen {
         stage.dispose();
         skin.dispose();
         buttonBackground.dispose();
+        minusButtonTexture.dispose();
+        plusButtonTexture.dispose();
     }
 }

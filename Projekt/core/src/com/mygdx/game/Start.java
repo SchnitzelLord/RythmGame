@@ -10,6 +10,7 @@ public class Start extends Game {
 
     @Override
     public void create() {
+        volume = 0.5f;
         batch = new SpriteBatch();
         this.setScreen(new MainMenuScreen(this));
     }
