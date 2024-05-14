@@ -57,7 +57,9 @@ public class OptionsMenuOne implements Screen {
         ImageButton minusButton = new ImageButton(minusStyle);
 
         table.bottom().left();
+        table.add().width(100);
         table.add(minusButton).expandY();
+        table.add().width(100);
         table.add(plusButton);
         table.row().pad(20, 0, 20, 0);
         table.add(backButton);
