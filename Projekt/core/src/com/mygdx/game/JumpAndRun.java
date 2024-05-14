@@ -60,7 +60,7 @@ public class JumpAndRun implements Screen {
         this.game = game;
         playerTexture = new Texture("characterSprite\\playerSprite.png");
         heartTexture = new Texture("characterSprite\\heartsprite_test.png");
-        player = new Sprite(playerTexture, 64, 64);
+        player = new Sprite(playerTexture, 64,64 );
         player.setX(1920 / 2);
         player.setY(1080 / 2);
         isPaused = false;
@@ -81,12 +81,12 @@ public class JumpAndRun implements Screen {
         rectangles =  new Array<Rectangle>();
         hearts = new Array<Sprite>();
         for (int i = 0;i < 10; i++) {
-            hearts.add(new Sprite(heartTexture,64,64));
+            Sprite heart = new Sprite(heartTexture,64,64);
+            hearts.add(heart);
+            heart.setX(10 + (i* heart.getWidth()) +10 );
+            heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
 
-        for (Sprite heart : hearts) {
-
-        }
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -106,6 +106,11 @@ public class JumpAndRun implements Screen {
             game.batch.setProjectionMatrix(camera.combined);
             //conductor.songPosition = song.getPosition();
             update();
+
+            for (int i = 0; i <lives; i++) { // draw all hearts
+                hearts.get(i).draw(game.batch);
+
+            }
 
             for(Rectangle rectangle: rectangles) {
                 game.batch.draw(playerTexture, rectangle.x, rectangle.y);
