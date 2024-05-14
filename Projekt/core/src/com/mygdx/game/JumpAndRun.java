@@ -128,8 +128,7 @@ public class JumpAndRun implements Screen {
             move = player.getY() - 600 * Gdx.graphics.getDeltaTime();
             if (move < 0) move = 0;
             player.setY(move);
-            jumpTime -= 1;
-            if (player.getY() <= 5)jumps = 2;   // smaller then 5 because the player is not exactly at zero
+            jumps = 2;
 
         } else {
             jumpTime -= 1;
@@ -168,6 +167,14 @@ public class JumpAndRun implements Screen {
         if (player.getY() + player.getHeight() < rec.y) return false;
         if (player.getY() > rec.y + rec.height) return false;
         if (player.getX() > rec.x + rec.width) return false;
+        return true;
+    }
+
+    private boolean overlap (Sprite sp) {
+        if (player.getX() + player.getWidth() < sp.getX()) return false;
+        if (player.getY() + player.getHeight() < sp.getY()) return false;
+        if (player.getY() > sp.getY() + sp.getHeight()) return false;
+        if (player.getX() > sp.getX() + sp.getWidth()) return false;
         return true;
     }
 
