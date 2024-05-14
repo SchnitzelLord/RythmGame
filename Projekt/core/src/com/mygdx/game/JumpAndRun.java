@@ -21,41 +21,24 @@ public class JumpAndRun implements Screen {
 
     private static final int MAX_HEIGTH = 1080;
     private static final int MAX_WIDTH = 1920;
-
-    private long lastRectangleTime;
-
     final Start game;
-    Sprite player;
-
+    private Sprite player;
+    private Texture playerTexture;
+    private OrthographicCamera camera;
+    private Conductor conductor;
+    private Music song;
+    private Texture heartTexture;
+    private Array<Sprite> hearts;
     private Array<Rectangle> rectangles;
-
+    private BitmapFont font = new BitmapFont();
     private int lives = 10;
-
-
-    Texture playerTexture;
-
+    private int jumps = 2;
     private boolean isPaused;
-
     private int jumpTime;
-
-    OrthographicCamera camera;
-
-    Conductor conductor;
-
-    Music song;
-
-    float volume;
-
-
+    float volume = 1;
     float move;
-
+    private long lastRectangleTime;
     boolean canSpawn;
-    int jumps = 2;
-
-    Texture heartTexture;
-    Array<Sprite> hearts;
-    BitmapFont font = new BitmapFont();
-
     public JumpAndRun(final Start game) {
         this.game = game;
         playerTexture = new Texture("characterSprite\\playerSprite.png");
@@ -68,7 +51,6 @@ public class JumpAndRun implements Screen {
         camera.setToOrtho(false, 1920, 1080);
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
-
     }
 
     @Override
@@ -86,14 +68,11 @@ public class JumpAndRun implements Screen {
             heart.setX(10 + (i* heart.getWidth()) +10 );
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
-
     }
 
     public void setIsPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
-
-
 
     @Override
     public void render(float delta) {
@@ -119,7 +98,6 @@ public class JumpAndRun implements Screen {
             font.draw(game.batch, "Lives : " + lives + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY(), MAX_WIDTH / 2, 900);
         }
 
-
         game.batch.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
@@ -137,10 +115,7 @@ public class JumpAndRun implements Screen {
             move = player.getX() + 200 * Gdx.graphics.getDeltaTime();
             if (move > MAX_WIDTH - player.getWidth()) move = player.getX();
             player.setX(move);
-
         }
-
-
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jumps > 0 ) { // just pressed so that the player has to press space again to double jump
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
@@ -156,14 +131,12 @@ public class JumpAndRun implements Screen {
             jumpTime -= 1;
             if (player.getY() <= 5)jumps = 2;   // smaller then 5 because the player is not exactly at zero
 
-
         } else {
             jumpTime -= 1;
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
             if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
         }
-
 
         for (Iterator<Rectangle> iter = rectangles.iterator(); iter.hasNext(); ) {
             Rectangle rectangle = iter.next();
@@ -173,15 +146,12 @@ public class JumpAndRun implements Screen {
             if(overlap(rectangle)) {
                 iter.remove();
                 lives -= 1;
-
             }
         }
-
 
         if(TimeUtils.nanoTime() - lastRectangleTime > 1000000000 && canSpawn) spawnRectangle();
 
         if (lives <= 0) Gdx.app.exit();
-
     }
 
     public void update() {
@@ -214,12 +184,10 @@ public class JumpAndRun implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
     }
 
     @Override
     public void pause() {
-
     }
 
     @Override
@@ -229,7 +197,6 @@ public class JumpAndRun implements Screen {
 
     @Override
     public void hide() {
-
     }
 
     @Override
