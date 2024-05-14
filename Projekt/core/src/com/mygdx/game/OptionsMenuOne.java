@@ -56,13 +56,24 @@ public class OptionsMenuOne implements Screen {
         ImageButton plusButton = new ImageButton(plusStyle);
         ImageButton minusButton = new ImageButton(minusStyle);
 
-
-        table.row().pad(20, 0, 20, 0);
-        table.add(minusButton);
+        table.bottom().left();
+        table.add(minusButton).expandY();
         table.add(plusButton);
         table.row().pad(20, 0, 20, 0);
         table.add(backButton);
 
+        minusButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Start.volume -= 0.1f;
+            }
+        });
+        plusButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Start.volume += 0.1f;
+            }
+        });
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
