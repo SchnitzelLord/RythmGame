@@ -66,6 +66,9 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new OcarinaGame(game));
+                //game.setScreen(new JumpAndRun(game));
+                //game.setScreen(new MazeLevel(game));
+                dispose();
             }
         });
 
