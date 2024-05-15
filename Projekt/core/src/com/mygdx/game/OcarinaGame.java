@@ -40,7 +40,7 @@ public class OcarinaGame implements Screen {
     private boolean canSpawn;
     private int hits;
     private long lastArrowSpawn;
-    private float SPEED = 900;
+    private float speed;
     private float hitPosition;
 
     public OcarinaGame(Start game) {
@@ -65,6 +65,8 @@ public class OcarinaGame implements Screen {
         hitPosition = player.getY() + player.getHeight() + 10;
 
         arrows = new Array<>();
+
+        System.out.println(speed);
     }
 
     @Override
@@ -74,6 +76,7 @@ public class OcarinaGame implements Screen {
         conductor.start();
         song.setVolume(Start.volume);
         song.play();
+        speed = (HEIGHT - hitPosition) / conductor.crochet;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class OcarinaGame implements Screen {
             camera.update();
             controls();
 
-            checkIsHittable();
+            //checkIsHittable();
 
             game.batch.setProjectionMatrix(camera.combined);
 
@@ -99,8 +102,7 @@ public class OcarinaGame implements Screen {
             game.batch.end();
 
             for (Arrow arrow : arrows) {
-                Sprite s = arrow.getSprite();
-                s.translateY(-SPEED * Gdx.graphics.getDeltaTime());
+                arrow.getSprite().translateY(-speed * Gdx.graphics.getDeltaTime());
             }
 
             if (TimeUtils.nanoTime() - lastArrowSpawn > conductor.crochet * 1000000000) spawnArrow();
