@@ -104,6 +104,8 @@ public class OcarinaGame implements Screen {
             }
 
             if (TimeUtils.nanoTime() - lastArrowSpawn > conductor.crochet * 1000000000) spawnArrow();
+
+            checkWinCondition();
         }
     }
 
@@ -138,11 +140,19 @@ public class OcarinaGame implements Screen {
             Gdx.input.isKeyPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
             Gdx.input.isKeyPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) hits++;
 
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+//            for (Arrow arrow : arrows) {
+//                System.out.println(arrow.getDirection());
+//            }
+//        }
+    }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            for (Arrow arrow : arrows) {
-                System.out.println(arrow.getDirection());
-            }
+    private void checkWinCondition() {
+        if (hits >= 20) {
+            isRunning = false;
+            song.pause();
+            game.setScreen(new MainMenuScreen(game));
+            dispose();
         }
     }
 
