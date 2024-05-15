@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -27,8 +28,7 @@ public class OcarinaGame implements Screen {
     private final BitmapFont font;
 
     private final Sprite player;
-    private final Array<Sprite> arrows;
-    private final Array<Sprite> arrowBuffer;
+    private final Array<Arrow> arrows;
 
     private final int WIDTH = 1920;
     private final int HEIGHT = 1080;
@@ -37,7 +37,7 @@ public class OcarinaGame implements Screen {
     private final int playerY = HEIGHT / 2 - 32;
 
     private boolean isRunning;
-    private boolean canHit;
+    private boolean canSpawn;
     private int hits;
     private long lastArrowSpawn;
     private float SPEED = 900;
@@ -64,14 +64,13 @@ public class OcarinaGame implements Screen {
 
         hitPosition = player.getY() + player.getHeight() + 10;
 
-        arrowBuffer = new Array<>();
         arrows = new Array<>();
     }
 
     @Override
     public void show() {
         isRunning = true;
-        canHit = false;
+        canSpawn = false;
         conductor.start();
         song.setVolume(Start.volume);
         song.play();
@@ -93,37 +92,57 @@ public class OcarinaGame implements Screen {
 
             player.draw(game.batch);
             font.draw(game.batch, "Hits: " + hits, 20, HEIGHT - 20);
-            for (Sprite s : arrows) {
-                s.draw(game.batch);
+            for (Arrow a : arrows) {
+                a.getSprite().draw(game.batch);
             }
 
             game.batch.end();
 
-            for (Iterator<Sprite> iter = arrows.iterator(); iter.hasNext(); ) {
-                Sprite s = iter.next();
+            for (Arrow arrow : arrows) {
+                Sprite s = arrow.getSprite();
                 s.translateY(-SPEED * Gdx.graphics.getDeltaTime());
-                if (s.getY() < hitPosition) {
-                    iter.remove();
-                }
             }
 
-            if (TimeUtils.nanoTime() - lastArrowSpawn > 1000000000) spawnArrow();
+            if (TimeUtils.nanoTime() - lastArrowSpawn > conductor.crochet * 1000000000) spawnArrow();
         }
     }
 
     private void spawnArrow() {
-        Sprite arrow = new Sprite(arrowTexture, 64, 64);
-        arrow.setRotation(0);
-        arrow.setPosition(playerX, HEIGHT + 64);
-        arrows.add(arrow);
+        Sprite sprite = new Sprite(arrowTexture, 64, 64);
+
+        int direction = MathUtils.random(0, 3);
+
+        sprite.setRotation(direction * 90);
+        sprite.setPosition(playerX, HEIGHT + sprite.getHeight());
+
+        arrows.add(new Arrow(sprite, Arrow.Direction.fromInt(direction)));
+
         lastArrowSpawn = TimeUtils.nanoTime();
     }
 
     private void controls() {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) pauseGame();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            if (canHit) hits++;
+        Arrow.Direction direction = null;
+
+        for (Iterator<Arrow> iter = arrows.iterator(); iter.hasNext(); ) {
+            Arrow a = iter.next();
+            if (a.getSprite().getY() < hitPosition) {
+                direction = a.getDirection();
+                iter.remove();
+            }
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && direction == Arrow.Direction.UP ||
+            Gdx.input.isKeyPressed(Input.Keys.A) && direction == Arrow.Direction.LEFT ||
+            Gdx.input.isKeyPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
+            Gdx.input.isKeyPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) hits++;
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            for (Arrow arrow : arrows) {
+                System.out.println(arrow.getDirection());
+            }
         }
     }
 
@@ -134,17 +153,17 @@ public class OcarinaGame implements Screen {
     }
 
     private void checkIsHittable() {
-        float offset = 5f;
+        float offset = 0.25f;
 
         float leftInterval = conductor.lastBeat + conductor.crochet - offset;
         if (leftInterval < 0) leftInterval = 0;
         float rightInterval = conductor.lastBeat + conductor.crochet + offset;
 
         if (leftInterval <= song.getPosition() && song.getPosition() <= rightInterval) {
-            canHit = true;
+            canSpawn = true;
             conductor.lastBeat += conductor.crochet;
         } else {
-            canHit = false;
+            canSpawn = false;
         }
     }
 
