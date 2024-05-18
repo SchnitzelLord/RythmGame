@@ -34,6 +34,7 @@ public class JumpAndRun implements Screen {
     private Array<Sprite> waves;
     private Array<Sprite> platforms;
     private Array<Rectangle> boosters;
+    private Array<Powerup> powerups;
     private Array<Rectangle> rectangles;
     private BitmapFont font = new BitmapFont();
     private int lives = 10;
@@ -51,6 +52,7 @@ public class JumpAndRun implements Screen {
     private long lastWaveTime;
     private long lastBoosterTime;
     private long lastPlatformTime;
+    private long lastPowerupTime;
     private boolean canSpawn;
 
     private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
@@ -94,6 +96,7 @@ public class JumpAndRun implements Screen {
         waves = new Array<>();
         boosters = new Array<>();
         platforms = new Array<>();
+        powerups = new Array<>();
         // array that holds the hearts and sets them
         for (int i = 0;i < 10; i++) {
             Sprite heart = new Sprite(heartTexture,64,64);
@@ -128,6 +131,10 @@ public class JumpAndRun implements Screen {
                 wave.draw(game.batch);
             }
 
+            for(Powerup powerup: powerups) {
+                powerup.draw(game.batch);
+            }
+
             for(Sprite platform: platforms) {
                 platform.draw(game.batch);
             }
@@ -136,7 +143,6 @@ public class JumpAndRun implements Screen {
             for(Rectangle booster: boosters) {
                 game.batch.draw(boosterTexture, booster.x, booster.y);
             }
-
 
 
             if (DEBUGGING) font.draw(game.batch, "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
@@ -173,12 +179,12 @@ public class JumpAndRun implements Screen {
             move = player.getY() - fallspeed;
             float checkPlatform = checkPlatforms();
             if (move < 0) move = 0;
-            else if (checkPlatform!= -100) {
-                jumps = 2;
+            else if (checkPlatform!= -100 ) {
+                if (jumps < 2)jumps = 2;
                 move = checkPlatform;
             }
             player.setY(move);
-            if (player.getY() == 0)jumps = 2; // when the player has hit the ground he can jump again
+            if (player.getY() == 0 && jumps < 2)jumps = 2; // when the player has hit the ground he can jump again
 
         } else {
             jumpTime -= 1;
@@ -231,16 +237,27 @@ public class JumpAndRun implements Screen {
             if(platform.getX() < 0) iter.remove();
             }
 
+        for (Iterator<Powerup> iter = powerups.iterator(); iter.hasNext(); ) {
+            Powerup powerup = iter.next();
+            powerup.setX(powerup.getX() - 200 * Gdx.graphics.getDeltaTime());
+            if(powerup.getX() < 0) iter.remove();
+
+            if(overlap(powerup)) {
+                iter.remove();
+                jumps = 5;
+            }
+        }
+
         // Fallspeed
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
 
-
-
         if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
+
+        if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000 && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
+        if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0) Gdx.app.exit();
-        if(TimeUtils.nanoTime() - lastBoosterTime > 1000000000 && (Math.random() > 0.75)  && canSpawn) spawnPlatform();
     }
 
     public void update() {
@@ -316,6 +333,7 @@ public class JumpAndRun implements Screen {
         lastBoosterTime = TimeUtils.nanoTime();
     }
 
+
     private void spawnPlatform() {
         double random = Math.random();
         Sprite platform = new Sprite(platformTexture,100,10);
@@ -328,6 +346,19 @@ public class JumpAndRun implements Screen {
         platform.setY(y);
         platforms.add(platform);
         lastPlatformTime = TimeUtils.nanoTime();
+    }
+
+    private void spawnPowerup() {
+        double random = Math.random();
+
+        int x = MAX_WIDTH;
+        int y = (int) (200 +  150*Math.random());
+        if (random > 0.5) y = (int) (450 +  150*Math.random());
+        Powerup powerup = PowerupCreator.createPowerup(Power.doubleJump);
+        powerup.setX(x);
+        powerup.setY(y);
+        powerups.add(powerup);
+        lastPowerupTime = TimeUtils.nanoTime();
     }
 
 
