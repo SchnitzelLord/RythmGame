@@ -67,9 +67,9 @@ public class JumpAndRun implements Screen {
         // initialise textures
         playerTexture = new Texture("characterSprite\\playerSprite.png");
         waveTexture = new Texture("characterSprite\\playerSprite.png");
-        heartTexture = new Texture("characterSprite\\heartsprite_test.png");
-        boosterTexture = new Texture("characterSprite\\booster.png");
-        platformTexture = new Texture("characterSprite\\platform.png");
+        heartTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
+        boosterTexture = new Texture("jumpAndRunSprites\\booster.png");
+        platformTexture = new Texture("jumpAndRunSprites\\platform.png");
 
         player = new Sprite(playerTexture, 64,64 );
         player.setX(1920 / 2);
@@ -144,7 +144,7 @@ public class JumpAndRun implements Screen {
             }
 
 
-            if (DEBUGGING) font.draw(game.batch, "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+            if (DEBUGGING) font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
         }
 
         game.batch.end();
@@ -235,7 +235,7 @@ public class JumpAndRun implements Screen {
                 if(powerup.getPower() == Powerup.Power.moreJumps)jumps = 5;
                 else if(powerup.getPower() == Powerup.Power.doublespeed) {
                     speedModHor = 2;
-                    speedModHorChangeTime = 30;
+                    speedModHorChangeTime = 120;
                 }
             }
         }
@@ -244,7 +244,7 @@ public class JumpAndRun implements Screen {
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
         if (speedModHorChangeTime > 0 ) speedModHorChangeTime -= 1;
-        else if (speedModHorChangeTime == 0) speedModHorChangeTime = 1;
+        else if (speedModHorChangeTime == 0) speedModHor = 1;
 
         if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
