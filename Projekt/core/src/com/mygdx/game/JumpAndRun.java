@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -24,11 +23,15 @@ public class JumpAndRun implements Screen {
     final Start game;
     private Sprite player;
     private Texture playerTexture;
+    private Texture heartTexture;
+    private Texture waveTexture;
+    private Texture boosterTexture;
     private OrthographicCamera camera;
     private Conductor conductor;
     private Music song;
-    private Texture heartTexture;
     private Array<Sprite> hearts;
+    private Array<Sprite> waves;
+    private Array<Rectangle> boosters;
     private Array<Rectangle> rectangles;
     private BitmapFont font = new BitmapFont();
     private int lives = 10;
@@ -37,15 +40,32 @@ public class JumpAndRun implements Screen {
     private int jumpTime;
     float volume = 1;
     float move;
+
+    float fallSpeedMod;
+    int fallSpeedChangeTime;
     private long lastRectangleTime;
-    boolean canSpawn;
+    private long lastWaveTime;
+    private long lastBoosterTime;
+    private boolean canSpawn;
+    
+    private static final boolean debugging = true; // so that i can see various stats if enabled
+
+    // sprite sizes
+    private int boosterWidth = 100;
+    private int boosterHeigth = 100;
+
     public JumpAndRun(final Start game) {
         this.game = game;
+        // initialise textures
         playerTexture = new Texture("characterSprite\\playerSprite.png");
+        waveTexture = new Texture("characterSprite\\playerSprite.png");
         heartTexture = new Texture("characterSprite\\heartsprite_test.png");
+        boosterTexture = new Texture("characterSprite\\booster.png");
+
         player = new Sprite(playerTexture, 64,64 );
         player.setX(1920 / 2);
         player.setY(1080 / 2);
+
         isPaused = false;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1920, 1080);
@@ -59,9 +79,13 @@ public class JumpAndRun implements Screen {
         song.setVolume(Start.volume);
         song.play();
         conductor.start();
+        fallSpeedChangeTime = 0;
 
-        rectangles =  new Array<Rectangle>();
-        hearts = new Array<Sprite>();
+        rectangles =  new Array<>(); // used for platforms
+        hearts = new Array<>();
+        waves = new Array<>();
+        boosters = new Array<>();
+        // array that holds the hearts
         for (int i = 0;i < 10; i++) {
             Sprite heart = new Sprite(heartTexture,64,64);
             hearts.add(heart);
@@ -86,16 +110,23 @@ public class JumpAndRun implements Screen {
             //conductor.songPosition = song.getPosition();
             update();
 
-            for (int i = 0; i <lives; i++) { // draw all hearts
+            // Draw Hearts
+            for (int i = 0; i <lives; i++) { // draw as many hearts as there are lives
                 hearts.get(i).draw(game.batch);
-
+            }
+            // Draw Waves
+            for(Sprite wave: waves) {
+                wave.draw(game.batch);
             }
 
-            for(Rectangle rectangle: rectangles) {
-                game.batch.draw(playerTexture, rectangle.x, rectangle.y);
+            // Draw Boosters
+            for(Rectangle booster: boosters) {
+                game.batch.draw(boosterTexture, booster.x, booster.y);
             }
 
-            font.draw(game.batch, "Lives : " + lives + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY(), MAX_WIDTH / 2, 900);
+
+
+            if (debugging) font.draw(game.batch, "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
         }
 
         game.batch.end();
@@ -125,7 +156,8 @@ public class JumpAndRun implements Screen {
             jumps -= 1;
 
         } else if (jumpTime <= 0) {
-            move = player.getY() - 600 * Gdx.graphics.getDeltaTime();
+            float fallspeed = fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
+            move = player.getY() - fallspeed;
             if (move < 0) move = 0;
             player.setY(move);
             if (player.getY() == 0)jumps = 2; // when the player has hit the ground he can jump again
@@ -136,10 +168,10 @@ public class JumpAndRun implements Screen {
             if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
         }
-
+        // Testing for Rectangles
         for (Iterator<Rectangle> iter = rectangles.iterator(); iter.hasNext(); ) {
             Rectangle rectangle = iter.next();
-            rectangle.x -= 150 * Gdx.graphics.getDeltaTime();
+            rectangle.x -= (int) (150 * Gdx.graphics.getDeltaTime());
             if(rectangle.x < 0) iter.remove();
 
             if(overlap(rectangle)) {
@@ -148,8 +180,40 @@ public class JumpAndRun implements Screen {
             }
         }
 
-        if(TimeUtils.nanoTime() - lastRectangleTime > 1000000000 && canSpawn) spawnRectangle();
+        // Wave Objects
 
+        for (Iterator<Sprite> iter = waves.iterator(); iter.hasNext(); ) {
+            Sprite wave = iter.next();
+            wave.setX(wave.getX() - 150 * Gdx.graphics.getDeltaTime());
+            if(wave.getX() < 0) iter.remove();
+
+            if(overlap(wave)) {
+                iter.remove();
+                lives -= 1;
+            }
+        }
+
+        // Boosters
+        for (Iterator<Rectangle> iter = boosters.iterator(); iter.hasNext(); ) {
+            Rectangle booster = iter.next();
+            booster.x -= (int) (150 * Gdx.graphics.getDeltaTime());
+            if(booster.x < 0) iter.remove();
+
+            if(overlap(booster)) {
+                fallSpeedMod = (float) -2; // negative because the fallspeed is multiplied with it
+                fallSpeedChangeTime = 20;
+                iter.remove();
+            }
+        }
+
+        // Fallspeed
+        if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
+        else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
+
+
+
+        if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
+        if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
         if (lives <= 0) Gdx.app.exit();
     }
 
@@ -178,7 +242,7 @@ public class JumpAndRun implements Screen {
         return true;
     }
 
-    private void spawnRectangle() {
+    private void spawnRectangle() {  // old version used for testing
         double random = Math.random();
         Rectangle rectangle = new Rectangle();
         rectangle.x = MAX_WIDTH;
@@ -190,6 +254,35 @@ public class JumpAndRun implements Screen {
         rectangles.add(rectangle);
         lastRectangleTime = TimeUtils.nanoTime();
     }
+
+    private void spawnWave() {
+        double random = Math.random();
+        Sprite wave = new Sprite(waveTexture,64,64);
+        int x = MAX_WIDTH;
+        int y = 0;
+
+        if (random < 0.33) y = (int) (200 +  100*Math.random());
+        else if (random < 0.66) y = (int) (450 +  100*Math.random());
+
+        wave.setX(x);
+        wave.setY(y);
+        waves.add(wave);
+        lastWaveTime = TimeUtils.nanoTime();
+    }
+
+    private void spawnBooster() {
+        double random = Math.random();
+        Rectangle booster = new Rectangle();
+        booster.x = MAX_WIDTH;
+        if (random < 0.33) booster.y = 0;
+        else if (random < 0.66)booster.y = (int) (200 +  100*Math.random()) ;
+        else booster.y = (int) (450 +  100*Math.random());
+        booster.width = boosterWidth;
+        booster.height = boosterHeigth;
+        boosters.add(booster);
+        lastBoosterTime = TimeUtils.nanoTime();
+    }
+
 
 
     @Override
