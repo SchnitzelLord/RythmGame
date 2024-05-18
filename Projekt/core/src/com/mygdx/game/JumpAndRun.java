@@ -26,11 +26,13 @@ public class JumpAndRun implements Screen {
     private Texture heartTexture;
     private Texture waveTexture;
     private Texture boosterTexture;
+    private Texture platformTexture;
     private OrthographicCamera camera;
     private Conductor conductor;
     private Music song;
     private Array<Sprite> hearts;
     private Array<Sprite> waves;
+    private Array<Sprite> platforms;
     private Array<Rectangle> boosters;
     private Array<Rectangle> rectangles;
     private BitmapFont font = new BitmapFont();
@@ -43,16 +45,20 @@ public class JumpAndRun implements Screen {
 
     float fallSpeedMod;
     int fallSpeedChangeTime;
+
+    // last variables used to prevent items from spawning to often
     private long lastRectangleTime;
     private long lastWaveTime;
     private long lastBoosterTime;
+    private long lastPlatformTime;
     private boolean canSpawn;
-    
-    private static final boolean debugging = true; // so that i can see various stats if enabled
+
+    private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
 
     // sprite sizes
     private int boosterWidth = 100;
     private int boosterHeigth = 100;
+    private long lastPlatformTimeTime;
 
     public JumpAndRun(final Start game) {
         this.game = game;
@@ -61,6 +67,7 @@ public class JumpAndRun implements Screen {
         waveTexture = new Texture("characterSprite\\playerSprite.png");
         heartTexture = new Texture("characterSprite\\heartsprite_test.png");
         boosterTexture = new Texture("characterSprite\\booster.png");
+        platformTexture = new Texture("characterSprite\\platform.png");
 
         player = new Sprite(playerTexture, 64,64 );
         player.setX(1920 / 2);
@@ -81,11 +88,13 @@ public class JumpAndRun implements Screen {
         conductor.start();
         fallSpeedChangeTime = 0;
 
-        rectangles =  new Array<>(); // used for platforms
+        // initilising Arra<s
+        rectangles =  new Array<>();
         hearts = new Array<>();
         waves = new Array<>();
         boosters = new Array<>();
-        // array that holds the hearts
+        platforms = new Array<>();
+        // array that holds the hearts and sets them
         for (int i = 0;i < 10; i++) {
             Sprite heart = new Sprite(heartTexture,64,64);
             hearts.add(heart);
@@ -119,6 +128,10 @@ public class JumpAndRun implements Screen {
                 wave.draw(game.batch);
             }
 
+            for(Sprite platform: platforms) {
+                platform.draw(game.batch);
+            }
+
             // Draw Boosters
             for(Rectangle booster: boosters) {
                 game.batch.draw(boosterTexture, booster.x, booster.y);
@@ -126,7 +139,7 @@ public class JumpAndRun implements Screen {
 
 
 
-            if (debugging) font.draw(game.batch, "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+            if (DEBUGGING) font.draw(game.batch, "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
         }
 
         game.batch.end();
@@ -158,7 +171,12 @@ public class JumpAndRun implements Screen {
         } else if (jumpTime <= 0) {
             float fallspeed = fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
             move = player.getY() - fallspeed;
+            float checkPlatform = checkPlatforms();
             if (move < 0) move = 0;
+            else if (checkPlatform!= -100) {
+                jumps = 2;
+                move = checkPlatform;
+            }
             player.setY(move);
             if (player.getY() == 0)jumps = 2; // when the player has hit the ground he can jump again
 
@@ -168,7 +186,7 @@ public class JumpAndRun implements Screen {
             if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
         }
-        // Testing for Rectangles
+        // Testing
         for (Iterator<Rectangle> iter = rectangles.iterator(); iter.hasNext(); ) {
             Rectangle rectangle = iter.next();
             rectangle.x -= (int) (150 * Gdx.graphics.getDeltaTime());
@@ -206,6 +224,13 @@ public class JumpAndRun implements Screen {
             }
         }
 
+        // platforms
+        for (Iterator<Sprite> iter = platforms.iterator(); iter.hasNext(); ) {
+            Sprite platform = iter.next();
+            platform.setX(platform.getX() - 150 * Gdx.graphics.getDeltaTime());
+            if(platform.getX() < 0) iter.remove();
+            }
+
         // Fallspeed
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
@@ -215,6 +240,7 @@ public class JumpAndRun implements Screen {
         if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
         if (lives <= 0) Gdx.app.exit();
+        if(TimeUtils.nanoTime() - lastBoosterTime > 1000000000 && (Math.random() > 0.75)  && canSpawn) spawnPlatform();
     }
 
     public void update() {
@@ -240,6 +266,13 @@ public class JumpAndRun implements Screen {
         if (player.getY() > sp.getY() + sp.getHeight()) return false;
         if (player.getX() > sp.getX() + sp.getWidth()) return false;
         return true;
+    }
+
+    private float checkPlatforms() {
+        for (Sprite platform : platforms) {
+            if (overlap(platform)) return platform.getY()+platform.getHeight();
+        }
+        return -100; // return as a false
     }
 
     private void spawnRectangle() {  // old version used for testing
@@ -281,6 +314,20 @@ public class JumpAndRun implements Screen {
         booster.height = boosterHeigth;
         boosters.add(booster);
         lastBoosterTime = TimeUtils.nanoTime();
+    }
+
+    private void spawnPlatform() {
+        double random = Math.random();
+        Sprite platform = new Sprite(platformTexture,100,10);
+        int x = MAX_WIDTH;
+
+        int y = (int) (200 +  150*Math.random());
+        if (random > 0.5) y = (int) (450 +  150*Math.random());
+
+        platform.setX(x);
+        platform.setY(y);
+        platforms.add(platform);
+        lastPlatformTime = TimeUtils.nanoTime();
     }
 
 
