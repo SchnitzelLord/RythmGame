@@ -20,6 +20,10 @@ public class JumpAndRun implements Screen {
 
     private static final int MAX_HEIGTH = 1080;
     private static final int MAX_WIDTH = 1920;
+
+    // sprite sizes
+    private static final int boosterWidth = 100;
+    private static final int boosterHeigth = 100;
     final Start game;
     private Sprite player;
     private Texture playerTexture;
@@ -35,8 +39,7 @@ public class JumpAndRun implements Screen {
     private Array<Sprite> platforms;
     private Array<Rectangle> boosters;
     private Array<Powerup> powerups;
-    private Array<Rectangle> rectangles;
-    private BitmapFont font = new BitmapFont();
+    private final BitmapFont font = new BitmapFont();
     private int lives = 10;
     private int jumps = 2;
     private boolean isPaused;
@@ -47,20 +50,17 @@ public class JumpAndRun implements Screen {
     float fallSpeedMod;
     int fallSpeedChangeTime;
 
+    float speedModHor = 1;
+    int speedModHorChangeTime;
+
     // last variables used to prevent items from spawning to often
-    private long lastRectangleTime;
+
     private long lastWaveTime;
     private long lastBoosterTime;
     private long lastPlatformTime;
     private long lastPowerupTime;
     private boolean canSpawn;
-
     private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
-
-    // sprite sizes
-    private int boosterWidth = 100;
-    private int boosterHeigth = 100;
-    private long lastPlatformTimeTime;
 
     public JumpAndRun(final Start game) {
         this.game = game;
@@ -91,7 +91,6 @@ public class JumpAndRun implements Screen {
         fallSpeedChangeTime = 0;
 
         // initilising Arra<s
-        rectangles =  new Array<>();
         hearts = new Array<>();
         waves = new Array<>();
         boosters = new Array<>();
@@ -157,12 +156,12 @@ public class JumpAndRun implements Screen {
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-            move = player.getX() - 300 * Gdx.graphics.getDeltaTime();
+            move = player.getX() -  speedModHor * 300 * Gdx.graphics.getDeltaTime();;
             if (move <= 0) move = 0;
             player.setX(move);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-            move = player.getX() + 300 * Gdx.graphics.getDeltaTime();
+            move = player.getX() + speedModHor * 300 * Gdx.graphics.getDeltaTime();
             if (move + player.getWidth()> MAX_WIDTH) move = MAX_WIDTH - player.getWidth(); // minus player.getwidth so that set places the sprite with the rigth lower corner at the rigth limit
             player.setX(move);
         }
@@ -191,17 +190,6 @@ public class JumpAndRun implements Screen {
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
             if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
             player.setY(move);
-        }
-        // Testing
-        for (Iterator<Rectangle> iter = rectangles.iterator(); iter.hasNext(); ) {
-            Rectangle rectangle = iter.next();
-            rectangle.x -= (int) (150 * Gdx.graphics.getDeltaTime());
-            if(rectangle.x < 0) iter.remove();
-
-            if(overlap(rectangle)) {
-                iter.remove();
-                lives -= 1;
-            }
         }
 
         // Wave Objects
@@ -244,17 +232,22 @@ public class JumpAndRun implements Screen {
 
             if(overlap(powerup)) {
                 iter.remove();
-                jumps = 5;
+                if(powerup.getPower() == Powerup.Power.moreJumps)jumps = 5;
+                else if(powerup.getPower() == Powerup.Power.doublespeed) {
+                    speedModHor = 2;
+                    speedModHorChangeTime = 30;
+                }
             }
         }
 
-        // Fallspeed
+        // Powerup duration
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
+        if (speedModHorChangeTime > 0 ) speedModHorChangeTime -= 1;
+        else if (speedModHorChangeTime == 0) speedModHorChangeTime = 1;
 
         if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
-
         if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000 && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0) Gdx.app.exit();
@@ -290,19 +283,6 @@ public class JumpAndRun implements Screen {
             if (overlap(platform)) return platform.getY()+platform.getHeight();
         }
         return -100; // return as a false
-    }
-
-    private void spawnRectangle() {  // old version used for testing can be removed
-        double random = Math.random();
-        Rectangle rectangle = new Rectangle();
-        rectangle.x = MAX_WIDTH;
-        if (random < 0.33) rectangle.y = 0;
-        else if (random < 0.66)rectangle.y = (int) (200 +  100*Math.random()) ;
-        else rectangle.y = (int) (450 +  100*Math.random());
-        rectangle.width = (int) player.getWidth();
-        rectangle.height = (int) player.getHeight();
-        rectangles.add(rectangle);
-        lastRectangleTime = TimeUtils.nanoTime();
     }
 
     private void spawnWave() {
@@ -343,12 +323,16 @@ public class JumpAndRun implements Screen {
     }
 
     private void spawnPowerup() {
-        double random = Math.random();
+        Powerup powerup;
 
+        double random = Math.random();
         int x = MAX_WIDTH;
         int y = (int) (200 +  150*Math.random());
         if (random > 0.5) y = (int) (450 +  150*Math.random());
-        Powerup powerup = Powerup.createPowerup(Powerup.Power.doubleJump);
+        double effect = Math.random();
+        if (effect > 0.5) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
+        else powerup = Powerup.createPowerup(Powerup.Power.doublespeed);
+
         spawnSpritesetup(powerups,powerup,x,y);
         lastPowerupTime = TimeUtils.nanoTime();
     }
@@ -357,11 +341,7 @@ public class JumpAndRun implements Screen {
         sp.setX(x);
         sp.setY(y);
         arr.add(sp);
-
-
     }
-
-
 
     @Override
     public void resize(int width, int height) {

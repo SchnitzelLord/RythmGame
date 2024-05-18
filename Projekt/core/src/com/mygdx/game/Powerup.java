@@ -5,10 +5,11 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 public class Powerup extends Sprite {
 
-    final Power power;
+    private final Power power;
 
     public enum Power {
-        doubleJump
+        moreJumps,
+        doublespeed
     }
 
 
@@ -30,7 +31,9 @@ public class Powerup extends Sprite {
     private static Texture getTexture(Power power) {
         Texture texture = null;
         switch (power) {
-            case doubleJump: texture = new Texture("characterSprite\\jump_placeholder.png");
+            case moreJumps: texture = new Texture("characterSprite\\jump_placeholder.png");
+                break;
+            case doublespeed: texture = new Texture("characterSprite\\jump_placeholder.png"); // for testing jump_placeholder.png
                 break;
         }
         return  texture;
