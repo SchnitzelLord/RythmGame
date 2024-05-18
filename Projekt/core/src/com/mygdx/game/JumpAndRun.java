@@ -279,7 +279,7 @@ public class JumpAndRun implements Screen {
 
     private boolean overlap (Sprite sp) {
         if (player.getX() + player.getWidth() < sp.getX()) return false;
-        if (player.getY() + player.getHeight() < sp.getY()) return false;
+        if (player.getY() < sp.getY()) return false;
         if (player.getY() > sp.getY() + sp.getHeight()) return false;
         if (player.getX() > sp.getX() + sp.getWidth()) return false;
         return true;
@@ -292,7 +292,7 @@ public class JumpAndRun implements Screen {
         return -100; // return as a false
     }
 
-    private void spawnRectangle() {  // old version used for testing
+    private void spawnRectangle() {  // old version used for testing can be removed
         double random = Math.random();
         Rectangle rectangle = new Rectangle();
         rectangle.x = MAX_WIDTH;
@@ -313,10 +313,7 @@ public class JumpAndRun implements Screen {
 
         if (random < 0.33) y = (int) (200 +  100*Math.random());
         else if (random < 0.66) y = (int) (450 +  100*Math.random());
-
-        wave.setX(x);
-        wave.setY(y);
-        waves.add(wave);
+        spawnSpritesetup(waves,wave,x,y);
         lastWaveTime = TimeUtils.nanoTime();
     }
 
@@ -341,10 +338,7 @@ public class JumpAndRun implements Screen {
 
         int y = (int) (200 +  150*Math.random());
         if (random > 0.5) y = (int) (450 +  150*Math.random());
-
-        platform.setX(x);
-        platform.setY(y);
-        platforms.add(platform);
+        spawnSpritesetup(platforms,platform,x,y);
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
@@ -354,11 +348,17 @@ public class JumpAndRun implements Screen {
         int x = MAX_WIDTH;
         int y = (int) (200 +  150*Math.random());
         if (random > 0.5) y = (int) (450 +  150*Math.random());
-        Powerup powerup = PowerupCreator.createPowerup(Power.doubleJump);
-        powerup.setX(x);
-        powerup.setY(y);
-        powerups.add(powerup);
+        Powerup powerup = Powerup.createPowerup(Powerup.Power.doubleJump);
+        spawnSpritesetup(powerups,powerup,x,y);
         lastPowerupTime = TimeUtils.nanoTime();
+    }
+
+    private void spawnSpritesetup(Array arr, Sprite sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
+        sp.setX(x);
+        sp.setY(y);
+        arr.add(sp);
+
+
     }
 
 
