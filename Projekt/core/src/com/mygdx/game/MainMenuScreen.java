@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -25,6 +26,8 @@ public class MainMenuScreen implements Screen {
     //objecs for buttons
     Skin skin;
     Texture buttonBackground;
+    Texture logoTexture;
+    Image logo;
 
     public MainMenuScreen(final Start game) {
         this.game = game;
@@ -36,6 +39,8 @@ public class MainMenuScreen implements Screen {
         buttonBackground = new Texture(Gdx.files.internal("buttons\\buttonLayout.png"));
         skin = new Skin();
         skin.add("button", buttonBackground);
+        logoTexture = new Texture(Gdx.files.internal("DayByDay.png"));
+        logo = new Image(logoTexture);
     }
 
 
@@ -48,24 +53,25 @@ public class MainMenuScreen implements Screen {
         stage.addActor(table);
 
         // create buttons
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont());
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont(Gdx.files.internal("font\\font.fnt")));
         TextButton newGame = new TextButton("New Game", style);
         TextButton options = new TextButton("Options", style);
         TextButton exit = new TextButton("Exit", style);
 
         // add title and buttons to screen
-        table.row().pad(20, 0, 20, 0);;
+        table.add(logo);
+        table.row().pad(15, 0, 20, 0);;
         table.add(newGame).fillX().uniformX();
-        table.row().pad(20, 0, 20, 0);;
+        table.row().pad(15, 0, 20, 0);;
         table.add(options).fillX().uniformX();
-        table.row().pad(20, 0, 20, 0);;
+        table.row().pad(15, 0, 20, 0);;
         table.add(exit).fillX().uniformX();
 
         //add event listeners to buttons
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new JumpAndRun(game));
+                game.setScreen(new MazeLevel(game));
             }
         });
 

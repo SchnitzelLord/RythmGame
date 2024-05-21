@@ -55,7 +55,7 @@ public class PauseScreen extends GameScreens {
         stage.addActor(table);
 
         // create buttons
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont());
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont(Gdx.files.internal("font\\font.fnt")));
         TextButton resume = new TextButton("Resume", style);
         TextButton options = new TextButton("Options", style);
         TextButton exit = new TextButton("Exit", style);
