@@ -32,6 +32,8 @@ public class JumpAndRun implements Screen {
     private Texture waveTexture;
     private Texture boosterTexture;
     private Texture platformTexture;
+
+    private Texture background1Texture;
     private OrthographicCamera camera;
     private Conductor conductor;
     private Music song;
@@ -40,6 +42,7 @@ public class JumpAndRun implements Screen {
     private Array<Sprite> platforms;
     private Array<Rectangle> boosters;
     private Array<Powerup> powerups;
+    private Array<Sprite> backgrounds;
     private final BitmapFont font = new BitmapFont();
     private int lives = 10;
     private int jumps = 2;
@@ -69,6 +72,10 @@ public class JumpAndRun implements Screen {
 
     private int shield;
 
+    float test1 = 1;
+    float test2 = 1;
+    int counter = 0;
+
     Rectangle zone; // used to give points
     private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
 
@@ -81,6 +88,7 @@ public class JumpAndRun implements Screen {
         boosterTexture = new Texture("jumpAndRunSprites\\booster.png");
         platformTexture = new Texture("jumpAndRunSprites\\platform.png");
         zoneTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
+        background1Texture = new Texture("jumpAndRunSprites\\test.png");
 
         player = new Sprite(playerTexture, 64,64 );
         player.setX(1920 / 2);
@@ -92,6 +100,7 @@ public class JumpAndRun implements Screen {
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
         shield = 0;
+
     }
 
     @Override
@@ -105,9 +114,8 @@ public class JumpAndRun implements Screen {
         currentCornerX = currentCenterX - MAX_WIDTH/2;
 
 
-        // create point zone
+        // initilising Arrays
 
-        // initilising Arra<s
         hearts = new Array<>();
         waves = new Array<>();
         boosters = new Array<>();
@@ -120,6 +128,13 @@ public class JumpAndRun implements Screen {
             heart.setX(10 + (i* heart.getWidth()) +10 );
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
+        // initilised the first two backgrounds
+        backgrounds = new Array<>();
+        Sprite background = new Sprite(background1Texture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
+        backgrounds.add(background);
+        spawnBackground(0); //
+
+
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -131,13 +146,25 @@ public class JumpAndRun implements Screen {
         ScreenUtils.clear(Color.BLUE);
 
 
+
         game.batch.begin();
         // draw point zone
 
-        player.draw(game.batch);
+
+
+
 
 
         if (!isPaused) {
+
+            for(Sprite background: backgrounds) {
+                background.draw(game.batch);
+                if (counter == 0) test1 = background.getX();
+                if (counter == 1) test2=  background.getX();
+                counter ++;
+            }
+
+            player.draw(game.batch);
             camera.position.x = player.getX();
 
             camera.update();
@@ -173,7 +200,7 @@ public class JumpAndRun implements Screen {
 
 
             if (DEBUGGING) {
-                font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2 + currentCornerX, 900);
+                font.draw(game.batch,"X1 " + test1 + "X2 " + test2 +"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2 + currentCornerX, 900);
             }
         }
 
@@ -253,8 +280,20 @@ public class JumpAndRun implements Screen {
             if(overlap(powerup)) {
                 iter.remove();
                 if(powerup.getPower() == Powerup.Power.moreJumps)jumps = 3;
-                if(powerup.getPower() == Powerup.Power.shield)shield = 1;
+                else if(powerup.getPower() == Powerup.Power.shield)shield = 1;
+                else if(powerup.getPower() == Powerup.Power.live) {
+                    if (lives < 10) lives++;
+                };
 
+            }
+        }
+
+        // backgrounds
+        for (Iterator<Sprite> iter = backgrounds.iterator(); iter.hasNext(); ) {
+            Sprite background= iter.next();
+            if(background.getX()  < currentCornerX - background.getWidth()) {
+                iter.remove();
+                spawnBackground(currentCornerX);
             }
         }
 
@@ -296,7 +335,7 @@ public class JumpAndRun implements Screen {
 
     private float checkPlatforms() {
         for (Sprite platform : platforms) {
-            if (overlap(platform)) return platform.getY()+platform.getHeight();
+            if (overlap(platform) && jumpTime == 0) return platform.getY()+platform.getHeight();
         }
         return -100; // return as a false
     }
@@ -338,6 +377,12 @@ public class JumpAndRun implements Screen {
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
+    private void spawnBackground(float leftXCorner) {
+        Sprite background = new Sprite(background1Texture,MAX_WIDTH,MAX_HEIGTH);
+        int x = (int)leftXCorner + MAX_WIDTH;
+        spawnSpritesetup(backgrounds,background,x,0);
+    }
+
     private void spawnPowerup(float leftXCorner) {
         Powerup powerup;
 
@@ -346,7 +391,8 @@ public class JumpAndRun implements Screen {
         int y = (int) (200 +  150*Math.random());
         if (random > 0.5) y = (int) (450 +  150*Math.random());
         double effect = Math.random();
-        if (effect > 0.5) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
+        if (effect < 0.33) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
+        else if (effect < 0.66)powerup = Powerup.createPowerup(Powerup.Power.live);
         else powerup = Powerup.createPowerup(Powerup.Power.shield);
 
         spawnSpritesetup(powerups,powerup,x,y);
