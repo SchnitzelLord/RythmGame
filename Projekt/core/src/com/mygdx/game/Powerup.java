@@ -9,7 +9,7 @@ public class Powerup extends Sprite {
 
     public enum Power {
         moreJumps,
-        doublespeed
+        shield
     }
 
 
@@ -31,9 +31,9 @@ public class Powerup extends Sprite {
     private static Texture getTexture(Power power) {
         Texture texture = null;
         switch (power) {
-            case moreJumps: texture = new Texture("characterSprite\\jump_placeholder.png");
+            case moreJumps: texture = new Texture("jumpAndRunSprites\\jump_placeholder.png");
                 break;
-            case doublespeed: texture = new Texture("characterSprite\\jump_placeholder.png"); // for testing jump_placeholder.png
+            case shield: texture = new Texture("jumpAndRunSprites\\shield.png"); // for testing jump_placeholder.png
                 break;
         }
         return  texture;

@@ -59,12 +59,15 @@ public class JumpAndRun implements Screen {
 
     // last variables used to prevent items from spawning to often
 
-    private long points;
     private long lastWaveTime;
     private long lastBoosterTime;
     private long lastPlatformTime;
     private long lastPowerupTime;
     private boolean canSpawn;
+
+    // Powerups
+
+    private int shield;
 
     Rectangle zone; // used to give points
     private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
@@ -88,7 +91,7 @@ public class JumpAndRun implements Screen {
         camera.setToOrtho(false, 1920, 1080);
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
-        points = 0;
+        shield = 0;
     }
 
     @Override
@@ -147,6 +150,7 @@ public class JumpAndRun implements Screen {
 
             // Draw Hearts
             for (int i = 0; i <lives; i++) { // draw as many hearts as there are lives
+                hearts.get(i).setX( currentCornerX + 20 +(i* hearts.get(i).getWidth()));
                 hearts.get(i).draw(game.batch);
             }
             // Draw Waves
@@ -169,7 +173,7 @@ public class JumpAndRun implements Screen {
 
 
             if (DEBUGGING) {
-                font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+                font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2 + currentCornerX, 900);
             }
         }
 
@@ -214,18 +218,19 @@ public class JumpAndRun implements Screen {
 
         for (Iterator<Sprite> iter = waves.iterator(); iter.hasNext(); ) {
             Sprite wave = iter.next();
-            if(wave.getX() < currentCornerX) iter.remove();
+            if(wave.getX() < currentCornerX - wave.getWidth()) iter.remove();
 
             if(overlap(wave)) {
                 iter.remove();
-                lives -= 1;
+                if (shield > 0) shield -=1;
+                else lives -= 1;
             }
         }
 
         // Boosters
         for (Iterator<Rectangle> iter = boosters.iterator(); iter.hasNext(); ) {
             Rectangle booster = iter.next();
-            if(booster.x < currentCornerX) iter.remove();
+            if(booster.x < currentCornerX - booster.getWidth()) iter.remove();
 
             if(overlap(booster)) {
                 fallSpeedMod = (float) -2; // negative because the fallspeed is multiplied with it
@@ -237,28 +242,25 @@ public class JumpAndRun implements Screen {
         // platforms
         for (Iterator<Sprite> iter = platforms.iterator(); iter.hasNext(); ) {
             Sprite platform = iter.next();
-            if(platform.getX() < 0) iter.remove();
+            if(platform.getX() < currentCornerX - platform.getWidth()) iter.remove();
             }
 
+        // powerups
         for (Iterator<Powerup> iter = powerups.iterator(); iter.hasNext(); ) {
             Powerup powerup = iter.next();
-            if(powerup.getX() < currentCornerX) iter.remove();
+            if(powerup.getX() < currentCornerX - powerup.getWidth()) iter.remove();
 
             if(overlap(powerup)) {
                 iter.remove();
                 if(powerup.getPower() == Powerup.Power.moreJumps)jumps = 3;
-                else if(powerup.getPower() == Powerup.Power.doublespeed) {
-                    speedModHor = 2;
-                    speedModHorChangeTime = 120;
-                }
+                if(powerup.getPower() == Powerup.Power.shield)shield = 1;
+
             }
         }
 
-        // Powerup duration
+
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
-        if (speedModHorChangeTime > 0 ) speedModHorChangeTime -= 1;
-        else if (speedModHorChangeTime == 0) speedModHor = 1;
 
         if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave(currentCornerX);
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster(currentCornerX);
@@ -345,7 +347,7 @@ public class JumpAndRun implements Screen {
         if (random > 0.5) y = (int) (450 +  150*Math.random());
         double effect = Math.random();
         if (effect > 0.5) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
-        else powerup = Powerup.createPowerup(Powerup.Power.doublespeed);
+        else powerup = Powerup.createPowerup(Powerup.Power.shield);
 
         spawnSpritesetup(powerups,powerup,x,y);
         lastPowerupTime = TimeUtils.nanoTime();
