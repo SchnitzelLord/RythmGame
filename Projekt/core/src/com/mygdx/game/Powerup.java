@@ -9,7 +9,8 @@ public class Powerup extends Sprite {
 
     public enum Power {
         moreJumps,
-        shield
+        shield,
+        live;
     }
 
 
@@ -34,6 +35,8 @@ public class Powerup extends Sprite {
             case moreJumps: texture = new Texture("jumpAndRunSprites\\jump_placeholder.png");
                 break;
             case shield: texture = new Texture("jumpAndRunSprites\\shield.png"); // for testing jump_placeholder.png
+                break;
+            case live: texture = new Texture("jumpAndRunSprites\\heartsprite_test.png"); // for testing jump_placeholder.png
                 break;
         }
         return  texture;
