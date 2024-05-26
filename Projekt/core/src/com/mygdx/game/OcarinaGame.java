@@ -20,11 +20,10 @@ public class OcarinaGame implements Screen {
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
     private static final float HIT_OFFSET = 10;
+    private static long ARROW_UPTIME = 1_000_000_000;
 
     private final float playerX;
     private final float playerY;
-
-    private final float hitPosition;
 
     private final Start game;
     private final Conductor conductor;
@@ -42,8 +41,12 @@ public class OcarinaGame implements Screen {
     private boolean isRunning;
     private int hits;
     private long lastArrowSpawn;
-    private float speed;
     private float spawnRateNano;
+
+    private int nLeftArrows;
+    private int nRightArrows;
+    private int nUpArrows;
+    private int nDownArrows;
 
     public OcarinaGame(Start game) {
         this.game = game;
@@ -70,10 +73,6 @@ public class OcarinaGame implements Screen {
         player.setPosition(playerX, playerY);
 
         arrows = new Array<>();
-
-        hitPosition = player.getY() + player.getHeight() + 10;
-        hits = 0;
-        lastArrowSpawn = 0;
     }
 
     @Override
@@ -84,8 +83,7 @@ public class OcarinaGame implements Screen {
         song.setVolume(Start.volume);
         song.play();
 
-        speed = (HEIGHT - hitPosition) / conductor.crochet;
-        spawnRateNano = conductor.crochet * 1000000000;
+        spawnRateNano = conductor.crochet * 1_000_000_000;
     }
 
     @Override
@@ -102,70 +100,112 @@ public class OcarinaGame implements Screen {
 
             player.draw(game.batch);
             font.draw(game.batch, "Hits: " + hits, 20, HEIGHT - 20);
-            for (Arrow a : arrows) {
-                a.getSprite().draw(game.batch);
+            for (Arrow currArrow : arrows) {
+                currArrow.getSprite().draw(game.batch);
+                if (TimeUtils.nanoTime() - currArrow.getSpawnTime() > ARROW_UPTIME) {
+                    remove(currArrow);
+                    reduceScore();
+                }
             }
 
             game.batch.end();
 
-            moveArrowDown();
+            // moveArrowDown();
 
+            // Spawn arrow at certain interval
             if (TimeUtils.nanoTime() - lastArrowSpawn > spawnRateNano) spawnArrow();
 
             checkWinCondition();
         }
     }
 
-    private void moveArrowDown() {
-        for (Iterator<Arrow> iter = arrows.iterator(); iter.hasNext(); ) {
-            Arrow arrow = iter.next();
-            arrow.getSprite().translateY(-speed * Gdx.graphics.getDeltaTime());
-            // Remove arrow if it falls to far down
-            if (arrow.getSprite().getY() < hitPosition - HIT_OFFSET) iter.remove();
+    private void reduceScore() {
+        if (hits > 0) hits--;
+    }
+
+    private void remove(Arrow arrow) {
+        int idx = arrows.indexOf(arrow, true);
+        arrows.removeIndex(idx);
+
+        // Reduce counter
+        switch (arrow.getDirection()) {
+            case UP:
+                nUpArrows--;
+                break;
+            case DOWN:
+                nDownArrows--;
+                break;
+            case LEFT:
+                nLeftArrows--;
+                break;
+            case RIGHT:
+                nRightArrows--;
+                break;
         }
     }
 
     private void spawnArrow() {
         Sprite sprite = new Sprite(arrowTexture, arrowTexture.getWidth(), arrowTexture.getHeight());
-        int direction = MathUtils.random(0, 3);
+        int dirInt = MathUtils.random(0, 3);
 
-        sprite.setRotation(direction * 90); // counter-clock rotation
-        sprite.setPosition(playerX, HEIGHT + sprite.getHeight());
+        sprite.setRotation(dirInt * 90); // counter-clock rotation, beginning with up-arrow
+        Arrow.Direction direction = Arrow.Direction.fromInt(dirInt);
 
-        arrows.add(new Arrow(sprite, Arrow.Direction.fromInt(direction)));
+        // Setup spawnpoint depending on arrow direction
+        switch (direction) {
+            case UP:
+                sprite.setPosition(playerX, playerY + player.getHeight() + (HIT_OFFSET + sprite.getHeight()) * nUpArrows);
+                nUpArrows++;
+                break;
+            case DOWN:
+                sprite.setPosition(playerX, playerY - player.getHeight() - (HIT_OFFSET + sprite.getHeight()) * nDownArrows);
+                nDownArrows++;
+                break;
+            case LEFT:
+                sprite.setPosition(playerX - player.getWidth() - (HIT_OFFSET + sprite.getWidth()) * nLeftArrows, playerY);
+                nLeftArrows++;
+                break;
+            case RIGHT:
+                sprite.setPosition(playerX + player.getWidth() + (HIT_OFFSET + sprite.getWidth()) * nRightArrows, playerY);
+                nRightArrows++;
+                break;
+        }
 
         lastArrowSpawn = TimeUtils.nanoTime();
+
+        arrows.add(new Arrow(sprite, direction, lastArrowSpawn));
     }
 
     private void controls() {
         // Check pause key being pressed
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) pauseGame();
 
-        // Get direction and idx of arrow that is around hitPosition
-        Arrow.Direction direction = null;
-        int idx = 0;
-        for (int i = 0; i < arrows.size; i++) {
-            Arrow a = arrows.get(i);
-            float y = a.getSprite().getY();
-            if (hitPosition - HIT_OFFSET <= y && y <= hitPosition + HIT_OFFSET) {
-                direction = a.getDirection();
-                idx = i;
+        // Check for every arrow if correct key has been pressed
+        for (Iterator<Arrow> iter = arrows.iterator(); iter.hasNext(); ) {
+            Arrow currArrow = iter.next();
+            Arrow.Direction direction = currArrow.getDirection();
+
+            if (Gdx.input.isKeyPressed(Input.Keys.W) && direction == Arrow.Direction.UP ||
+                Gdx.input.isKeyPressed(Input.Keys.A) && direction == Arrow.Direction.LEFT ||
+                Gdx.input.isKeyPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
+                Gdx.input.isKeyPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) {
+
+                hits++;
+                remove(currArrow);
+
+            // Penalty for just pressing at random
+            } else if (Gdx.input.isKeyJustPressed(Input.Keys.W) ||
+                        Gdx.input.isKeyJustPressed(Input.Keys.A) ||
+                        Gdx.input.isKeyJustPressed(Input.Keys.S) ||
+                        Gdx.input.isKeyJustPressed(Input.Keys.D)) {
+
+                reduceScore();
             }
-        }
-
-        // Check if arrow direction match input direction
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && direction == Arrow.Direction.UP ||
-            Gdx.input.isKeyPressed(Input.Keys.A) && direction == Arrow.Direction.LEFT ||
-            Gdx.input.isKeyPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
-            Gdx.input.isKeyPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) {
-
-            hits++;
-            arrows.removeIndex(idx);
         }
     }
 
     private void checkWinCondition() {
-        if (hits >= 20) {
+        if (hits >= 50) {
             isRunning = false;
             song.pause();
             game.setScreen(new MainMenuScreen(game));
