@@ -1,12 +1,14 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class Start extends Game {
 
     public SpriteBatch batch;
     public static float volume;
+    public static Texture playerTexture;
 
     @Override
     public void create() {
@@ -21,6 +23,7 @@ public class Start extends Game {
 
     public void dispose() {
         batch.dispose();
+        playerTexture.dispose();
 
     }
 }

@@ -60,18 +60,18 @@ public class MainMenuScreen implements Screen {
 
         // add title and buttons to screen
         table.add(logo);
-        table.row().pad(15, 0, 20, 0);;
+        table.row().pad(15, 0, 20, 0);
         table.add(newGame).fillX().uniformX();
-        table.row().pad(15, 0, 20, 0);;
+        table.row().pad(15, 0, 20, 0);
         table.add(options).fillX().uniformX();
-        table.row().pad(15, 0, 20, 0);;
+        table.row().pad(15, 0, 20, 0);
         table.add(exit).fillX().uniformX();
 
         //add event listeners to buttons
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MazeLevel(game));
+                game.setScreen(new CharSelect(game));
             }
         });
 
@@ -128,5 +128,6 @@ public class MainMenuScreen implements Screen {
         stage.dispose();
         skin.dispose();
         buttonBackground.dispose();
+        logoTexture.dispose();
     }
 }

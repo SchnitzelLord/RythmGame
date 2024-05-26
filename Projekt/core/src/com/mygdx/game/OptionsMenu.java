@@ -151,5 +151,6 @@ public class OptionsMenu implements Screen {
         buttonBackground.dispose();
         minusButtonTexture.dispose();
         plusButtonTexture.dispose();
+        font.dispose();
     }
 }
