@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.time.format.TextStyle;
@@ -37,7 +38,7 @@ public class CharSelect implements Screen {
     public CharSelect(final Start game) {
         this.game = game;
         // make the stage an input processor
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
         skin = new Skin();
         font = new BitmapFont(Gdx.files.internal("font\\font.fnt"));
