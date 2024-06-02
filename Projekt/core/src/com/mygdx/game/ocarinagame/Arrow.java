@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.ocarinagame;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
