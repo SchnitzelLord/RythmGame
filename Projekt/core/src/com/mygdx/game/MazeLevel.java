@@ -97,7 +97,6 @@ public class MazeLevel implements Screen {
             }
             blackScreen.draw(game.batch, blackScreenAlpha);
         }
-        text.draw(game.batch, String.valueOf(canMove) + " " + song.getPosition() + " " + String.valueOf(blackScreenTimer), 1080.0f/2.0f, 1920.0f/2.0f);
         game.batch.end();
 
         //pause game and switch to pause menu
