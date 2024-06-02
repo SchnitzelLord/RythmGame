@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Queue;
@@ -44,8 +45,11 @@ public class MazeLevel implements Screen {
 
     boolean blackScreenTimer = false;
 
+    BitmapFont text = new BitmapFont();
+
     public MazeLevel(final Start game) {
         this.game = game;
+
         player = new Sprite(Start.playerTexture, 64, 64);
         player.setX(1920 / 2);
         player.setY(1080 / 2);
@@ -54,6 +58,7 @@ public class MazeLevel implements Screen {
         camera.setToOrtho(false, 1920, 1080);
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
+        conductor.start();
         enemy = new Sprite(Start.playerTexture, 64, 64);
         enemy.setX(player.getX() - 300);
         enemy.setY(player.getY());
@@ -71,7 +76,6 @@ public class MazeLevel implements Screen {
         setIsPaused(false);
         song.setVolume(Start.volume);
         song.play();
-        conductor.start();
     }
 
     @Override
@@ -88,11 +92,12 @@ public class MazeLevel implements Screen {
             game.batch.setProjectionMatrix(camera.combined);
             update();
             updateBlackScreenTimer();
+            if (blackScreenTimer) {
+                darken();
+            }
+            blackScreen.draw(game.batch, blackScreenAlpha);
         }
-        if (blackScreenTimer) {
-            darken();
-        }
-        blackScreen.draw(game.batch, blackScreenAlpha);
+        text.draw(game.batch, String.valueOf(canMove) + " " + song.getPosition() + " " + String.valueOf(blackScreenTimer), 1080.0f/2.0f, 1920.0f/2.0f);
         game.batch.end();
 
         //pause game and switch to pause menu

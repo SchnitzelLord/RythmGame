@@ -7,12 +7,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 
 public class PauseScreen extends GameScreens {
 
@@ -31,18 +32,24 @@ public class PauseScreen extends GameScreens {
     //objects for buttons
     Skin skin;
     Texture buttonBackground;
+    Texture optionButtonTexture;
+    Texture quitButtonTexture;
 
     public PauseScreen(final Start game, Screen screen) {
         this.game = game;
         this.lastScreen = screen;
 
         // make the stage an input processor
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
         //initialize texture for buttons
         buttonBackground = new Texture(Gdx.files.internal("buttons\\buttonLayout.png"));
+        optionButtonTexture = new Texture(Gdx.files.internal("buttons\\OptionsButton.png"));
+        quitButtonTexture = new Texture(Gdx.files.internal("buttons\\QuitButton.png"));
         skin = new Skin();
         skin.add("button", buttonBackground);
+        skin.add("options", optionButtonTexture);
+        skin.add("quit", quitButtonTexture);
     }
 
 
@@ -57,16 +64,17 @@ public class PauseScreen extends GameScreens {
         // create buttons
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont(Gdx.files.internal("font\\font.fnt")));
         TextButton resume = new TextButton("Resume", style);
-        TextButton options = new TextButton("Options", style);
-        TextButton exit = new TextButton("Exit", style);
+        ImageButton.ImageButtonStyle optionButtonStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"));
+        ImageButton.ImageButtonStyle quitButtonStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"));
+        ImageButton optionButton = new ImageButton(optionButtonStyle);
+        ImageButton quitButton = new ImageButton(quitButtonStyle);
 
         // add title and buttons to screen
-        table.row().pad(20, 0, 20, 0);
-        table.add(resume).fillX().uniformX();
-        table.row().pad(20, 0, 20, 0);;
-        table.add(options).fillX().uniformX();
-        table.row().pad(20, 0, 20, 0);;
-        table.add(exit).fillX().uniformX();
+        table.add(resume);
+        table.row();
+        table.add(optionButton);
+        table.row();
+        table.add(quitButton);
 
         //add event listeners to buttons
         resume.addListener(new ChangeListener() {
@@ -76,14 +84,14 @@ public class PauseScreen extends GameScreens {
             }
         });
 
-        options.addListener(new ChangeListener() {
+        optionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new OptionsMenu(game, thisScreen));
             }
         });
 
-        exit.addListener(new ChangeListener() {
+        quitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.exit();
