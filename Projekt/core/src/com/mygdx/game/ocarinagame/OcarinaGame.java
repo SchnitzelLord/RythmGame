@@ -13,6 +13,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.PauseScreen;
@@ -21,10 +23,12 @@ import com.mygdx.game.Start;
 import java.util.*;
 
 public class OcarinaGame implements Screen {
-    private static final int WIDTH = 1920;
-    private static final int HEIGHT = 1080;
+    private static final int SCREEN_WIDTH = 1920;
+    private static final int SCREEN_HEIGHT = 1080;
+    private static final int WORLD_WIDTH = 250;
+    private static final int WORLD_HEIGHT = 250;
     private static final float HIT_OFFSET = 10;
-    private static final long ARROW_UPTIME = 2_000_000_000;
+    private static final long ARROW_UPTIME = 400_000_000;
     private static final long SPAWN_OFFSET = 50_000_000;
     private static final boolean IS_PENALTY_ON = false;
     private static final boolean IS_ARROW_POSITION_OFFSET_ACTIVE = false;
@@ -36,6 +40,7 @@ public class OcarinaGame implements Screen {
     private final Conductor conductor;
     private final Music song;
     private final OrthographicCamera camera;
+    private final Viewport viewport;
 
     private final Texture playerTexture;
     private final Texture arrowTexture;
@@ -60,6 +65,7 @@ public class OcarinaGame implements Screen {
 
         // Setup UI
         font = new BitmapFont();
+        font.getData().setScale(0.7f);
 
         // Setup audio
         conductor = new Conductor(120, 0);
@@ -67,16 +73,23 @@ public class OcarinaGame implements Screen {
 
         // Setup camera
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, WIDTH, HEIGHT);
+        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        // Setup viewport for scaling
+        viewport = new FillViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        viewport.apply(true);
 
         // Setup textures
-        playerTexture = new Texture("characterSprite\\playerSprite.png");
+        playerTexture = new Texture("ocarina-game\\player.png");
         arrowTexture = new Texture("ocarina-game\\arrow-up.png");
 
         // Setup player
         player = new Sprite(playerTexture, playerTexture.getWidth(), playerTexture.getHeight());
-        playerX = WIDTH / 2.0f - player.getWidth();
-        playerY = HEIGHT / 2.0f - player.getHeight();
+        //playerX = (WIDTH - player.getWidth()) * 0.5f;
+        //playerY = (HEIGHT - player.getHeight()) * 0.5f;
+        playerX = (WORLD_WIDTH - player.getWidth()) * 0.5f;
+        playerY = (WORLD_HEIGHT - player.getHeight()) * 0.5f;
+
         player.setPosition(playerX, playerY);
 
         allArrows = new Array<>();
@@ -112,7 +125,7 @@ public class OcarinaGame implements Screen {
             game.batch.begin();
 
             player.draw(game.batch);
-            font.draw(game.batch, "Hits: " + hits, 20, HEIGHT - 20);
+            font.draw(game.batch, "Hits: " + hits, 5, WORLD_HEIGHT - 60);
             for (Arrow currArrow : allArrows) {
                 currArrow.getSprite().draw(game.batch);
                 if (TimeUtils.nanoTime() - currArrow.getSpawnTime() > ARROW_UPTIME) {
@@ -135,7 +148,7 @@ public class OcarinaGame implements Screen {
     }
 
     private void removeArrowOfDirection(Arrow.Direction direction) {
-        // Remove the oldest arrow of specific direction and adjust position
+        // Remove the oldest arrow with specific direction and adjust position
         Arrow toRemove = null;
         switch (direction) {
             case UP:
@@ -265,7 +278,7 @@ public class OcarinaGame implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        viewport.update(width, height);
     }
 
     @Override
