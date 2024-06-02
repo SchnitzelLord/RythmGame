@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 //Options menu when in main menu
@@ -24,34 +25,38 @@ public class OptionsMenu implements Screen {
     Stage stage;
 
     Skin skin;
-    Texture buttonBackground;
     Texture minusButtonTexture;
     Texture plusButtonTexture;
+    Texture backButtonTexture;
     Label.LabelStyle textStyle;
     BitmapFont font;
     Label volume;
-    FreeTypeFontGenerator fontGenerator;
-    FreeTypeFontGenerator.FreeTypeFontParameter parameter;
+    Texture backgroundTexture;
+    Image background;
 
     public OptionsMenu(final Start game, GameScreens screen) {
         this.game = game;
         this.lastScreen = screen;
 
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
 
-        buttonBackground = new Texture(Gdx.files.internal("buttons\\buttonLayout.png"));
         minusButtonTexture = new Texture(Gdx.files.internal("buttons\\minusButton.png"));
         plusButtonTexture = new Texture(Gdx.files.internal("buttons\\plusButton.png"));
+        backButtonTexture = new Texture(Gdx.files.internal("buttons\\backButton.png"));
         skin = new Skin();
-        skin.add("button", buttonBackground);
+        skin.add("back", backButtonTexture);
         skin.add("minus", minusButtonTexture);
         skin.add("plus", plusButtonTexture);
-        font = new BitmapFont(Gdx.files.internal("font\\font.fnt"));
+        font = new BitmapFont(Gdx.files.internal("font\\smallFont.fnt"));
         textStyle = new Label.LabelStyle(font, Color.WHITE);
         skin.add("font", textStyle);
         volume = new Label(String.format("%.0f %s", Start.volume * 100, "%"), skin, "font");
         volume.setAlignment(0);
+        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        background = new Image(backgroundTexture);
+        background.setHeight(1080);
+        background.setWidth(1920);
 
     }
 
@@ -63,19 +68,18 @@ public class OptionsMenu implements Screen {
         table.setDebug(true);
         stage.addActor(table);
 
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), font);
-        TextButton backButton = new TextButton("Back", style);
+        ImageButton.ImageButtonStyle backStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"));
         ImageButton.ImageButtonStyle minusStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("minus"), skin.getDrawable("minus"), skin.getDrawable("minus"), skin.getDrawable("minus"), skin.getDrawable("minus"), skin.getDrawable("minus"));
         ImageButton.ImageButtonStyle plusStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("plus"), skin.getDrawable("plus"), skin.getDrawable("plus"), skin.getDrawable("plus"), skin.getDrawable("plus"), skin.getDrawable("plus"));
+        ImageButton backButton = new ImageButton(backStyle);
         ImageButton plusButton = new ImageButton(plusStyle);
         ImageButton minusButton = new ImageButton(minusStyle);
 
-        table.bottom().left();
-        table.add("Volume", "font").width(100);
-        table.add(minusButton).expandY();
-        table.add(volume).width(150);
+        table.add("Volume", "font");
+        table.add(minusButton);
+        table.add(volume);
         table.add(plusButton);
-        table.row().pad(20, 0, 20, 0);
+        table.row().pad(50, 0, 0, 0);
         table.add(backButton);
 
         minusButton.addListener(new ChangeListener() {
@@ -117,6 +121,9 @@ public class OptionsMenu implements Screen {
 
 
         //draw stage
+        game.batch.begin();
+        background.draw(game.batch, 1.0f);
+        game.batch.end();
         stage.act();
         stage.draw();
 
@@ -148,7 +155,7 @@ public class OptionsMenu implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        buttonBackground.dispose();
+        backButtonTexture.dispose();
         minusButtonTexture.dispose();
         plusButtonTexture.dispose();
         font.dispose();

@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.audio.Music;
 
 
 public class MainMenuScreen implements Screen {
@@ -33,15 +34,13 @@ public class MainMenuScreen implements Screen {
     Image background;
 
     Camera camera;
-    /*
-    Texture buttonBackground;
-    Texture logoTexture;
-    Image logo;
-     */
+
+    Music backgroundMusic;
 
     public MainMenuScreen(final Start game) {
         this.game = game;
 
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music\\8_bit_clash.mp3"));
         camera = new OrthographicCamera(627, 420);
         // make the stage an input processor
         stage = new Stage(new FillViewport(627, 420));
@@ -58,29 +57,19 @@ public class MainMenuScreen implements Screen {
         background = new Image(backgroundTexture);
         background.setHeight(1080);
         background.setWidth(1920);
-        /*
-        logoTexture = new Texture(Gdx.files.internal("DayByDay.png"));
-        logo = new Image(logoTexture);
-         */
     }
 
 
     @Override
     public void show() {
+        backgroundMusic.setVolume(Start.volume);
+        backgroundMusic.play();
+        backgroundMusic.setLooping(true);
         // table to organize buttons; fills screen
         Table table = new Table();
         table.setFillParent(true);
         table.setDebug(false);
         stage.addActor(table);
-
-        // create buttons
-        /*
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont(Gdx.files.internal("font\\font.fnt")));
-        TextButton newGame = new TextButton("New Game", style);
-        TextButton options = new TextButton("Options", style);
-        TextButton exit = new TextButton("Exit", style);
-
-         */
 
         ImageButton.ImageButtonStyle newGameStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("newGame"), skin.getDrawable("newGame"), skin.getDrawable("newGame"), skin.getDrawable("newGame"), skin.getDrawable("newGame"), skin.getDrawable("newGame"));
         ImageButton.ImageButtonStyle optionsStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"));
@@ -104,6 +93,7 @@ public class MainMenuScreen implements Screen {
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                backgroundMusic.stop();
                 game.setScreen(new CharSelect(game));
             }
         });
@@ -111,6 +101,7 @@ public class MainMenuScreen implements Screen {
         options.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                backgroundMusic.stop();
                 game.setScreen(new OptionsMenu(game, null));
             }
         });
@@ -134,7 +125,6 @@ public class MainMenuScreen implements Screen {
         game.batch.end();
         stage.act();
         stage.draw();
-
 
     }
 
@@ -167,5 +157,6 @@ public class MainMenuScreen implements Screen {
         optionsButtonTexture.dispose();
         quitButtonTexture.dispose();
         backgroundTexture.dispose();
+        backgroundMusic.dispose();
     }
 }

@@ -13,8 +13,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.Timer;
 
 import javax.sound.sampled.AudioInputStream;
 import java.util.NoSuchElementException;

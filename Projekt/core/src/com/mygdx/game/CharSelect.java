@@ -31,9 +31,8 @@ public class CharSelect implements Screen {
 
     Texture femalCharTexture;
 
-    ImageButton maleSelect;
-
-    ImageButton femaleSelect;
+    Texture backgroundTexture;
+    Image background;
 
     public CharSelect(final Start game) {
         this.game = game;
@@ -48,6 +47,10 @@ public class CharSelect implements Screen {
         femalCharTexture = new Texture(Gdx.files.internal("characterSprite\\femaleSprite.png"));
         skin.add("maleChar", maleCharTexture);
         skin.add("femaleChar", femalCharTexture);
+        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        background = new Image(backgroundTexture);
+        background.setHeight(1080);
+        background.setWidth(1920);
     }
 
     @Override
@@ -94,6 +97,9 @@ public class CharSelect implements Screen {
         ScreenUtils.clear(Color.BLACK);
 
         //draw stage
+        game.batch.begin();
+        background.draw(game.batch, 1.0f);
+        game.batch.end();
         stage.act();
         stage.draw();
     }
