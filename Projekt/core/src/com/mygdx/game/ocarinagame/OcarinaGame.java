@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.Conductor;
 import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.PauseScreen;
 import com.mygdx.game.Start;
@@ -28,24 +27,23 @@ public class OcarinaGame implements Screen {
     private static final int WORLD_WIDTH = 250;
     private static final int WORLD_HEIGHT = 250;
     private static final float HIT_OFFSET = 10;
-    private static final long ARROW_UPTIME = 400_000_000;
-    private static final long SPAWN_OFFSET = 50_000_000;
-    private static final boolean IS_PENALTY_ON = false;
+    private static final long ARROW_UPTIME = 500_000_000;
+    private static final long SPAWN_OFFSET = 350_000_000;
+    private static final boolean IS_PENALTY_ON = true;
     private static final boolean IS_ARROW_POSITION_OFFSET_ACTIVE = false;
+    private static final long SEC_IN_NANO = 1_000_000_000;
 
     private final float playerX;
     private final float playerY;
 
     private final Start game;
-    private final Conductor conductor;
     private final Music song;
     private final OrthographicCamera camera;
     private final Viewport viewport;
+    //private final HUD hud;
 
     private final Texture playerTexture;
     private final Texture arrowTexture;
-
-    private final BitmapFont font;
 
     private final Sprite player;
     private final Array<Arrow> allArrows;
@@ -57,19 +55,17 @@ public class OcarinaGame implements Screen {
     private boolean isRunning;
     private int hits;
     private long lastArrowSpawn;
-    private float spawnRateNano;
+    private int lastArrowDirectionInt;
+    private float bpm;
+    private long nanoPerBeat;
 
 
     public OcarinaGame(Start game) {
         this.game = game;
 
-        // Setup UI
-        font = new BitmapFont();
-        font.getData().setScale(0.7f);
-
         // Setup audio
-        conductor = new Conductor(120, 0);
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
+        setBPM(120);
 
         // Setup camera
         camera = new OrthographicCamera();
@@ -79,14 +75,15 @@ public class OcarinaGame implements Screen {
         viewport = new FillViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
         viewport.apply(true);
 
+        // Setup UI
+        //hud = new HUD(game.batch);
+
         // Setup textures
         playerTexture = new Texture("ocarina-game\\player.png");
         arrowTexture = new Texture("ocarina-game\\arrow-up.png");
 
         // Setup player
         player = new Sprite(playerTexture, playerTexture.getWidth(), playerTexture.getHeight());
-        //playerX = (WIDTH - player.getWidth()) * 0.5f;
-        //playerY = (HEIGHT - player.getHeight()) * 0.5f;
         playerX = (WORLD_WIDTH - player.getWidth()) * 0.5f;
         playerY = (WORLD_HEIGHT - player.getHeight()) * 0.5f;
 
@@ -97,19 +94,29 @@ public class OcarinaGame implements Screen {
         leftArrows = new Array<>();
         downArrows = new Array<>();
         rightArrows = new Array<>();
+
+        lastArrowDirectionInt = -1;
+        lastArrowSpawn = TimeUtils.nanoTime() + SPAWN_OFFSET;
+    }
+
+    public static int getWorldWidth() {
+        return WORLD_WIDTH;
+    }
+
+    public static int getWorldHeight() {
+        return WORLD_HEIGHT;
+    }
+
+    private void setBPM(float bpm) {
+        this.bpm = bpm;
+        nanoPerBeat = (long) ((60 / bpm) * SEC_IN_NANO);
     }
 
     @Override
     public void show() {
         isRunning = true;
-
-        conductor.start();
         song.setVolume(Start.volume);
         song.play();
-
-        // Spawnrate = 60 * BPM^-1
-        // BPM^-1 ... time between beat in minutes
-        spawnRateNano = conductor.crochet * 1_000_000_000;
     }
 
     @Override
@@ -119,28 +126,33 @@ public class OcarinaGame implements Screen {
 
             camera.update();
             controls();
-
-            // Setup SpriteBatch and draw sprites
-            game.batch.setProjectionMatrix(camera.combined);
-            game.batch.begin();
-
-            player.draw(game.batch);
-            font.draw(game.batch, "Hits: " + hits, 5, WORLD_HEIGHT - 60);
-            for (Arrow currArrow : allArrows) {
-                currArrow.getSprite().draw(game.batch);
-                if (TimeUtils.nanoTime() - currArrow.getSpawnTime() > ARROW_UPTIME) {
-                    removeArrowOfDirection(currArrow.getDirection());
-                    if (IS_PENALTY_ON) reduceScore();
-                }
-            }
-
-            game.batch.end();
+            draw();
 
             // Spawn arrow at certain interval
-            if (TimeUtils.nanoTime() - lastArrowSpawn > spawnRateNano - SPAWN_OFFSET) spawnArrow();
+            if (TimeUtils.nanoTime() - lastArrowSpawn > nanoPerBeat) spawnArrow();
+            System.out.println(TimeUtils.nanoTime());
 
             checkWinCondition();
         }
+    }
+
+    private void draw() {
+        // Setup SpriteBatch and draw sprites
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
+
+        player.draw(game.batch);
+        for (Arrow currArrow : allArrows) {
+            currArrow.getSprite().draw(game.batch);
+            if (TimeUtils.nanoTime() - currArrow.getSpawnTime() > ARROW_UPTIME) {
+                removeArrowOfDirection(currArrow.getDirection());
+                if (IS_PENALTY_ON) reduceScore();
+            }
+        }
+
+        game.batch.end();
+
+        //hud.getStage().draw();
     }
 
     private void reduceScore() {
@@ -148,7 +160,7 @@ public class OcarinaGame implements Screen {
     }
 
     private void removeArrowOfDirection(Arrow.Direction direction) {
-        // Remove the oldest arrow with specific direction and adjust position
+        // Remove the oldest arrow with specific direction and adjust position by filling the gap after removal
         Arrow toRemove = null;
         switch (direction) {
             case UP:
@@ -199,10 +211,13 @@ public class OcarinaGame implements Screen {
     private void spawnArrow() {
         Sprite sprite = new Sprite(arrowTexture, arrowTexture.getWidth(), arrowTexture.getHeight());
         int dirInt = MathUtils.random(0, 3);
+        // Prevent arrow of same direction to spawn consecutively
+        while (lastArrowDirectionInt == dirInt) dirInt = MathUtils.random(0, 3);
 
         sprite.setRotation(dirInt * 90); // counter-clock rotation, beginning with up-arrow
         Arrow.Direction direction = Arrow.Direction.fromInt(dirInt);
         lastArrowSpawn = TimeUtils.nanoTime();
+
         Arrow a = new Arrow(sprite, direction, lastArrowSpawn);
         allArrows.add(a);
 
@@ -231,6 +246,8 @@ public class OcarinaGame implements Screen {
                 rightArrows.add(a);
                 break;
         }
+
+        lastArrowDirectionInt = dirInt;
     }
 
     private void controls() {
@@ -246,8 +263,8 @@ public class OcarinaGame implements Screen {
                     Gdx.input.isKeyJustPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
                     Gdx.input.isKeyJustPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) {
 
-                hits++;
-                removeArrowOfDirection(direction);
+                    hits++;
+                    removeArrowOfDirection(direction);
 
                 // Penalty for just pressing at random
             } else if (IS_PENALTY_ON &&
@@ -301,6 +318,5 @@ public class OcarinaGame implements Screen {
         song.dispose();
         playerTexture.dispose();
         arrowTexture.dispose();
-        font.dispose();
     }
 }
