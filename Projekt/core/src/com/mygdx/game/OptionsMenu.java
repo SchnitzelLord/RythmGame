@@ -62,7 +62,7 @@ public class OptionsMenu implements Screen {
         Table table = new Table();
         table.setSkin(skin);
         table.setFillParent(true);
-        table.setDebug(true);
+        table.setDebug(false);
         stage.addActor(table);
 
         ImageButton.ImageButtonStyle backStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"), skin.getDrawable("back"));

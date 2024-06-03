@@ -82,7 +82,7 @@ public class MainMenuScreen implements Screen {
         ImageButton quit = new ImageButton(quitStyle);
 
         // add title and buttons to screen
-        table.row().pad(-38, 4, 4, 0);
+        table.row().pad(-38, 5, 4, 0);
         table.add(newGame);
         table.row().pad(0, 2, 4, 0);
         table.add(options);

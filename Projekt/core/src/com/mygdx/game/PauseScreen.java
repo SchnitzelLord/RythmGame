@@ -58,7 +58,7 @@ public class PauseScreen extends GameScreens {
         // table to organize buttons; fills screen
         Table table = new Table();
         table.setFillParent(true);
-        table.setDebug(true);
+        table.setDebug(false);
         stage.addActor(table);
 
         // create buttons
