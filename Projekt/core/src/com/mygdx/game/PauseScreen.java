@@ -31,7 +31,7 @@ public class PauseScreen extends GameScreens {
 
     //objects for buttons
     Skin skin;
-    Texture buttonBackground;
+    Texture resumeButtonTexture;
     Texture optionButtonTexture;
     Texture quitButtonTexture;
 
@@ -43,11 +43,11 @@ public class PauseScreen extends GameScreens {
         stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
         //initialize texture for buttons
-        buttonBackground = new Texture(Gdx.files.internal("buttons\\buttonLayout.png"));
+        resumeButtonTexture = new Texture(Gdx.files.internal("buttons\\resumeButton.png"));
         optionButtonTexture = new Texture(Gdx.files.internal("buttons\\OptionsButton.png"));
         quitButtonTexture = new Texture(Gdx.files.internal("buttons\\QuitButton.png"));
         skin = new Skin();
-        skin.add("button", buttonBackground);
+        skin.add("resume", resumeButtonTexture);
         skin.add("options", optionButtonTexture);
         skin.add("quit", quitButtonTexture);
     }
@@ -62,22 +62,22 @@ public class PauseScreen extends GameScreens {
         stage.addActor(table);
 
         // create buttons
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(skin.getDrawable("button"), skin.getDrawable("button"), skin.getDrawable("button"), new BitmapFont(Gdx.files.internal("font\\font.fnt")));
-        TextButton resume = new TextButton("Resume", style);
+        ImageButton.ImageButtonStyle resumeButtonStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("resume"), skin.getDrawable("resume"), skin.getDrawable("resume"), skin.getDrawable("resume"), skin.getDrawable("resume"), skin.getDrawable("resume"));
         ImageButton.ImageButtonStyle optionButtonStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"), skin.getDrawable("options"));
         ImageButton.ImageButtonStyle quitButtonStyle = new ImageButton.ImageButtonStyle(skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"), skin.getDrawable("quit"));
+        ImageButton resumeButton = new ImageButton(resumeButtonStyle);
         ImageButton optionButton = new ImageButton(optionButtonStyle);
         ImageButton quitButton = new ImageButton(quitButtonStyle);
 
         // add title and buttons to screen
-        table.add(resume);
-        table.row();
+        table.add(resumeButton);
+        table.row().pad(20, 0, 0, 0);
         table.add(optionButton);
-        table.row();
-        table.add(quitButton);
+        table.row().pad(20, 0, 0, 0);
+        table.add(quitButton).center();
 
         //add event listeners to buttons
-        resume.addListener(new ChangeListener() {
+        resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(lastScreen);
@@ -140,7 +140,7 @@ public class PauseScreen extends GameScreens {
         //get rid of objects to keep memory free
         stage.dispose();
         skin.dispose();
-        buttonBackground.dispose();
+        resumeButtonTexture.dispose();
     }
 }
 

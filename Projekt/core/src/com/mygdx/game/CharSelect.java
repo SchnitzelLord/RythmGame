@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -22,7 +23,9 @@ public class CharSelect implements Screen {
 
     Skin skin;
 
-    BitmapFont font;
+    FreeTypeFontGenerator generator;
+    FreeTypeFontGenerator.FreeTypeFontParameter parameter;
+    BitmapFont pixelFont;
 
     Label.LabelStyle textStyle;
 
@@ -39,8 +42,11 @@ public class CharSelect implements Screen {
         stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
         skin = new Skin();
-        font = new BitmapFont(Gdx.files.internal("font\\font.fnt"));
-        textStyle = new Label.LabelStyle(font, Color.WHITE);
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
+        parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 20;
+        pixelFont = generator.generateFont(parameter);
+        textStyle = new Label.LabelStyle(pixelFont, Color.WHITE);
         skin.add("font", textStyle);
         maleCharTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
         femalCharTexture = new Texture(Gdx.files.internal("characterSprite\\femaleSprite.png"));
@@ -65,6 +71,7 @@ public class CharSelect implements Screen {
         ImageButton maleSelectButton = new ImageButton(maleButtonStyle);
         ImageButton femaleSelectButton = new ImageButton(femaleButtonStyle);
 
+        table.row().pad(0, 60, 0, 0);
         table.add("Choose your Character", "font").center();
         table.row().pad(15, 0, 50, 0);
         table.add(maleSelectButton).center();
@@ -74,7 +81,7 @@ public class CharSelect implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Start.playerTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
-                game.setScreen(new MazeLevel(game));
+                game.setScreen(new TransitionScreen(game, "MazeLevel"));
             }
         });
 
@@ -129,6 +136,7 @@ public class CharSelect implements Screen {
         stage.dispose();
         maleCharTexture.dispose();
         femalCharTexture.dispose();
-        font.dispose();
+        generator.dispose();
+        pixelFont.dispose();
     }
 }

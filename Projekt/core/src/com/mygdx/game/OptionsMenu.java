@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -26,10 +27,14 @@ public class OptionsMenu implements Screen {
     Texture plusButtonTexture;
     Texture backButtonTexture;
     Label.LabelStyle textStyle;
-    BitmapFont font;
     Label volume;
     Texture backgroundTexture;
     Image background;
+    FreeTypeFontGenerator generator;
+    FreeTypeFontGenerator.FreeTypeFontParameter parameter;
+    BitmapFont pixelFont;
+
+
 
     public OptionsMenu(final Start game, GameScreens screen) {
         this.game = game;
@@ -38,6 +43,10 @@ public class OptionsMenu implements Screen {
         stage = new Stage(new FillViewport(627, 420));
         Gdx.input.setInputProcessor(stage);
 
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
+        parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 20;
+        pixelFont = generator.generateFont(parameter);
         minusButtonTexture = new Texture(Gdx.files.internal("buttons\\minusButton.png"));
         plusButtonTexture = new Texture(Gdx.files.internal("buttons\\plusButton.png"));
         backButtonTexture = new Texture(Gdx.files.internal("buttons\\backButton.png"));
@@ -45,8 +54,7 @@ public class OptionsMenu implements Screen {
         skin.add("back", backButtonTexture);
         skin.add("minus", minusButtonTexture);
         skin.add("plus", plusButtonTexture);
-        font = new BitmapFont(Gdx.files.internal("font\\smallFont.fnt"));
-        textStyle = new Label.LabelStyle(font, Color.WHITE);
+        textStyle = new Label.LabelStyle(pixelFont, Color.WHITE);
         skin.add("font", textStyle);
         volume = new Label(String.format("%.0f %s", Start.volume * 100, "%"), skin, "font");
         volume.setAlignment(0);
@@ -155,6 +163,7 @@ public class OptionsMenu implements Screen {
         backButtonTexture.dispose();
         minusButtonTexture.dispose();
         plusButtonTexture.dispose();
-        font.dispose();
+        pixelFont.dispose();
+        generator.dispose();
     }
 }
