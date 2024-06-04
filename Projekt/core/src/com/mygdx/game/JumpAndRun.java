@@ -22,7 +22,7 @@ public class JumpAndRun implements Screen {
     private Music song;
     private static final int MAX_HEIGTH = 1080;
     private static final int MAX_WIDTH = 1920;
-    private static final int itemSpeed = 150;
+    private static final int itemSpeed = 300;
 
     private static final boolean DEBUGGING = true; // so that one can view see various stats if enabled
 
@@ -77,6 +77,8 @@ public class JumpAndRun implements Screen {
     private long lastPlatformTime;
     private long lastPowerupTime;
     private boolean canSpawn;
+    private float debug_fallspeed;
+    private int debug_remove;
 
     public JumpAndRun(final Start game) {
         this.game = game;
@@ -145,50 +147,34 @@ public class JumpAndRun implements Screen {
         // draw point zone
 
         if (!isPaused) {
-
-            for(Sprite background: backgrounds) {
-                background.draw(game.batch);
-
-            }
-
-            player.draw(game.batch);
             update(); // update the conductor
+            draw(backgrounds,waves, powerups,platforms,boosters,platforms);
 
-            // Draw Hearts
             for (int i = 0; i < lives; i++) { // draw as many hearts as there are lives
                 hearts.get(i).setX( 20 +(i* hearts.get(i).getWidth()));
                 hearts.get(i).draw(game.batch);
             }
-            // Draw Waves
-            for(Sprite wave: waves) {
-                wave.draw(game.batch);
-            }
 
-            for(Powerup powerup: powerups) {
-                powerup.draw(game.batch);
-            }
-
-            for(Sprite platform: platforms) {
-                platform.draw(game.batch);
-            }
-
-            // Draw Boosters
-            for(Sprite booster: boosters) {
-                game.batch.draw(boosterTexture, booster.getX(), booster.getY());
-            }
+            player.draw(game.batch);
 
             if (DEBUGGING) {
-                font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+                font.draw(game.batch," removed count "+ debug_remove + " backgroundarray length = "+ backgrounds.size + " fallspeed = " + debug_fallspeed + " spedMod = " + speedModHor + "Speed time = " + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
                 game.batch.draw(debugBeatTexture,MAX_WIDTH/2-2,0);
             }
         }
-
         game.batch.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             setIsPaused(true);
             song.pause();
             game.setScreen(new PauseScreen(game, this));
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.S)) {
+            jumpTime = 0;
+            jumps = 0;
+            fallSpeedMod = 3;
+            fallSpeedChangeTime = 20;
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jumps > 0 ) { // just pressed so that the player has to press space again to double jump
@@ -201,11 +187,16 @@ public class JumpAndRun implements Screen {
         } else if (jumpTime <= 0) {
             float fallspeed = fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
             move = player.getY() - fallspeed;
+            debug_fallspeed = - fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
             float checkPlatform = checkPlatforms();
-            if (move < 0) move = 0;
-            else if (checkPlatform!= -100 ) {
+
+            if (checkPlatform!= -100 ) {
                 if (jumps < 2)jumps = 2;
                 move = checkPlatform;
+                fallSpeedMod = 1;
+            } else if (move < 0) {
+                move = 0;
+                fallSpeedMod = 1;
             }
             player.setY(move);
             if (player.getY() == 0 && jumps < 2)jumps = 2; // when the player has hit the ground he can jump again
@@ -213,7 +204,7 @@ public class JumpAndRun implements Screen {
         } else {
             jumpTime -= 1;
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
-            if (move + player.getHeight() > MAX_HEIGTH) move = player.getY();
+            if (move + player.getHeight() > MAX_HEIGTH) move = MAX_HEIGTH-player.getHeight();
             player.setY(move);
         }
 
@@ -273,16 +264,16 @@ public class JumpAndRun implements Screen {
             Sprite background= iter.next();
             background.setX(background.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(background.getX()  + background.getWidth() < 0) {
-                iter.remove();
                 spawnBackground();
+                iter.remove();
+                debug_remove ++;
             }
         }
-
 
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
 
-        if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) {
+        if(TimeUtils.nanoTime() - lastWaveTime > 1500000000 && canSpawn) {
             spawnWavebot();
             spawnWavetop();
         };
@@ -293,7 +284,7 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        float offset =  + Gdx.graphics.getDeltaTime() * itemSpeed - Gdx.graphics.getDeltaTime() * 64 / 1000;   // the first part is so that the waves middle arrives on beat at MaxWidth/2 and the other is so that when the player doges the wave the beat arrives
+        float offset =  + Gdx.graphics.getDeltaTime() * itemSpeed - Gdx.graphics.getDeltaTime() * 64;   // the first part is so that the waves middle arrives on beat at MaxWidth/2 and the other is so that when the player doges the wave the beat arrives
         if (song.getPosition() - offset   >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset <= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
@@ -304,7 +295,7 @@ public class JumpAndRun implements Screen {
 
     private boolean overlap(Sprite sp1, Sprite sp2) {
         if (sp2.getX() + sp2.getWidth() < sp1.getX()) return false;
-        if (sp2.getY() < sp1.getY()) return false;
+        if (sp2.getY() + sp2.getHeight() < sp1.getY()) return false;
         if (sp2.getY() > sp1.getY() + sp1.getHeight()) return false;
         if (sp2.getX() > sp1.getX() + sp1.getWidth()) return false;
         return true;
@@ -335,7 +326,7 @@ public class JumpAndRun implements Screen {
         if(random < 0.4) y = 0;
         else if (random < 0.8) y = (int) (200 +  waveSPawnVariantion*Math.random());
         else y = (int) (MAX_HEIGTH * random);
-        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y);
+        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y,true);
         if (!noOverlap) spawnWavebot();
         lastWaveTime = TimeUtils.nanoTime();
     }
@@ -349,7 +340,7 @@ public class JumpAndRun implements Screen {
         else if  (random < 0.9) y = (int) (800 +  waveSPawnVariantion*Math.random());
         else y = (int) (MAX_HEIGTH * random);
 
-        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y);
+        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y,true);
         if (!noOverlap) spawnWavetop();
         lastWaveTime = TimeUtils.nanoTime();
     }
@@ -361,7 +352,7 @@ public class JumpAndRun implements Screen {
         if (random < 0.33) booster.setY(0);
         else if (random < 0.66) y = (int) (450 +  100*Math.random()) ;
         else y = (int) (700 +  100*Math.random());
-        boolean noOverlap = spawnSpritesetup(boosters,booster,MAX_WIDTH,y);
+        boolean noOverlap = spawnSpritesetup(boosters,booster,MAX_WIDTH,y,true);
         if (!noOverlap) spawnBooster();
         lastBoosterTime = TimeUtils.nanoTime();
     }
@@ -374,16 +365,15 @@ public class JumpAndRun implements Screen {
         if (random < 0.3) y = (int) (100 +  150*Math.random());
         else if (random < 0.6) y = (int) (400 +  150*Math.random());
         else  y = (int) (700 +  150*Math.random());
-        boolean noOverlap = spawnSpritesetup(platforms,platform,MAX_WIDTH,y);
+        boolean noOverlap = spawnSpritesetup(platforms,platform,MAX_WIDTH,y,true);
         if (!noOverlap) spawnPlatform();
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
     private void spawnBackground() {
         Sprite background = new Sprite(background1Texture,MAX_WIDTH,MAX_HEIGTH);
-        spawnSpritesetup(backgrounds,background,MAX_WIDTH,0);
+        spawnSpritesetup(backgrounds,background,MAX_WIDTH,0,false);
     }
-
     private void spawnPowerup() {
         Powerup powerup;
 
@@ -394,20 +384,31 @@ public class JumpAndRun implements Screen {
         if (effect < 0.33) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
         else if (effect < 0.66)powerup = Powerup.createPowerup(Powerup.Power.live);
         else powerup = Powerup.createPowerup(Powerup.Power.shield);
-        boolean noOverlap = spawnSpritesetup(powerups,powerup,MAX_WIDTH,y);
+        boolean noOverlap = spawnSpritesetup(powerups,powerup,MAX_WIDTH,y,true);
         if (!noOverlap) spawnPowerup();
         lastPowerupTime = TimeUtils.nanoTime();
     }
 
-    private <T extends Sprite> boolean spawnSpritesetup(Array<T> arr, T sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
+    private <T extends Sprite> boolean spawnSpritesetup(Array<T> arr, T sp, int x, int y, boolean check) { // used to avoid code compilation try later to remove unsafe operation
         sp.setX(x);
         sp.setY(y);
-        if (overlap(boosters,sp)) return false;// return false to signal that there is an overlap
-        else if (overlap(platforms,sp)) return false;
-        else if (overlap(powerups,sp)) return false;
-        else if (overlap(waves,sp)) return false;
+        if (check) {
+            if (overlap(boosters, sp)) return false;// return false to signal that there is an overlap
+            else if (overlap(platforms, sp)) return false;
+            else if (overlap(powerups, sp)) return false;
+            else if (overlap(waves, sp)) return false;
+        }
         arr.add(sp);
         return true;
+    }
+
+    @SafeVarargs
+    private final void draw(Array<? extends Sprite>... arr) { // methode to avoid code repetition to draw all my items
+        for (Array<? extends Sprite> itemarray : arr) {
+            for(Sprite item : itemarray) {
+                item.draw(game.batch);
+            }
+        }
     }
 
     @Override
