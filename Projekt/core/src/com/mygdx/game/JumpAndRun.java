@@ -30,6 +30,7 @@ public class JumpAndRun implements Screen {
     private static final int platformWidth = 100;
     private static final int platformHeigth = 10;
     private static final int waveSPawnVariantion = 150;
+    private static final int itemSpeed = 150;
     final Start game;
     private Sprite player;
     private Texture playerTexture;
@@ -240,7 +241,7 @@ public class JumpAndRun implements Screen {
 
         for (Iterator<Sprite> iter = waves.iterator(); iter.hasNext(); ) {
             Sprite wave = iter.next();
-            wave.setX(wave.getX() - 150 * Gdx.graphics.getDeltaTime());
+            wave.setX(wave.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(wave.getX() + wave.getWidth()< 0) iter.remove();
 
             if(overlap(wave)) {
@@ -253,7 +254,7 @@ public class JumpAndRun implements Screen {
         // Boosters
         for (Iterator<Sprite> iter = boosters.iterator(); iter.hasNext(); ) {
             Sprite booster = iter.next();
-            booster.setX(booster.getX() - 150 * Gdx.graphics.getDeltaTime());
+            booster.setX(booster.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(booster.getX()+ booster.getWidth() < 0) iter.remove();
 
             if(overlap(booster)) {
@@ -266,14 +267,14 @@ public class JumpAndRun implements Screen {
         // platforms
         for (Iterator<Sprite> iter = platforms.iterator(); iter.hasNext(); ) {
             Sprite platform = iter.next();
-            platform.setX(platform.getX() - 150 * Gdx.graphics.getDeltaTime());
+            platform.setX(platform.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(platform.getX()+ platform.getWidth()< 0) iter.remove();
             }
 
         // powerups
         for (Iterator<Powerup> iter = powerups.iterator(); iter.hasNext(); ) {
             Powerup powerup = iter.next();
-            powerup.setX(powerup.getX() - 150 * Gdx.graphics.getDeltaTime());
+            powerup.setX(powerup.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(powerup.getX() + powerup.getWidth()< 0) iter.remove();
 
             if(overlap(powerup)) {
@@ -290,7 +291,7 @@ public class JumpAndRun implements Screen {
         // backgrounds
         for (Iterator<Sprite> iter = backgrounds.iterator(); iter.hasNext(); ) {
             Sprite background= iter.next();
-            background.setX(background.getX() - 150 * Gdx.graphics.getDeltaTime());
+            background.setX(background.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(background.getX()  + background.getWidth() < 0) {
                 iter.remove();
                 spawnBackground(currentCornerX);
