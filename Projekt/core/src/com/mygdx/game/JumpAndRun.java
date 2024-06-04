@@ -13,37 +13,42 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
-import java.awt.*;
 import java.util.Iterator;
 
 public class JumpAndRun implements Screen {
-
+    final Start game;
+    private OrthographicCamera camera;
+    private Conductor conductor;
+    private Music song;
     private static final int MAX_HEIGTH = 1080;
     private static final int MAX_WIDTH = 1920;
+    private static final int itemSpeed = 150;
+
+    private static final boolean DEBUGGING = true; // so that one can view see various stats if enabled
 
     // sprite sizes
     private static final int boosterWidth = 100;
     private static final int boosterHeigth = 100;
     private static final int waveWidth = 64;
     private static final int waveHeigth = 64;
-
     private static final int platformWidth = 100;
     private static final int platformHeigth = 10;
     private static final int waveSPawnVariantion = 150;
-    private static final int itemSpeed = 150;
-    final Start game;
-    private Sprite player;
+
+    // Textures -----------------------------------------------------------------------
     private Texture playerTexture;
+    Texture debugBeatTexture;
     private Texture heartTexture;
     private Texture zoneTexture;
     private Texture waveTexture;
     private Texture boosterTexture;
     private Texture platformTexture;
-
     private Texture background1Texture;
-    private OrthographicCamera camera;
-    private Conductor conductor;
-    private Music song;
+
+    // items-----------------------------------------------------------------------
+
+    private Sprite player;
+    Sprite debugBeat;
     private Array<Sprite> hearts;
     private Array<Sprite> waves;
     private Array<Sprite> platforms;
@@ -51,42 +56,27 @@ public class JumpAndRun implements Screen {
     private Array<Powerup> powerups;
     private Array<Sprite> backgrounds;
     private final BitmapFont font = new BitmapFont();
-    private int lives = 100;
+
+    // variables used in the game logic
+
+    private int lives = 10;
     private int jumps = 2;
-    private boolean isPaused;
     private int jumpTime;
-    float volume = 1;
-    float move;
-
-    float currentCenterX; // used to spawn and move other objects relative to it
-    float currentCornerX; // used as a new zero point for drawing/spawning the sprites relative to the screen
-
-    float fallSpeedMod;
-    int fallSpeedChangeTime;
-
-    float speedModHor = 1;
-    int speedModHorChangeTime;
+    private int fallSpeedChangeTime;
+    private int shield;
+    private int counter = 0;
+    private float volume = 1;
+    private float move;
+    private float fallSpeedMod;
+    private float speedModHor = 1;
+    private boolean isPaused;
 
     // last variables used to prevent items from spawning to often
-
     private long lastWaveTime;
     private long lastBoosterTime;
     private long lastPlatformTime;
     private long lastPowerupTime;
     private boolean canSpawn;
-
-    Texture debugBeatTexture;
-    Sprite debugBeat;
-    // Powerups
-
-    private int shield;
-
-    float test1 = 1;
-    float test2 = 1;
-    int counter = 0;
-
-    Rectangle zone; // used to give points
-    private static final boolean DEBUGGING = true; // so that i can see various stats if enabled
 
     public JumpAndRun(final Start game) {
         this.game = game;
@@ -112,13 +102,9 @@ public class JumpAndRun implements Screen {
         shield = 0;
         conductor.start();
 
-
         fallSpeedChangeTime = 0;
-        currentCenterX = MAX_WIDTH/2;
-        currentCornerX = currentCenterX - MAX_WIDTH/2;
 
-
-        // initilising Arrays
+        // initializing Arrays
 
         hearts = new Array<>();
         waves = new Array<>();
@@ -132,16 +118,13 @@ public class JumpAndRun implements Screen {
             heart.setX(10 + (i* heart.getWidth()) +10 );
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
-        // initilised the first two backgrounds
+        // initialised the first two backgrounds
 
         backgrounds = new Array<>();
         Sprite background = new Sprite(background1Texture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
-        spawnBackground(0); //
+        spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
-
-
-
     }
 
     @Override
@@ -149,7 +132,6 @@ public class JumpAndRun implements Screen {
         setIsPaused(false);
         song.setVolume(Start.volume);
         song.play();
-
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -159,27 +141,21 @@ public class JumpAndRun implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLUE);
-
         game.batch.begin();
         // draw point zone
-
 
         if (!isPaused) {
 
             for(Sprite background: backgrounds) {
                 background.draw(game.batch);
-                if (counter == 0) test1 = background.getX();
-                if (counter == 1) test2 = background.getX();
-                counter ++;
+
             }
 
             player.draw(game.batch);
-
-            //conductor.songPosition = song.getPosition();
-            update();
+            update(); // update the conductor
 
             // Draw Hearts
-            for (int i = 0; i < 10; i++) { // draw as many hearts as there are lives
+            for (int i = 0; i < lives; i++) { // draw as many hearts as there are lives
                 hearts.get(i).setX( 20 +(i* hearts.get(i).getWidth()));
                 hearts.get(i).draw(game.batch);
             }
@@ -201,9 +177,8 @@ public class JumpAndRun implements Screen {
                 game.batch.draw(boosterTexture, booster.getX(), booster.getY());
             }
 
-
             if (DEBUGGING) {
-                font.draw(game.batch,"X1 " + test1 + "X2 " + test2 +"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+                font.draw(game.batch,"spedMod = " + speedModHor + "Speed time = " + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
                 game.batch.draw(debugBeatTexture,MAX_WIDTH/2-2,0);
             }
         }
@@ -215,7 +190,6 @@ public class JumpAndRun implements Screen {
             song.pause();
             game.setScreen(new PauseScreen(game, this));
         }
-
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jumps > 0 ) { // just pressed so that the player has to press space again to double jump
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
@@ -300,7 +274,7 @@ public class JumpAndRun implements Screen {
             background.setX(background.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(background.getX()  + background.getWidth() < 0) {
                 iter.remove();
-                spawnBackground(currentCornerX);
+                spawnBackground();
             }
         }
 
@@ -370,7 +344,6 @@ public class JumpAndRun implements Screen {
         double random = Math.random();
         Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
         int y;
-
         if (random < 0.5) y = (int) (450 +  100*Math.random());
         else if  (random < 0.7) y = (int) (800 +  waveSPawnVariantion*Math.random());
         else if  (random < 0.9) y = (int) (800 +  waveSPawnVariantion*Math.random());
@@ -406,7 +379,7 @@ public class JumpAndRun implements Screen {
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
-    private void spawnBackground(float leftXCorner) {
+    private void spawnBackground() {
         Sprite background = new Sprite(background1Texture,MAX_WIDTH,MAX_HEIGTH);
         spawnSpritesetup(backgrounds,background,MAX_WIDTH,0);
     }
@@ -426,7 +399,7 @@ public class JumpAndRun implements Screen {
         lastPowerupTime = TimeUtils.nanoTime();
     }
 
-    private boolean spawnSpritesetup(Array arr, Sprite sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
+    private <T extends Sprite> boolean spawnSpritesetup(Array<T> arr, T sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
         sp.setX(x);
         sp.setY(y);
         if (overlap(boosters,sp)) return false;// return false to signal that there is an overlap
