@@ -51,7 +51,7 @@ public class JumpAndRun implements Screen {
     private Array<Powerup> powerups;
     private Array<Sprite> backgrounds;
     private final BitmapFont font = new BitmapFont();
-    private int lives = 10;
+    private int lives = 100;
     private int jumps = 2;
     private boolean isPaused;
     private int jumpTime;
@@ -75,6 +75,8 @@ public class JumpAndRun implements Screen {
     private long lastPowerupTime;
     private boolean canSpawn;
 
+    Texture debugBeatTexture;
+    Sprite debugBeat;
     // Powerups
 
     private int shield;
@@ -96,9 +98,10 @@ public class JumpAndRun implements Screen {
         platformTexture = new Texture("jumpAndRunSprites\\platform.png");
         zoneTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
         background1Texture = new Texture("jumpAndRunSprites\\test.png");
+        debugBeatTexture = new Texture("jumpAndRunSprites\\debugBeat2.png");
 
         player = new Sprite(playerTexture, 64,64 );
-        player.setX(1920 / 2);
+        player.setX(1920 / 2- 32);
         player.setY(1080 / 2);
 
         isPaused = false;
@@ -130,10 +133,12 @@ public class JumpAndRun implements Screen {
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
         // initilised the first two backgrounds
+
         backgrounds = new Array<>();
         Sprite background = new Sprite(background1Texture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
         spawnBackground(0); //
+        debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
 
 
 
@@ -174,7 +179,7 @@ public class JumpAndRun implements Screen {
             update();
 
             // Draw Hearts
-            for (int i = 0; i <lives; i++) { // draw as many hearts as there are lives
+            for (int i = 0; i < 10; i++) { // draw as many hearts as there are lives
                 hearts.get(i).setX( 20 +(i* hearts.get(i).getWidth()));
                 hearts.get(i).draw(game.batch);
             }
@@ -199,6 +204,7 @@ public class JumpAndRun implements Screen {
 
             if (DEBUGGING) {
                 font.draw(game.batch,"X1 " + test1 + "X2 " + test2 +"spedMod = " + speedModHor + "Speed time = " + speedModHorChangeTime + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
+                game.batch.draw(debugBeatTexture,MAX_WIDTH/2-2,0);
             }
         }
 
@@ -313,7 +319,8 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() <= conductor.lastBeat + conductor.crochet + 0.3f) {
+        float offset = Gdx.graphics.getDeltaTime() * itemSpeed / 1000;
+        if (song.getPosition() - offset   >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset <= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
         } else {
