@@ -24,6 +24,11 @@ public class JumpAndRun implements Screen {
     // sprite sizes
     private static final int boosterWidth = 100;
     private static final int boosterHeigth = 100;
+    private static final int waveWidth = 64;
+    private static final int waveHeigth = 64;
+
+    private static final int platformWidth = 100;
+    private static final int platformHeigth = 10;
     final Start game;
     private Sprite player;
     private Texture playerTexture;
@@ -40,7 +45,7 @@ public class JumpAndRun implements Screen {
     private Array<Sprite> hearts;
     private Array<Sprite> waves;
     private Array<Sprite> platforms;
-    private Array<Rectangle> boosters;
+    private Array<Sprite> boosters;
     private Array<Powerup> powerups;
     private Array<Sprite> backgrounds;
     private final BitmapFont font = new BitmapFont();
@@ -100,15 +105,9 @@ public class JumpAndRun implements Screen {
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
         shield = 0;
-
-    }
-
-    @Override
-    public void show() {
-        setIsPaused(false);
-        song.setVolume(Start.volume);
-        song.play();
         conductor.start();
+
+
         fallSpeedChangeTime = 0;
         currentCenterX = MAX_WIDTH/2;
         currentCornerX = currentCenterX - MAX_WIDTH/2;
@@ -134,6 +133,15 @@ public class JumpAndRun implements Screen {
         backgrounds.add(background);
         spawnBackground(0); //
 
+
+
+    }
+
+    @Override
+    public void show() {
+        setIsPaused(false);
+        song.setVolume(Start.volume);
+        song.play();
 
     }
 
@@ -194,8 +202,8 @@ public class JumpAndRun implements Screen {
             }
 
             // Draw Boosters
-            for(Rectangle booster: boosters) {
-                game.batch.draw(boosterTexture, booster.x, booster.y);
+            for(Sprite booster: boosters) {
+                game.batch.draw(boosterTexture, booster.getX(), booster.getY());
             }
 
 
@@ -255,9 +263,9 @@ public class JumpAndRun implements Screen {
         }
 
         // Boosters
-        for (Iterator<Rectangle> iter = boosters.iterator(); iter.hasNext(); ) {
-            Rectangle booster = iter.next();
-            if(booster.x < currentCornerX - booster.getWidth()) iter.remove();
+        for (Iterator<Sprite> iter = boosters.iterator(); iter.hasNext(); ) {
+            Sprite booster = iter.next();
+            if(booster.getX() < currentCornerX - booster.getWidth()) iter.remove();
 
             if(overlap(booster)) {
                 fallSpeedMod = (float) -2; // negative because the fallspeed is multiplied with it
@@ -317,20 +325,23 @@ public class JumpAndRun implements Screen {
         }
     }
 
-    private boolean overlap (Rectangle rec) {
-        if (player.getX() + player.getWidth() < rec.x) return false;
-        if (player.getY() + player.getHeight() < rec.y) return false;
-        if (player.getY() > rec.y + rec.height) return false;
-        if (player.getX() > rec.x + rec.width) return false;
+    private boolean overlap(Sprite sp1, Sprite sp2) {
+        if (sp2.getX() + sp2.getWidth() < sp1.getX()) return false;
+        if (sp2.getY() < sp1.getY()) return false;
+        if (sp2.getY() > sp1.getY() + sp1.getHeight()) return false;
+        if (sp2.getX() > sp1.getX() + sp1.getWidth()) return false;
         return true;
     }
 
     private boolean overlap (Sprite sp) {
-        if (player.getX() + player.getWidth() < sp.getX()) return false;
-        if (player.getY() < sp.getY()) return false;
-        if (player.getY() > sp.getY() + sp.getHeight()) return false;
-        if (player.getX() > sp.getX() + sp.getWidth()) return false;
-        return true;
+        return overlap(sp,player);
+    }
+
+    private boolean overlap (Array<Sprite> arr, Sprite sp) {
+        for (Sprite item : arr) {
+            if (overlap(item,sp)) return true;
+        }
+        return false;
     }
 
     private float checkPlatforms() {
@@ -342,7 +353,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnWave(float leftXCorner) {
         double random = Math.random();
-        Sprite wave = new Sprite(waveTexture,64,64);
+        Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
         int x =  (int)leftXCorner + MAX_WIDTH;
         int y = 0;
 
@@ -354,13 +365,11 @@ public class JumpAndRun implements Screen {
 
     private void spawnBooster(float leftXCorner) {
         double random = Math.random();
-        Rectangle booster = new Rectangle();
-        booster.x = (int)leftXCorner + MAX_WIDTH;
-        if (random < 0.33) booster.y = 0;
-        else if (random < 0.66)booster.y = (int) (200 +  100*Math.random()) ;
-        else booster.y = (int) (450 +  100*Math.random());
-        booster.width = boosterWidth;
-        booster.height = boosterHeigth;
+        Sprite booster = new Sprite(boosterTexture,boosterWidth,boosterHeigth );
+        booster.setX((int)leftXCorner + MAX_WIDTH);
+        if (random < 0.33) booster.setY(0);
+        else if (random < 0.66)booster.setY((int) (200 +  100*Math.random())) ;
+        else booster.setY((int) (450 +  100*Math.random()));
         boosters.add(booster);
         lastBoosterTime = TimeUtils.nanoTime();
     }
@@ -368,7 +377,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnPlatform(float leftXCorner) {
         double random = Math.random();
-        Sprite platform = new Sprite(platformTexture,100,10);
+        Sprite platform = new Sprite(platformTexture,platformWidth,platformHeigth);
         int x = (int)leftXCorner + MAX_WIDTH;
 
         int y = (int) (200 +  150*Math.random());
