@@ -7,7 +7,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -26,7 +25,7 @@ public class OcarinaGame implements Screen {
     private static final int SCREEN_HEIGHT = 1080;
     private static final int WORLD_WIDTH = 250;
     private static final int WORLD_HEIGHT = 250;
-    private static final float HIT_OFFSET = 10;
+    private static final float SPAWNN_OFFSET = 10;
     private static final long ARROW_UPTIME = 500_000_000;
     private static final long SPAWN_OFFSET = 350_000_000;
     private static final boolean IS_PENALTY_ON = true;
@@ -40,7 +39,7 @@ public class OcarinaGame implements Screen {
     private final Music song;
     private final OrthographicCamera camera;
     private final Viewport viewport;
-    //private final HUD hud;
+    private final HUD hud;
 
     private final Texture playerTexture;
     private final Texture arrowTexture;
@@ -53,7 +52,7 @@ public class OcarinaGame implements Screen {
     private final Array<Arrow> rightArrows;
 
     private boolean isRunning;
-    private int hits;
+    private int score;
     private long lastArrowSpawn;
     private int lastArrowDirectionInt;
     private float bpm;
@@ -76,7 +75,7 @@ public class OcarinaGame implements Screen {
         viewport.apply(true);
 
         // Setup UI
-        //hud = new HUD(game.batch);
+        hud = new HUD(game.batch, this);
 
         // Setup textures
         playerTexture = new Texture("ocarina-game\\player.png");
@@ -99,12 +98,20 @@ public class OcarinaGame implements Screen {
         lastArrowSpawn = TimeUtils.nanoTime() + SPAWN_OFFSET;
     }
 
-    public static int getWorldWidth() {
+    public int getWorldWidth() {
         return WORLD_WIDTH;
     }
 
-    public static int getWorldHeight() {
+    public int getWorldHeight() {
         return WORLD_HEIGHT;
+    }
+
+    public int getScreenWidth() {
+        return SCREEN_WIDTH;
+    }
+
+    public int getScreenHeight() {
+        return SCREEN_HEIGHT;
     }
 
     private void setBPM(float bpm) {
@@ -144,6 +151,7 @@ public class OcarinaGame implements Screen {
         player.draw(game.batch);
         for (Arrow currArrow : allArrows) {
             currArrow.getSprite().draw(game.batch);
+            // Remove arrow at certain time interval
             if (TimeUtils.nanoTime() - currArrow.getSpawnTime() > ARROW_UPTIME) {
                 removeArrowOfDirection(currArrow.getDirection());
                 if (IS_PENALTY_ON) reduceScore();
@@ -152,11 +160,15 @@ public class OcarinaGame implements Screen {
 
         game.batch.end();
 
-        //hud.getStage().draw();
+        hud.update();
     }
 
     private void reduceScore() {
-        if (hits > 0) hits--;
+        if (score > 0) score--;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     private void removeArrowOfDirection(Arrow.Direction direction) {
@@ -227,22 +239,22 @@ public class OcarinaGame implements Screen {
         switch (direction) {
             case UP:
                 float multUpOffset = sprite.getHeight() * upArrows.size;
-                sprite.setPosition(playerX, playerY + player.getHeight() + HIT_OFFSET + multUpOffset* offsetFactor);
+                sprite.setPosition(playerX, playerY + player.getHeight() + SPAWNN_OFFSET + multUpOffset* offsetFactor);
                 upArrows.add(a);
                 break;
             case DOWN:
                 float multDownOffset = sprite.getHeight() * downArrows.size;
-                sprite.setPosition(playerX, playerY - player.getHeight() - HIT_OFFSET - multDownOffset * offsetFactor);
+                sprite.setPosition(playerX, playerY - player.getHeight() - SPAWNN_OFFSET - multDownOffset * offsetFactor);
                 downArrows.add(a);
                 break;
             case LEFT:
                 float multLeftOffset = sprite.getWidth() * leftArrows.size;
-                sprite.setPosition(playerX - player.getWidth() - HIT_OFFSET - multLeftOffset * offsetFactor, playerY);
+                sprite.setPosition(playerX - player.getWidth() - SPAWNN_OFFSET - multLeftOffset * offsetFactor, playerY);
                 leftArrows.add(a);
                 break;
             case RIGHT:
                 float multRightOffset = sprite.getWidth() * rightArrows.size;
-                sprite.setPosition(playerX + player.getWidth() + HIT_OFFSET + multRightOffset * offsetFactor, playerY);
+                sprite.setPosition(playerX + player.getWidth() + SPAWNN_OFFSET + multRightOffset * offsetFactor, playerY);
                 rightArrows.add(a);
                 break;
         }
@@ -263,7 +275,7 @@ public class OcarinaGame implements Screen {
                     Gdx.input.isKeyJustPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
                     Gdx.input.isKeyJustPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) {
 
-                    hits++;
+                    score++;
                     removeArrowOfDirection(direction);
 
                 // Penalty for just pressing at random
@@ -279,7 +291,7 @@ public class OcarinaGame implements Screen {
     }
 
     private void checkWinCondition() {
-        if (hits >= 50) {
+        if (score >= 50) {
             isRunning = false;
             song.pause();
             game.setScreen(new MainMenuScreen(game));
@@ -318,5 +330,6 @@ public class OcarinaGame implements Screen {
         song.dispose();
         playerTexture.dispose();
         arrowTexture.dispose();
+        hud.dispose();
     }
 }
