@@ -29,6 +29,7 @@ public class JumpAndRun implements Screen {
 
     private static final int platformWidth = 100;
     private static final int platformHeigth = 10;
+    private static final int waveSPawnVariantion = 150;
     final Start game;
     private Sprite player;
     private Texture playerTexture;
@@ -300,9 +301,12 @@ public class JumpAndRun implements Screen {
         if (fallSpeedChangeTime > 0 ) fallSpeedChangeTime -= 1;
         else if (fallSpeedChangeTime == 0) fallSpeedMod = 1;
 
-        if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) spawnWave();
+        if(TimeUtils.nanoTime() - lastWaveTime > 1000000000 && canSpawn) {
+            spawnWavebot();
+            spawnWavetop();
+        };
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
-        if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000 && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
+        if(TimeUtils.nanoTime() - lastPlatformTime > 500000000 && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0) Gdx.app.exit();
     }
@@ -342,14 +346,30 @@ public class JumpAndRun implements Screen {
         return -100; // return as a false
     }
 
-    private void spawnWave() {
+    private void spawnWavebot() {
         double random = Math.random();
         Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
-        int y = 0;
-        if (random < 0.33) y = (int) (200 +  100*Math.random());
-        else if (random < 0.66) y = (int) (450 +  100*Math.random());
+        int y;
+        if(random < 0.4) y = 0;
+        else if (random < 0.8) y = (int) (200 +  waveSPawnVariantion*Math.random());
+        else y = (int) (MAX_HEIGTH * random);
         boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y);
-        if (!noOverlap) spawnWave();
+        if (!noOverlap) spawnWavebot();
+        lastWaveTime = TimeUtils.nanoTime();
+    }
+
+    private void spawnWavetop() {
+        double random = Math.random();
+        Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
+        int y;
+
+        if (random < 0.5) y = (int) (450 +  100*Math.random());
+        else if  (random < 0.7) y = (int) (800 +  waveSPawnVariantion*Math.random());
+        else if  (random < 0.9) y = (int) (800 +  waveSPawnVariantion*Math.random());
+        else y = (int) (MAX_HEIGTH * random);
+
+        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y);
+        if (!noOverlap) spawnWavetop();
         lastWaveTime = TimeUtils.nanoTime();
     }
 
@@ -358,8 +378,8 @@ public class JumpAndRun implements Screen {
         Sprite booster = new Sprite(boosterTexture,boosterWidth,boosterHeigth );
         int y = 0;
         if (random < 0.33) booster.setY(0);
-        else if (random < 0.66) y = (int) (200 +  100*Math.random()) ;
-        else y = (int) (450 +  100*Math.random());
+        else if (random < 0.66) y = (int) (450 +  100*Math.random()) ;
+        else y = (int) (700 +  100*Math.random());
         boolean noOverlap = spawnSpritesetup(boosters,booster,MAX_WIDTH,y);
         if (!noOverlap) spawnBooster();
         lastBoosterTime = TimeUtils.nanoTime();
@@ -369,8 +389,10 @@ public class JumpAndRun implements Screen {
     private void spawnPlatform() {
         double random = Math.random();
         Sprite platform = new Sprite(platformTexture,platformWidth,platformHeigth);
-        int y = (int) (0 +  150*Math.random());
-        if (random > 0.5) y = (int) (200 +  150*Math.random());
+        int y;
+        if (random < 0.3) y = (int) (100 +  150*Math.random());
+        else if (random < 0.6) y = (int) (400 +  150*Math.random());
+        else  y = (int) (700 +  150*Math.random());
         boolean noOverlap = spawnSpritesetup(platforms,platform,MAX_WIDTH,y);
         if (!noOverlap) spawnPlatform();
         lastPlatformTime = TimeUtils.nanoTime();
