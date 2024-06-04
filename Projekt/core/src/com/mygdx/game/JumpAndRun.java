@@ -337,7 +337,7 @@ public class JumpAndRun implements Screen {
         return overlap(sp,player);
     }
 
-    private boolean overlap (Array<Sprite> arr, Sprite sp) {
+    private boolean overlap (Array< ? extends Sprite> arr, Sprite sp) {
         for (Sprite item : arr) {
             if (overlap(item,sp)) return true;
         }
@@ -359,7 +359,8 @@ public class JumpAndRun implements Screen {
 
         if (random < 0.33) y = (int) (200 +  100*Math.random());
         else if (random < 0.66) y = (int) (450 +  100*Math.random());
-        spawnSpritesetup(waves,wave,x,y);
+        boolean noOverlap = spawnSpritesetup(waves,wave,x,y);
+        if (!noOverlap) spawnWave(leftXCorner);
         lastWaveTime = TimeUtils.nanoTime();
     }
 
@@ -382,7 +383,8 @@ public class JumpAndRun implements Screen {
 
         int y = (int) (200 +  150*Math.random());
         if (random > 0.5) y = (int) (450 +  150*Math.random());
-        spawnSpritesetup(platforms,platform,x,y);
+        boolean noOverlap = spawnSpritesetup(platforms,platform,x,y);
+        if (!noOverlap) spawnPlatform(leftXCorner);
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
@@ -404,14 +406,20 @@ public class JumpAndRun implements Screen {
         else if (effect < 0.66)powerup = Powerup.createPowerup(Powerup.Power.live);
         else powerup = Powerup.createPowerup(Powerup.Power.shield);
 
-        spawnSpritesetup(powerups,powerup,x,y);
+        boolean noOverlap = spawnSpritesetup(powerups,powerup,x,y);
+        if (!noOverlap) spawnPowerup(leftXCorner);
         lastPowerupTime = TimeUtils.nanoTime();
     }
 
-    private void spawnSpritesetup(Array arr, Sprite sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
+    private boolean spawnSpritesetup(Array arr, Sprite sp, int x, int y) { // used to avoid code compilation try later to remove unsafe operation
         sp.setX(x);
         sp.setY(y);
+        if (overlap(boosters,sp)) return false;// return false to signal that there is an overlap
+        else if (overlap(platforms,sp)) return false;
+        else if (overlap(powerups,sp)) return false;
+        else if (overlap(waves,sp)) return false;
         arr.add(sp);
+        return true;
     }
 
     @Override
