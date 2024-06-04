@@ -319,7 +319,7 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        float offset = Gdx.graphics.getDeltaTime() * itemSpeed / 1000;
+        float offset =  + Gdx.graphics.getDeltaTime() * itemSpeed - Gdx.graphics.getDeltaTime() * 64 / 1000;   // the first part is so that the waves middle arrives on beat at MaxWidth/2 and the other is so that when the player doges the wave the beat arrives
         if (song.getPosition() - offset   >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset <= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
