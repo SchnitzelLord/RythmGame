@@ -1,15 +1,11 @@
 package com.mygdx.game.ocarinagame;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
@@ -25,11 +21,7 @@ class HUD implements Disposable {
     private int score;
     private final Label scoreLabel;
 
-    private final ProgressBar progressBar;
-    private final Texture progressBarTexture;
-    private final Texture progressBarEmptyTexture;
-
-    private final Skin skin;
+    private final ScoreProgressBar progressBar;
 
     HUD(SpriteBatch spriteBatch, OcarinaGame game) {
         this.game = game;
@@ -38,24 +30,12 @@ class HUD implements Disposable {
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
         stage = new Stage(viewport, spriteBatch);
 
-        skin = new Skin();
-
-        // Setup progress bar
-        progressBarTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar.png"));
-        progressBarEmptyTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-empty.png"));
-        skin.add("progressBar", progressBarTexture);
-        skin.add("progressBarEmpty", progressBarEmptyTexture);
-
-        ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
-        progressBarStyle.background = skin.getDrawable("progressBarEmpty");
-        progressBarStyle.knobBefore = skin.getDrawable("progressBar");
-        progressBar = new ProgressBar(0, 100, 1, false, progressBarStyle);
-        progressBar.setValue(0);
-        progressBar.setAnimateDuration(0.5f);
-
         // Setup score label
         scoreLabel = new Label(String.format("Score: %d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         scoreLabel.setFontScale(0.3f);
+
+        // Create progress bar
+        progressBar = new ScoreProgressBar(0, 100, 1, 0.5f);
 
         // Organize HUD in table
         Table table = new Table();
@@ -81,8 +61,6 @@ class HUD implements Disposable {
     @Override
     public void dispose() {
         stage.dispose();
-        progressBarTexture.dispose();
-        progressBarEmptyTexture.dispose();
-        skin.dispose();
+        progressBar.dispose();
     }
 }
