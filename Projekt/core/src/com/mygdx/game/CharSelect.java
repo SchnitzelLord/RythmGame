@@ -82,6 +82,7 @@ public class CharSelect implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 Start.playerTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
                 game.setScreen(new TransitionScreen(game, "MazeLevel"));
+                maleSelectButton.remove();
             }
         });
 
@@ -90,6 +91,7 @@ public class CharSelect implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 Start.playerTexture = new Texture(Gdx.files.internal("characterSprite\\femaleSprite.png"));
                 game.setScreen(new MazeLevel(game));
+                femaleSelectButton.remove();
             }
         });
 

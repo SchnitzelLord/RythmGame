@@ -95,6 +95,7 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
                 game.setScreen(new CharSelect(game));
+                newGame.remove();
             }
         });
 
@@ -103,6 +104,7 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
                 game.setScreen(new OptionsMenu(game, null));
+                options.remove();
             }
         });
 

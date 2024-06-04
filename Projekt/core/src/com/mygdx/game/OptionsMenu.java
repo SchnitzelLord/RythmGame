@@ -114,6 +114,9 @@ public class OptionsMenu implements Screen {
                     game.setScreen(new MainMenuScreen(game));
                 } else {
                     game.setScreen(new PauseScreen(game, lastScreen.getScreen()));
+                    plusButton.remove();
+                    minusButton.remove();
+                    backButton.remove();
                 }
 
             }

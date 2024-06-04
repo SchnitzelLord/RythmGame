@@ -81,6 +81,7 @@ public class PauseScreen extends GameScreens {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(lastScreen);
+                resumeButton.remove();
             }
         });
 
@@ -88,6 +89,7 @@ public class PauseScreen extends GameScreens {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new OptionsMenu(game, thisScreen));
+                optionButton.remove();
             }
         });
 
