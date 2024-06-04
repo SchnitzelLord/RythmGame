@@ -427,6 +427,13 @@ public class JumpAndRun implements Screen {
     @Override
     public void dispose() {
         playerTexture.dispose();
+        playerTexture.dispose();
+        waveTexture.dispose();
+        heartTexture.dispose();
+        boosterTexture.dispose();
+        platformTexture.dispose();
+        zoneTexture.dispose();
+        background1Texture.dispose();
         song.dispose();
     }
 }
