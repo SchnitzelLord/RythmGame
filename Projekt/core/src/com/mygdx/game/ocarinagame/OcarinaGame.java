@@ -25,19 +25,22 @@ public class OcarinaGame implements Screen {
     private static final int SCREEN_HEIGHT = 1080;
     private static final int WORLD_WIDTH = 250;
     private static final int WORLD_HEIGHT = WORLD_WIDTH * 9 / 16;
+
     private static final float SPAWN_POSITION_OFFSET = 10;
-    private static final float ARROW_UPTIME = 0.5f;
-    private static final float SPAWN_OFFSET = 0.35f;
-    private static final boolean IS_PENALTY_ON = true;
     private static final boolean IS_ARROW_POSITION_OFFSET_ACTIVE = false;
+    private static final float ARROW_UPTIME = 0.5f;
+    private static final float SPAWN_TIME_OFFSET = 0.35f;
+    private static final boolean IS_PENALTY_ON = true;
     private static final int FINISH_SCORE = 50;
 
+    private static final float TIME_RANGE_OFFSET = 0.001f; // for float comparisons
+
+    private final Sprite player;
     private final float playerX;
     private final float playerY;
 
     private final Start game;
     private final Music song;
-    private final Conductor conductor;
     private final OrthographicCamera camera;
     private final Viewport viewport;
     private final HUD hud;
@@ -45,13 +48,13 @@ public class OcarinaGame implements Screen {
     private final Texture playerTexture;
     private final Texture arrowTexture;
 
-    private final Sprite player;
     private final Array<Arrow> allArrows;
     private final Array<Arrow> upArrows;
     private final Array<Arrow> leftArrows;
     private final Array<Arrow> downArrows;
     private final Array<Arrow> rightArrows;
 
+    private Conductor conductor;
     private boolean isRunning;
     private int score;
     private int lastArrowDirectionInt;
@@ -65,6 +68,12 @@ public class OcarinaGame implements Screen {
         // Setup audio
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
         conductor = new Conductor(120, 0);
+        conductor.start();
+        // First arrow spawns earlier than beat
+        // Calculation for when next beat based on last beat
+        // Offset therefore included in every beat
+        // Offset necessary because of reaction time of player
+        conductor.lastBeat = SPAWN_TIME_OFFSET;
 
         // Setup camera
         camera = new OrthographicCamera();
@@ -83,6 +92,7 @@ public class OcarinaGame implements Screen {
 
         // Setup player
         player = new Sprite(playerTexture, playerTexture.getWidth(), playerTexture.getHeight());
+            // Position at center of screen
         playerX = (WORLD_WIDTH - player.getWidth()) * 0.5f;
         playerY = (WORLD_HEIGHT - player.getHeight()) * 0.5f;
 
@@ -95,7 +105,6 @@ public class OcarinaGame implements Screen {
         rightArrows = new Array<>();
 
         lastArrowDirectionInt = -1;
-        conductor.lastBeat = SPAWN_OFFSET;
     }
 
     // Getter
@@ -120,7 +129,69 @@ public class OcarinaGame implements Screen {
         return score;
     }
 
-    // Utility and functionality methods
+    public int getFinishScore() {
+        return FINISH_SCORE;
+    }
+
+    // Overrides of functionality methods
+
+    @Override
+    public void show() {
+        isRunning = true;
+        song.setVolume(Start.volume);
+        song.play();
+    }
+
+    @Override
+    public void render(float delta) {
+        if (isRunning) {
+            ScreenUtils.clear(Color.PURPLE);
+
+            camera.update();
+            controls();
+            draw();
+
+            // Spawn arrow at certain interval
+            if (arrowCanSpawn()) spawnArrow();
+
+            checkWinCondition();
+
+            hud.update();
+
+            if (song.getPosition() > 5 - TIME_RANGE_OFFSET && song.getPosition() < 5 + TIME_RANGE_OFFSET) setBPM(60);
+        }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+    }
+
+    @Override
+    public void pause() {
+        pauseGame();
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        isRunning = false;
+        song.dispose();
+        playerTexture.dispose();
+        arrowTexture.dispose();
+        hud.dispose();
+    }
+
+    // private functionality & utility methods
 
     private void reduceScore() {
         if (score > 0) score--;
@@ -273,12 +344,11 @@ public class OcarinaGame implements Screen {
         game.setScreen(new PauseScreen(game, this));
     }
 
-    @Override
-    public void show() {
-        isRunning = true;
-        song.setVolume(Start.volume);
-        song.play();
+    private void setBPM(int bpm) {
+        conductor = new Conductor(bpm, 0);
+        conductor.lastBeat = SPAWN_TIME_OFFSET + song.getPosition();
         conductor.start();
+        arrowCanSpawn();
     }
 
     private void draw() {
@@ -297,52 +367,5 @@ public class OcarinaGame implements Screen {
         }
 
         game.batch.end();
-    }
-
-    @Override
-    public void render(float delta) {
-        if (isRunning) {
-            ScreenUtils.clear(Color.PURPLE);
-
-            camera.update();
-            controls();
-            draw();
-
-            // Spawn arrow at certain interval
-            if (arrowCanSpawn()) spawnArrow();
-
-            checkWinCondition();
-
-            hud.update();
-        }
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height);
-    }
-
-    @Override
-    public void pause() {
-        pauseGame();
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-        isRunning = false;
-        song.dispose();
-        playerTexture.dispose();
-        arrowTexture.dispose();
-        hud.dispose();
     }
 }

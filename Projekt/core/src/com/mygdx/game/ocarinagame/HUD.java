@@ -18,7 +18,7 @@ class HUD implements Disposable {
     private final Stage stage;
     private final Viewport viewport;
 
-    private final Label scoreLabel;
+//    private final Label scoreLabel;
 
     private final ScoreProgressBar progressBar;
 
@@ -29,11 +29,11 @@ class HUD implements Disposable {
         stage = new Stage(viewport, spriteBatch);
 
         // Setup score label
-        scoreLabel = new Label(String.format("Score: %d", game.getScore()), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        scoreLabel.setFontScale(0.3f);
+//        scoreLabel = new Label(String.format("Score: %d", game.getScore()), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+//        scoreLabel.setFontScale(0.3f);
 
         // Create progress bar
-        progressBar = new ScoreProgressBar(0, 50, 1, 0.25f);
+        progressBar = new ScoreProgressBar(0, game.getFinishScore(), 1, 0.25f);
         progressBar.setFillParent(true);
 
         // Organize HUD in table
@@ -49,7 +49,7 @@ class HUD implements Disposable {
     }
 
     void update() {
-        scoreLabel.setText(String.format("Score: %d", game.getScore()));
+//        scoreLabel.setText(String.format("Score: %d", game.getScore()));
         progressBar.setValue(game.getScore());
 
         stage.draw();
