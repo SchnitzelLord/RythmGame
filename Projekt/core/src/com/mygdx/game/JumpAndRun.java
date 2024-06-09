@@ -51,7 +51,7 @@ public class JumpAndRun implements Screen {
     Sprite debugBeat;
     private Array<Sprite> hearts;
     private Array<Sprite> waves;
-    private Array<Sprite> platforms;
+    private Array<Platform> platforms;
     private Array<Sprite> boosters;
     private Array<Powerup> powerups;
     private Array<Sprite> backgrounds;
@@ -87,12 +87,12 @@ public class JumpAndRun implements Screen {
         waveTexture = new Texture("characterSprite\\playerSprite.png");
         heartTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
         boosterTexture = new Texture("jumpAndRunSprites\\booster.png");
-        platformTexture = new Texture("jumpAndRunSprites\\platform.png");
         zoneTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
-        background1Texture = new Texture("jumpAndRunSprites\\test.png");
+        background1Texture = new Texture("jumpAndRunSprites\\image.png");
         debugBeatTexture = new Texture("jumpAndRunSprites\\debugBeat2.png");
 
         player = new Sprite(playerTexture, 64,64 );
+        player.setX(1920 / 2- 32);
         player.setX(1920 / 2- 32);
         player.setY(1080 / 2);
 
@@ -236,7 +236,7 @@ public class JumpAndRun implements Screen {
         }
 
         // platforms
-        for (Iterator<Sprite> iter = platforms.iterator(); iter.hasNext(); ) {
+        for (Iterator<Platform> iter = platforms.iterator(); iter.hasNext(); ) {
             Sprite platform = iter.next();
             platform.setX(platform.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(platform.getX()+ platform.getWidth()< 0) iter.remove();
@@ -293,7 +293,7 @@ public class JumpAndRun implements Screen {
         }
     }
 
-    private boolean overlap(Sprite sp1, Sprite sp2) {
+    public static boolean overlap(Sprite sp1, Sprite sp2) {
         if (sp2.getX() + sp2.getWidth() < sp1.getX()) return false;
         if (sp2.getY() + sp2.getHeight() < sp1.getY()) return false;
         if (sp2.getY() > sp1.getY() + sp1.getHeight()) return false;
@@ -301,7 +301,7 @@ public class JumpAndRun implements Screen {
         return true;
     }
 
-    private boolean overlap (Sprite sp) {
+    public boolean overlap (Sprite sp) {
         return overlap(sp,player);
     }
 
@@ -313,8 +313,8 @@ public class JumpAndRun implements Screen {
     }
 
     private float checkPlatforms() {
-        for (Sprite platform : platforms) {
-            if (overlap(platform) && jumpTime == 0) return platform.getY()+platform.getHeight();
+        for (Platform platform : platforms) {
+            if (platform.overlap(player) && jumpTime == 0) return platform.getY()+platform.getHeight();
         }
         return -100; // return as a false
     }
@@ -360,7 +360,8 @@ public class JumpAndRun implements Screen {
 
     private void spawnPlatform() {
         double random = Math.random();
-        Sprite platform = new Sprite(platformTexture,platformWidth,platformHeigth);
+        Platform platform = Platform.createPlatform(Platform.Type.test);
+        System.out.print(platform.getWidth());
         int y;
         if (random < 0.3) y = (int) (100 +  150*Math.random());
         else if (random < 0.6) y = (int) (400 +  150*Math.random());
@@ -394,7 +395,7 @@ public class JumpAndRun implements Screen {
         sp.setY(y);
         if (check) {
             if (overlap(boosters, sp)) return false;// return false to signal that there is an overlap
-            else if (overlap(platforms, sp)) return false;
+            else if (overlap(platforms, sp)) return false; // shouldn't spawn in the platform sprite so the custom overlap is not used
             else if (overlap(powerups, sp)) return false;
             else if (overlap(waves, sp)) return false;
         }
