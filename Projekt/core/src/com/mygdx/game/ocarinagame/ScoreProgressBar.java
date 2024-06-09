@@ -25,13 +25,14 @@ class ScoreProgressBar extends ProgressBar implements Disposable {
         skin.add("progressBar", progressBarTexture);
         skin.add("progressBarEmpty", progressBarEmptyTexture);
 
-        // Set texture left und right of knob (separator)
+        // Set texture of progressbar for when it's filled and when it's empty
         getStyle().background = skin.getDrawable("progressBarEmpty");
         getStyle().knobBefore = skin.getDrawable("progressBar");
 
         setValue(0);
+        setSize(progressBarTexture.getWidth(), progressBarTexture.getHeight());
 
-        // Smooth animation
+        // Smooth animation by setting time needed to change from one step to another
         setAnimateDuration(animateDuration);
     }
 

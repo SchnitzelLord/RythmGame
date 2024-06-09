@@ -20,9 +20,9 @@ public class Arrow {
 
     private final Direction direction;
     private final Sprite sprite;
-    private final double spawnTime;
+    private final float spawnTime;
 
-    public Arrow(Sprite sprite, Direction direction, double spawnTime) {
+    public Arrow(Sprite sprite, Direction direction, float spawnTime) {
         this.sprite = sprite;
         this.direction = direction;
         this.spawnTime = spawnTime;
@@ -36,7 +36,7 @@ public class Arrow {
         return sprite;
     }
 
-    public double getSpawnTime() {
+    public float getSpawnTime() {
         return spawnTime;
     }
 }
