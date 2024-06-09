@@ -154,11 +154,17 @@ public class OcarinaGame implements Screen {
             // Spawn arrow at certain interval
             if (arrowCanSpawn()) spawnArrow();
 
-            checkWinCondition();
+            // Remove arrow after certain amount of time
+            removeAfterUptime();
+
+            if (checkWinCondition()) {
+                dispose();
+                switchToScreen(new MainMenuScreen(game));
+            };
 
             hud.update();
 
-            if (song.getPosition() > 5 - TIME_RANGE_OFFSET && song.getPosition() < 5 + TIME_RANGE_OFFSET) setBPM(60);
+            //if (song.getPosition() > 5 - TIME_RANGE_OFFSET && song.getPosition() < 5 + TIME_RANGE_OFFSET) setBPM(60);
         }
     }
 
@@ -169,7 +175,7 @@ public class OcarinaGame implements Screen {
 
     @Override
     public void pause() {
-        pauseGame();
+        switchToScreen(new PauseScreen(game, this));
     }
 
     @Override
@@ -303,45 +309,53 @@ public class OcarinaGame implements Screen {
 
     private void controls() {
         // Check pause key being pressed
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) pauseGame();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) switchToScreen(new PauseScreen(game, this));
 
         // Check for every arrow if correct key has been pressed
         for (Arrow currArrow : allArrows) {
             Arrow.Direction direction = currArrow.getDirection();
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.W) && direction == Arrow.Direction.UP ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.A) && direction == Arrow.Direction.LEFT ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.S) && direction == Arrow.Direction.DOWN ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.D) && direction == Arrow.Direction.RIGHT) {
+            if (isUpKeyPressed() && direction == Arrow.Direction.UP ||
+                isLeftKeyPressed() && direction == Arrow.Direction.LEFT ||
+                isDonwKeyPressed() && direction == Arrow.Direction.DOWN ||
+                isRightKeyPressed() && direction == Arrow.Direction.RIGHT) {
 
                     score++;
                     removeArrowOfDirection(direction);
 
                 // Penalty for just pressing keys at random
             } else if (IS_PENALTY_ON &&
-                    (Gdx.input.isKeyJustPressed(Input.Keys.W) ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.A) ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.S) ||
-                    Gdx.input.isKeyJustPressed(Input.Keys.D))) {
+                     (isUpKeyPressed() || isLeftKeyPressed() || isDonwKeyPressed() || isRightKeyPressed())) {
 
                 reduceScore();
             }
         }
     }
 
-    private void checkWinCondition() {
-        if (score >= FINISH_SCORE) {
-            isRunning = false;
-            song.pause();
-            game.setScreen(new MainMenuScreen(game));
-            dispose();
-        }
+    private boolean isUpKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP);
     }
 
-    private void pauseGame() {
+    private boolean isLeftKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT);
+    }
+
+    private boolean isRightKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT);
+    }
+
+    private boolean isDonwKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN);
+    }
+
+    private boolean checkWinCondition() {
+        return score >= FINISH_SCORE;
+    }
+
+    private void switchToScreen(Screen screen) {
         isRunning = false;
         song.pause();
-        game.setScreen(new PauseScreen(game, this));
+        game.setScreen(screen);
     }
 
     private void setBPM(int bpm) {
@@ -359,13 +373,17 @@ public class OcarinaGame implements Screen {
         player.draw(game.batch);
         for (Arrow currArrow : allArrows) {
             currArrow.getSprite().draw(game.batch);
-            // Remove arrow at certain time interval
+        }
+
+        game.batch.end();
+    }
+
+    private void removeAfterUptime() {
+        for (Arrow currArrow : allArrows) {
             if (song.getPosition() - currArrow.getSpawnTime() > ARROW_UPTIME) {
                 removeArrowOfDirection(currArrow.getDirection());
                 if (IS_PENALTY_ON) reduceScore();
             }
         }
-
-        game.batch.end();
     }
 }
