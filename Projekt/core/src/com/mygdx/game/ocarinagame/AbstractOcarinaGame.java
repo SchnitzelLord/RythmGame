@@ -1,0 +1,251 @@
+package com.mygdx.game.ocarinagame;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.Conductor;
+import com.mygdx.game.PauseScreen;
+import com.mygdx.game.Start;
+
+public abstract class AbstractOcarinaGame implements Screen {
+    // Game and screen sizes
+    protected static final int SCREEN_WIDTH = 1920;
+    protected static final int SCREEN_HEIGHT = 1080;
+    protected static final int WORLD_WIDTH = 250;
+    protected static final int WORLD_HEIGHT = WORLD_WIDTH * 9 / 16;
+
+    // General offset for float comparisons
+    protected static final float TIME_RANGE_OFFSET = 0.001f;
+
+    // Game state with default values
+    protected boolean isPenaltyOn = true;
+    protected int finishScore = 50;
+    protected boolean isRunning = false;
+    protected int score = 0;
+    protected int lastArrowDirectionInt = -1;
+
+    // Game elements
+    protected final Sprite player;
+    protected final float playerX;
+    protected final float playerY;
+
+    protected final Start game;
+    protected final OrthographicCamera camera;
+    protected final Viewport viewport;
+
+    protected HUD hud;
+    protected Conductor conductor;
+    protected Music song;
+
+    // Textures
+    protected final Texture playerTexture;
+    protected final Texture arrowTexture;
+
+    protected final Array<Arrow> allArrows;
+
+
+    // Constructor
+
+    protected AbstractOcarinaGame(Start game) {
+        this.game = game;
+
+        // Setup camera
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        // Setup viewport for scaling
+        viewport = new FillViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        viewport.apply(true);
+
+        // Setup textures
+        playerTexture = new Texture("ocarina-game\\player.png");
+        arrowTexture = new Texture("ocarina-game\\arrow-up.png");
+
+        // Setup player
+        player = new Sprite(playerTexture, playerTexture.getWidth(), playerTexture.getHeight());
+            // Position at center of screen
+        playerX = (WORLD_WIDTH - player.getWidth()) * 0.5f;
+        playerY = (WORLD_HEIGHT - player.getHeight()) * 0.5f;
+        player.setPosition(playerX, playerY);
+
+        allArrows = new Array<>();
+    }
+
+    // Getter
+
+    public int getWorldWidth() {
+        return WORLD_WIDTH;
+    }
+
+    public int getWorldHeight() {
+        return WORLD_HEIGHT;
+    }
+
+    public int getScreenWidth() {
+        return SCREEN_WIDTH;
+    }
+
+    public int getScreenHeight() {
+        return SCREEN_HEIGHT;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getFinishScore() {
+        return finishScore;
+    }
+
+    // Overrides of functionality methods
+
+    @Override
+    public void show() {
+        isRunning = true;
+        song.setVolume(Start.volume);
+        song.play();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+    }
+
+    @Override
+    public void pause() {
+        switchToScreen(new PauseScreen(game, this));
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        isRunning = false;
+        song.dispose();
+        playerTexture.dispose();
+        arrowTexture.dispose();
+        hud.dispose();
+    }
+
+    // abstract methods
+
+    public abstract void render(float delta);
+
+    protected abstract void setupArrowSpawnPosition(Arrow arrow);
+
+    protected abstract void setBPM(int bpm);
+
+    // functionality & utility methods
+
+    protected int increaseScore() {
+        return score++;
+    }
+
+    protected void reduceScore() {
+        if (score > 0) score--;
+    }
+
+    protected boolean arrowCanSpawn() {
+        // Calculate time when next beat will happen
+        conductor.nextBeatTime = conductor.lastBeat + conductor.crochet;
+
+        // Spawn arrow when nextBeatTime is reached
+        if (song.getPosition() >= conductor.nextBeatTime) {
+            conductor.lastBeat = song.getPosition();
+            return true;
+        }
+        return false;
+    }
+
+    protected void spawnArrow() {
+        Sprite sprite = new Sprite(arrowTexture, arrowTexture.getWidth(), arrowTexture.getHeight());
+        int dirInt = MathUtils.random(0, 3);
+
+        // Prevent arrow of same direction to spawn consecutively
+        while (lastArrowDirectionInt == dirInt) dirInt = MathUtils.random(0, 3);
+
+        sprite.setRotation(dirInt * 90); // counter-clock rotation, beginning with up-arrow
+        Arrow.Direction direction = Arrow.Direction.fromInt(dirInt);
+
+        Arrow a = new Arrow(sprite, direction, song.getPosition());
+        setupArrowSpawnPosition(a);
+        allArrows.add(a);
+
+        lastArrowDirectionInt = dirInt;
+    }
+
+    protected boolean isInputEqualsDirection(Arrow.Direction direction) {
+        // Check if correct key has been pressed
+        return isUpKeyPressed() && direction == Arrow.Direction.UP ||
+                isLeftKeyPressed() && direction == Arrow.Direction.LEFT ||
+                isDownKeyPressed() && direction == Arrow.Direction.DOWN ||
+                isRightKeyPressed() && direction == Arrow.Direction.RIGHT;
+    }
+
+    protected boolean isMissPenaltyTriggered() {
+        // Penalty for just pressing keys at random
+        return isPenaltyOn && (isUpKeyPressed() || isLeftKeyPressed() || isDownKeyPressed() || isRightKeyPressed());
+    }
+
+    protected void pauseGameOnEscape() {
+        // Check pause key being pressed
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            switchToScreen(new PauseScreen(game, this));
+        }
+    }
+
+    protected boolean isUpKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.W) || Gdx.input.isKeyJustPressed(Input.Keys.UP);
+    }
+
+    protected boolean isLeftKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.A) || Gdx.input.isKeyJustPressed(Input.Keys.LEFT);
+    }
+
+    protected boolean isRightKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.D) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT);
+    }
+
+    protected boolean isDownKeyPressed() {
+        return Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN);
+    }
+
+    protected boolean checkWinCondition() {
+        return score >= finishScore;
+    }
+
+    protected void switchToScreen(Screen screen) {
+        isRunning = false;
+        song.pause();
+        game.setScreen(screen);
+    }
+
+    protected void draw() {
+        // Setup SpriteBatch and draw sprites
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
+
+        player.draw(game.batch);
+        for (Arrow currArrow : allArrows) {
+            currArrow.getSprite().draw(game.batch);
+        }
+
+        game.batch.end();
+    }
+}

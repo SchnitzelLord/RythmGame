@@ -1,19 +1,16 @@
 package com.mygdx.game.ocarinagame;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 
-class HUD implements Disposable {
-    private final OcarinaGame game;
+public class HUD implements Disposable {
+    private final AbstractOcarinaGame game;
 
     private final Stage stage;
     private final Viewport viewport;
@@ -22,7 +19,7 @@ class HUD implements Disposable {
 
     private final ScoreProgressBar progressBar;
 
-    HUD(SpriteBatch spriteBatch, OcarinaGame game) {
+    HUD(SpriteBatch spriteBatch, AbstractOcarinaGame game) {
         this.game = game;
 
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
@@ -34,6 +31,7 @@ class HUD implements Disposable {
 
         // Create progress bar
         progressBar = new ScoreProgressBar(0, game.getFinishScore(), 1, 0.25f);
+        System.out.println("Finish Score: " + game.getFinishScore());
         progressBar.setFillParent(true);
 
         // Organize HUD in table
@@ -51,6 +49,7 @@ class HUD implements Disposable {
     void update() {
 //        scoreLabel.setText(String.format("Score: %d", game.getScore()));
         progressBar.setValue(game.getScore());
+        //System.out.println("Score: " + game.getScore());
 
         stage.draw();
         stage.act();

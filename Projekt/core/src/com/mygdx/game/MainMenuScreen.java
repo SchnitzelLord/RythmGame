@@ -13,7 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.ocarinagame.OcarinaGame;
+import com.mygdx.game.ocarinagame.OcarinaGameAppearing;
+import com.mygdx.game.ocarinagame.OcarinaGameFalling;
 
 public class MainMenuScreen implements Screen {
 
@@ -66,7 +67,7 @@ public class MainMenuScreen implements Screen {
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new OcarinaGame(game));
+                game.setScreen(new OcarinaGameAppearing(game));
                 //game.setScreen(new JumpAndRun(game));
                 //game.setScreen(new MazeLevel(game));
                 dispose();
