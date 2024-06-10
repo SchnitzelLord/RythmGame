@@ -10,6 +10,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.*;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Queue;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -45,7 +49,10 @@ public class MazeLevel implements Screen {
 
     boolean blackScreenTimer = false;
 
-    BitmapFont text = new BitmapFont();
+    TiledMap map;
+    MapLayer wallLayer;
+    MapObjects walls;
+    MapRenderer renderer;
 
     public MazeLevel(final Start game) {
         this.game = game;
@@ -62,6 +69,13 @@ public class MazeLevel implements Screen {
         enemy = new Sprite(Start.playerTexture, 64, 64);
         enemy.setX(player.getX() - 300);
         enemy.setY(player.getY());
+        //initializing map
+        map = new TmxMapLoader().load("maps\\MazeMap\\MazeMap.tmx");
+        wallLayer = map.getLayers().get("Walls");
+        walls = wallLayer.getObjects();
+        renderer = new OrthogonalTiledMapRenderer(map);
+        renderer.setView(camera);
+
         movementQueue = new Queue<>();
         for (int i = 0; i < 3; i++) {
             movementQueue.addLast(() -> enemy.setX(enemy.getX() + 100));
@@ -84,6 +98,7 @@ public class MazeLevel implements Screen {
 
         //begin drawing objets
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        renderer.render();
         game.batch.begin();
         player.draw(game.batch);
         enemy.draw(game.batch);
@@ -206,5 +221,6 @@ public class MazeLevel implements Screen {
     public void dispose() {
         song.dispose();
         blackScreenTexture.dispose();
+        map.dispose();
     }
 }
