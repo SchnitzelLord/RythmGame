@@ -119,13 +119,12 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
             if (isInputEqualsDirection(direction)) {
                 score++;
                 removeArrowOfDirection(a.getDirection());
-                System.out.println("Score increased");
+            } else if (isMissPenaltyTriggered()) {
+                reduceScore();
             }
         }
 
-        if (isMissPenaltyTriggered()) reduceScore();
         pauseGameOnEscape();
-        System.out.println("Score: " + getScore());
     }
 
     private void removeAfterUptime() {
