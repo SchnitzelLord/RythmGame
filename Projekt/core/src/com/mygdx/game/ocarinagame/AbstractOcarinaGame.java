@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
@@ -19,24 +22,13 @@ public abstract class AbstractOcarinaGame implements Screen {
     // Game and screen sizes
     protected static final int SCREEN_WIDTH = 1920;
     protected static final int SCREEN_HEIGHT = 1080;
-    protected static final int WORLD_WIDTH = 250;
+    protected static final int WORLD_WIDTH = 135;
     protected static final int WORLD_HEIGHT = WORLD_WIDTH * 9 / 16;
 
-    // General offset for float comparisons
+    // General offset for float comparisons (for changing bpm at specific time)
     protected static final float TIME_RANGE_OFFSET = 0.001f;
 
-    // Game state with default values
-    protected boolean isPenaltyOn = true;
-    protected int finishScore = 50;
-    protected boolean isRunning = false;
-    protected int score = 0;
-    protected int lastArrowDirectionInt = -1;
-
     // Game elements
-    protected final Sprite player;
-    protected final float playerX;
-    protected final float playerY;
-
     protected final Start game;
     protected final OrthographicCamera camera;
     protected final Viewport viewport;
@@ -45,9 +37,17 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected Conductor conductor;
     protected Music song;
 
+    // Game state with default values
+    protected boolean isPenaltyOn = true;
+    protected int finishScore = 50;
+    protected boolean isRunning = false;
+    protected int score = 0;
+    protected int lastArrowDirectionInt = -1;
+
     // Textures
-    protected final Texture playerTexture;
     protected final Texture arrowTexture;
+    protected Texture backgroundTexture;
+    protected Image background;
 
     protected final Array<Arrow> allArrows;
 
@@ -66,15 +66,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         viewport.apply(true);
 
         // Setup textures
-        playerTexture = new Texture("ocarina-game\\player.png");
         arrowTexture = new Texture("ocarina-game\\arrow-up.png");
-
-        // Setup player
-        player = new Sprite(playerTexture, playerTexture.getWidth(), playerTexture.getHeight());
-            // Position at center of screen
-        playerX = (WORLD_WIDTH - player.getWidth()) * 0.5f;
-        playerY = (WORLD_HEIGHT - player.getHeight()) * 0.5f;
-        player.setPosition(playerX, playerY);
 
         allArrows = new Array<>();
     }
@@ -108,6 +100,16 @@ public abstract class AbstractOcarinaGame implements Screen {
     // Overrides of functionality methods
 
     @Override
+    public void render(float delta) {
+        if (isRunning) {
+            ScreenUtils.clear(Color.CLEAR);
+
+            camera.update();
+            hud.update();
+        }
+    }
+
+    @Override
     public void show() {
         isRunning = true;
         song.setVolume(Start.volume);
@@ -138,43 +140,31 @@ public abstract class AbstractOcarinaGame implements Screen {
     public void dispose() {
         isRunning = false;
         song.dispose();
-        playerTexture.dispose();
         arrowTexture.dispose();
+        backgroundTexture.dispose();
         hud.dispose();
     }
 
-    // abstract methods
-
-    public abstract void render(float delta);
+    // Abstract methods
 
     protected abstract void setupArrowSpawnPosition(Arrow arrow);
 
     protected abstract void setBPM(int bpm);
 
-    // functionality & utility methods
+    protected abstract void controls();
 
-    protected int increaseScore() {
-        return score++;
-    }
+    protected abstract boolean canArrowSpawn();
+
+    // Functionality & utility methods
 
     protected void reduceScore() {
+        // Reduce score only if player has any score points, no negative score
         if (score > 0) score--;
-    }
-
-    protected boolean arrowCanSpawn() {
-        // Calculate time when next beat will happen
-        conductor.nextBeatTime = conductor.lastBeat + conductor.crochet;
-
-        // Spawn arrow when nextBeatTime is reached
-        if (song.getPosition() >= conductor.nextBeatTime) {
-            conductor.lastBeat = song.getPosition();
-            return true;
-        }
-        return false;
     }
 
     protected void spawnArrow() {
         Sprite sprite = new Sprite(arrowTexture, arrowTexture.getWidth(), arrowTexture.getHeight());
+        // Choose random direction for arrow
         int dirInt = MathUtils.random(0, 3);
 
         // Prevent arrow of same direction to spawn consecutively
@@ -226,7 +216,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         return Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN);
     }
 
-    protected boolean checkWinCondition() {
+    protected boolean isGameWon() {
         return score >= finishScore;
     }
 
@@ -236,12 +226,11 @@ public abstract class AbstractOcarinaGame implements Screen {
         game.setScreen(screen);
     }
 
-    protected void draw() {
+    protected void drawArrows() {
         // Setup SpriteBatch and draw sprites
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        player.draw(game.batch);
         for (Arrow currArrow : allArrows) {
             currArrow.getSprite().draw(game.batch);
         }

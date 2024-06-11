@@ -15,8 +15,6 @@ public class HUD implements Disposable {
     private final Stage stage;
     private final Viewport viewport;
 
-//    private final Label scoreLabel;
-
     private final ScoreProgressBar progressBar;
 
     HUD(SpriteBatch spriteBatch, AbstractOcarinaGame game) {
@@ -24,10 +22,6 @@ public class HUD implements Disposable {
 
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
         stage = new Stage(viewport, spriteBatch);
-
-        // Setup score label
-//        scoreLabel = new Label(String.format("Score: %d", game.getScore()), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-//        scoreLabel.setFontScale(0.3f);
 
         // Create progress bar
         progressBar = new ScoreProgressBar(0, game.getFinishScore(), 1, 0.25f);
@@ -41,16 +35,19 @@ public class HUD implements Disposable {
         table.setPosition(0, -game.getWorldHeight() + progressBar.getHeight());
 
         table.add(progressBar).left().expandX();
-        //table.add(scoreLabel).right().padRight(10);
 
         stage.addActor(table);
     }
 
-    void update() {
-//        scoreLabel.setText(String.format("Score: %d", game.getScore()));
-        progressBar.setValue(game.getScore());
-        //System.out.println("Score: " + game.getScore());
+    public float getProgressBarHeight() {
+        return progressBar.getHeight();
+    }
 
+    void update() {
+        progressBar.setValue(game.getScore());
+    }
+
+    void draw() {
         stage.draw();
         stage.act();
     }

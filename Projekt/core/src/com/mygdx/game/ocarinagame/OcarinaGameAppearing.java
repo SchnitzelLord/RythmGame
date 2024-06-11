@@ -1,11 +1,10 @@
 package com.mygdx.game.ocarinagame;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.Start;
@@ -23,9 +22,11 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
     private final Array<Arrow> downArrows;
     private final Array<Arrow> rightArrows;
 
+    // Constructor
+
     public OcarinaGameAppearing(Start game) {
         // Setup basic game elements like
-        // camera, viewpoint, textures, lastArrowDirection, allArrows
+        // camera, viewpoint, textures, allArrows
         super(game);
 
         // Setup UI
@@ -46,29 +47,35 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         leftArrows = new Array<>();
         downArrows = new Array<>();
         rightArrows = new Array<>();
+
+        // Setup background
+        backgroundTexture = new Texture("ocarina-game\\wake-up-background.png");
+        background = new Image(backgroundTexture);
     }
 
     // Overrides
 
+    // Already updates HUD and camera, checks for controls, draws arrows and background, spawn arrows
     @Override
     public void render(float delta) {
+        // Clear screen, update HUD & camera
+        super.render(delta);
+
         if (isRunning) {
-            ScreenUtils.clear(Color.PURPLE);
-            camera.update();
             controls();
+
             draw();
-            // Spawn arrow at certain interval
-            if (arrowCanSpawn()) spawnArrow();
+
+            if (canArrowSpawn()) spawnArrow();
 
             // Remove arrow after certain amount of time
             removeAfterUptime();
 
-            if (checkWinCondition()) {
+            // If game is won, clear memory usage for textures and switch to next screen
+            if (isGameWon()) {
                 dispose();
                 switchToScreen(new MainMenuScreen(game));
-            };
-
-            hud.update();
+            }
         }
     }
 
@@ -76,28 +83,31 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
     protected void setupArrowSpawnPosition(Arrow arrow) {
         Arrow.Direction direction = arrow.getDirection();
         Sprite sprite = arrow.getSprite();
-        int offsetFactor = IS_ARROW_POSITION_OFFSET_ACTIVE ? 1 : 0;
 
-        // Setup spawnpoint depending on arrow direction and duplicates
+        int offsetFactor = IS_ARROW_POSITION_OFFSET_ACTIVE ? 1 : 0;
+        float screenCenterX = WORLD_WIDTH * 0.5f;
+        float screenCenterY = WORLD_HEIGHT * 0.5f;
+
+        // Setup spawnpoint depending on arrow direction and duplicates (if offset is active)
         switch (direction) {
             case UP:
                 float multUpOffset = arrowTexture.getHeight() * upArrows.size;
-                sprite.setPosition(playerX, playerY + player.getHeight() + SPAWN_POSITION_OFFSET + multUpOffset* offsetFactor);
+                sprite.setPosition(screenCenterX, screenCenterY + SPAWN_POSITION_OFFSET + multUpOffset * offsetFactor);
                 upArrows.add(arrow);
                 break;
             case DOWN:
                 float multDownOffset = arrowTexture.getHeight() * downArrows.size;
-                sprite.setPosition(playerX, playerY - player.getHeight() - SPAWN_POSITION_OFFSET - multDownOffset * offsetFactor);
+                sprite.setPosition(screenCenterX, screenCenterY - SPAWN_POSITION_OFFSET - multDownOffset * offsetFactor);
                 downArrows.add(arrow);
                 break;
             case LEFT:
                 float multLeftOffset = arrowTexture.getWidth() * leftArrows.size;
-                sprite.setPosition(playerX - player.getWidth() - SPAWN_POSITION_OFFSET - multLeftOffset * offsetFactor, playerY);
+                sprite.setPosition(screenCenterX - SPAWN_POSITION_OFFSET - multLeftOffset * offsetFactor, screenCenterY);
                 leftArrows.add(arrow);
                 break;
             case RIGHT:
                 float multRightOffset = arrowTexture.getWidth() * rightArrows.size;
-                sprite.setPosition(playerX + player.getWidth() + SPAWN_POSITION_OFFSET + multRightOffset * offsetFactor, playerY);
+                sprite.setPosition(screenCenterX + SPAWN_POSITION_OFFSET + multRightOffset * offsetFactor, screenCenterY);
                 rightArrows.add(arrow);
                 break;
         }
@@ -108,10 +118,10 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         conductor = new Conductor(bpm, 0);
         conductor.lastBeat = SPAWN_TIME_OFFSET + song.getPosition();
         conductor.start();
-        arrowCanSpawn();
     }
 
-    private void controls() {
+    @Override
+    protected void controls() {
         // Check for every arrow if correct key has been pressed
         for (Arrow a : allArrows) {
             Arrow.Direction direction = a.getDirection();
@@ -125,6 +135,33 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         }
 
         pauseGameOnEscape();
+    }
+
+    @Override
+    protected boolean canArrowSpawn()  {
+        // Calculate time when next beat will happen
+        conductor.nextBeatTime = conductor.lastBeat + conductor.crochet;
+
+        // Spawn arrow when nextBeatTime is reached
+        if (song.getPosition() >= conductor.nextBeatTime) {
+            conductor.lastBeat = song.getPosition();
+            return true;
+        }
+        return false;
+    }
+
+    // Private function & utility methods
+
+    private void draw() {
+        // Setup spriteBatch and draw sprites/textures
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
+        background.draw(game.batch, 1.0f);
+        game.batch.end();
+
+        hud.draw();
+
+        drawArrows();
     }
 
     private void removeAfterUptime() {
