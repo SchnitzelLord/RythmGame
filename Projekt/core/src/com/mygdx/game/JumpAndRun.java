@@ -24,7 +24,7 @@ public class JumpAndRun implements Screen {
     private static final int MAX_WIDTH = 1920;
     private static final int itemSpeed = 300;
 
-    private static final boolean DEBUGGING = true; // so that one can view see various stats if enabled
+    private static final boolean DEBUGGING = false; // so that one can view see various stats if enabled
 
     // sprite sizes
     private static final int boosterWidth = 100;
@@ -36,7 +36,12 @@ public class JumpAndRun implements Screen {
     private static final int waveSPawnVariantion = 150;
 
     // Textures -----------------------------------------------------------------------
-    private Texture playerTexture;
+    private Texture playerTexture;  // this is used for debugging with the playerSprite
+    // 3 textrues for the three sprites in the walkcycle
+
+    private Texture playerTexture0;
+    private Texture playerTexture1;
+    private Texture playerTexture2;
     Texture debugBeatTexture;
     private Texture heartTexture;
     private Texture zoneTexture;
@@ -47,7 +52,10 @@ public class JumpAndRun implements Screen {
 
     // items-----------------------------------------------------------------------
 
-    private Sprite player;
+    private Sprite player; // Spirte used for the game logic involving the player is not drawn
+    private Sprite player_walk0;
+    private Sprite player_walk1;
+    private Sprite player_walk2;  // three player walk for the animation fo the player movement
     Sprite debugBeat;
     private Array<Sprite> hearts;
     private Array<Sprite> waves;
@@ -64,7 +72,7 @@ public class JumpAndRun implements Screen {
     private int jumpTime;
     private int fallSpeedChangeTime;
     private int shield;
-    private int counter = 0;
+    private int counter = 0; // counter used for the walk animation of the player
     private float volume = 1;
     private float move;
     private float fallSpeedMod;
@@ -84,17 +92,22 @@ public class JumpAndRun implements Screen {
         this.game = game;
         // initialise textures
         playerTexture = new Texture("characterSprite\\playerSprite.png");
+        playerTexture0 = new Texture("characterSprite\\player0.png");
+        playerTexture1 = new Texture("characterSprite\\player0.png");
+        playerTexture2 = new Texture("characterSprite\\player1.png");
         waveTexture = new Texture("characterSprite\\playerSprite.png");
-        heartTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
-        boosterTexture = new Texture("jumpAndRunSprites\\booster.png");
-        zoneTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
+        heartTexture = new Texture("jumpAndRunSprites\\heartsprite.png");
+        boosterTexture = new Texture("jumpAndRunSprites\\booster2.png");
 
         debugBeatTexture = new Texture("jumpAndRunSprites\\debugBeat2.png");
 
-        player = new Sprite(playerTexture, 64,64 );
-        player.setX(1920 / 2- 32);
-        player.setX(1920 / 2- 32);
-        player.setY(1080 / 2);
+        player = new Sprite(playerTexture, 64,64 ); // used for the game logic is not visable
+        player_walk0 = new Sprite(playerTexture0, 64,64 ); // standing frame
+        player_walk1 = new Sprite(playerTexture1, 64,64 ); // one step frame
+        player_walk2 = new Sprite(playerTexture2, 64,64 ); // other step
+        player.setX(MAX_WIDTH / 2- 32);
+        player.setY(MAX_HEIGTH / 2);
+
 
         isPaused = false;
         camera = new OrthographicCamera();
@@ -128,8 +141,8 @@ public class JumpAndRun implements Screen {
 
     public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
         this(game);
-        if (levelId == 1)backgroundTexture = new Texture("jumpAndRunSprites\\image.png");//if levelId == 1 set the background to the one for the second lvel
-        else backgroundTexture = new Texture("jumpAndRunSprites\\image.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
+        if (levelId == 0)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
+        else backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunset.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
 
         backgrounds = new Array<>();
         Sprite background = new Sprite(backgroundTexture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
@@ -159,16 +172,27 @@ public class JumpAndRun implements Screen {
             update(); // update the conductor
             draw(backgrounds,waves, powerups,platforms,boosters,platforms);
 
+            setplayerCords(player,player_walk0,player_walk1,player_walk2);
+
             for (int i = 0; i < lives; i++) { // draw as many hearts as there are lives
                 hearts.get(i).setX( 20 +(i* hearts.get(i).getWidth()));
                 hearts.get(i).draw(game.batch);
             }
 
-            player.draw(game.batch);
+            if (counter/ 10 == 0  ) player_walk0.draw(game.batch);
+            else if (counter/ 10 == 1)player_walk1.draw(game.batch);
+            else if (counter/ 10 == 2)player_walk0.draw(game.batch);
+            else if (counter/ 10 == 3)player_walk2.draw(game.batch);
+
+            counter++;
+            if (counter > 39) counter = 0;
+
 
             if (DEBUGGING) {
                 font.draw(game.batch," removed count "+ debug_remove + " backgroundarray length = "+ backgrounds.size + " fallspeed = " + debug_fallspeed + " spedMod = " + speedModHor + "Speed time = " + "Lives : " + lives + " Nr_Boosters : " + boosters.size + "  Jumptime = " + jumpTime + " Nr of jumps = " + jumps + " playery = " + player.getY() , MAX_WIDTH / 2, 900);
                 game.batch.draw(debugBeatTexture,MAX_WIDTH/2-2,0);
+
+                player.draw(game.batch);
             }
         }
         game.batch.end();
@@ -369,7 +393,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnPlatform() {
         double random = Math.random();
-        Platform platform = Platform.createPlatform(Platform.Type.test);
+        Platform platform = Platform.createPlatform(Platform.Type.car1);
         System.out.print(platform.getWidth());
         int y;
         if (random < 0.3) y = (int) (100 +  150*Math.random());
@@ -418,6 +442,15 @@ public class JumpAndRun implements Screen {
             for(Sprite item : itemarray) {
                 item.draw(game.batch);
             }
+        }
+    }
+
+    private void setplayerCords(Sprite player,Sprite ... walks) { // function that sets all the player Sprites to the one used in the gmae logic (first one)
+        float x = player.getX();
+        float y = player.getY();
+        for(Sprite playerWalk : walks) {
+            playerWalk.setX(x);
+            playerWalk.setY(y);
         }
     }
 

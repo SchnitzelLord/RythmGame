@@ -32,11 +32,11 @@ public class Powerup extends Sprite {
     private static Texture getTexture(Power power) {
         Texture texture = null;
         switch (power) {
-            case moreJumps: texture = new Texture("jumpAndRunSprites\\jump_placeholder.png");
+            case moreJumps: texture = new Texture("jumpAndRunSprites\\jump.png");
                 break;
-            case shield: texture = new Texture("jumpAndRunSprites\\shield.png"); // for testing jump_placeholder.png
+            case shield: texture = new Texture("jumpAndRunSprites\\shield2.png"); // for testing jump_placeholder.png
                 break;
-            case live: texture = new Texture("jumpAndRunSprites\\heartsprite_test.png"); // for testing jump_placeholder.png
+            case live: texture = new Texture("jumpAndRunSprites\\heartsprite.png"); // for testing jump_placeholder.png
                 break;
         }
         return  texture;
