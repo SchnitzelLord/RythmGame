@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -33,6 +34,7 @@ public class OptionsMenu implements Screen {
     FreeTypeFontGenerator generator;
     FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     BitmapFont pixelFont;
+    OrthographicCamera camera;
 
 
 
@@ -40,7 +42,8 @@ public class OptionsMenu implements Screen {
         this.game = game;
         this.lastScreen = screen;
 
-        stage = new Stage(new FillViewport(627, 420));
+        camera = new OrthographicCamera(627, 420);
+        stage = new Stage(new FillViewport(627, 420, camera));
         Gdx.input.setInputProcessor(stage);
 
         generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
@@ -58,10 +61,8 @@ public class OptionsMenu implements Screen {
         skin.add("font", textStyle);
         volume = new Label(String.format("%.0f %s", Start.volume * 100, "%"), skin, "font");
         volume.setAlignment(0);
-        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         background = new Image(backgroundTexture);
-        background.setHeight(1080);
-        background.setWidth(1920);
 
     }
 
@@ -130,6 +131,7 @@ public class OptionsMenu implements Screen {
 
         //draw stage
         game.batch.begin();
+        game.batch.setProjectionMatrix(camera.combined);
         background.draw(game.batch, 1.0f);
         game.batch.end();
         stage.act();

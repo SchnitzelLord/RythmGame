@@ -43,7 +43,7 @@ public class MainMenuScreen implements Screen {
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Music\\8_bit_clash.mp3"));
         camera = new OrthographicCamera(627, 420);
         // make the stage an input processor
-        stage = new Stage(new FillViewport(627, 420));
+        stage = new Stage(new FillViewport(627, 420, camera));
         Gdx.input.setInputProcessor(stage);
         //initialize texture for buttons
         newGameButtonTexture = new Texture(Gdx.files.internal("buttons\\NewGameButton.png"));
@@ -53,10 +53,8 @@ public class MainMenuScreen implements Screen {
         skin.add("newGame", newGameButtonTexture);
         skin.add("options", optionsButtonTexture);
         skin.add("quit", quitButtonTexture);
-        backgroundTexture = new Texture(Gdx.files.internal("image.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Menus\\image.png"));
         background = new Image(backgroundTexture);
-        background.setHeight(1080);
-        background.setWidth(1920);
     }
 
 
@@ -94,8 +92,9 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
-                game.setScreen(new CharSelect(game));
                 newGame.remove();
+                newGame.setDisabled(true);
+                game.setScreen(new TransitionScreen(game, "MazeLevel"));
             }
         });
 
@@ -103,8 +102,9 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
-                game.setScreen(new OptionsMenu(game, null));
                 options.remove();
+                options.setDisabled(true);
+                game.setScreen(new OptionsMenu(game, null));
             }
         });
 
@@ -123,6 +123,7 @@ public class MainMenuScreen implements Screen {
 
         //draw stage
         game.batch.begin();
+        game.batch.setProjectionMatrix(camera.combined);
         background.draw(game.batch, 1.0f);
         game.batch.end();
         stage.act();

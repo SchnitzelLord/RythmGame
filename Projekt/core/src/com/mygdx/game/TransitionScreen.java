@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -20,6 +21,7 @@ public class TransitionScreen implements Screen {
     BitmapFont pixelFont;
     Texture backgroundTexture;
     Image background;
+    OrthographicCamera camera;
 
     Timer timer = new Timer();
 
@@ -27,12 +29,13 @@ public class TransitionScreen implements Screen {
         this.game = game;
 
         this.nextScreen = screen;
-
+        camera = new OrthographicCamera(1920, 1080);
+        camera.position.set(1920 / 2, 1080 / 2, 0);
         generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 30;
         pixelFont = generator.generateFont(parameter);
-        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         background = new Image(backgroundTexture);
         background.setHeight(1080);
         background.setWidth(1920);
@@ -60,11 +63,13 @@ public class TransitionScreen implements Screen {
         ScreenUtils.clear(Color.BLACK);
 
         game.batch.begin();
+        game.batch.setProjectionMatrix(camera.combined);
         background.draw(game.batch, 1.0f);
         if (nextScreen.equals("JumpAndRun")) {
             pixelFont.draw(game.batch, "Evade the Waves!", 740, 800);
             pixelFont.draw(game.batch, "Jump - SPACE", 780, 750);
-            pixelFont.draw(game.batch, "Watch out for power ups", 710, 700);
+            pixelFont.draw(game.batch, "Stomp - S", 8000, 700);
+            pixelFont.draw(game.batch, "Watch out for power ups", 710, 650);
 
         } else if (nextScreen.equals("MazeLevel")) {
             pixelFont.draw(game.batch, "Move to the beat", 730, 800);

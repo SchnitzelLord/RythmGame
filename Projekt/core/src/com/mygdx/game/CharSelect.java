@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.viewport.FillViewport;
 
 import java.time.format.TextStyle;
 
-public class CharSelect implements Screen {
+public abstract class CharSelect implements Screen {
 
     final Start game;
 
@@ -80,7 +80,7 @@ public class CharSelect implements Screen {
         maleSelectButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Start.playerTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
+                //playerTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
                 game.setScreen(new TransitionScreen(game, "MazeLevel"));
                 maleSelectButton.remove();
             }
@@ -89,7 +89,7 @@ public class CharSelect implements Screen {
         femaleSelectButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Start.playerTexture = new Texture(Gdx.files.internal("characterSprite\\femaleSprite.png"));
+                //playerTexture = new Texture(Gdx.files.internal("characterSprite\\femaleSprite.png"));
                 game.setScreen(new MazeLevel(game));
                 femaleSelectButton.remove();
             }

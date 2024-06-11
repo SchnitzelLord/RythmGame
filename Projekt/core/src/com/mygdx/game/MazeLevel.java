@@ -12,9 +12,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.*;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Queue;
@@ -31,12 +34,13 @@ public class MazeLevel implements Screen {
 
     Sprite enemy;
 
+    Texture playerTexture;
+
     private boolean isPaused;
 
     OrthographicCamera camera;
 
     OrthographicCamera hudCamera;
-    OrthographicCamera mapCamera;
 
     Conductor conductor;
 
@@ -71,25 +75,24 @@ public class MazeLevel implements Screen {
         this.game = game;
         hudBatch = new SpriteBatch();
 
-        player = new Sprite(Start.playerTexture, 64, 64);
+        playerTexture = new Texture(Gdx.files.internal("characterSprite\\maleSprite.png"));
+        player = new Sprite(playerTexture, 8, 8);
         hud = new MazeHud(game);
-        player.setX(20);
-        player.setY(1200);
+        player.setX(15);
+        player.setY(1210);
         isPaused = false;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1920, 1080);
+        camera.setToOrtho(false, 192, 108);
         camera.position.set(player.getX(), player.getY(), 0);
         hudCamera = new OrthographicCamera();
-        hudCamera.setToOrtho(false, 125, 125);
+        hudCamera.setToOrtho(false, 192, 108);
         hudCamera.position.set(player.getX(), player.getY(), 0);
-        mapCamera = new OrthographicCamera();
-        mapCamera.setToOrtho(false, 1250, 1250);
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Nightmare_145bpm.mp3"));
         conductor = new Conductor(145, 0);
         conductor.start();
         monsterConductor = new Conductor(145, 0);
         monsterConductor.start();
-        enemy = new Sprite(Start.playerTexture, 64, 64);
+        enemy = new Sprite(playerTexture, 8, 8);
         enemy.setX(player.getX() - 60);
         enemy.setY(player.getY());
         //initializing map
@@ -99,9 +102,9 @@ public class MazeLevel implements Screen {
         renderer = new OrthogonalTiledMapRenderer(map);
         movementQueue = new Queue<>();
         for (int i = 0; i < 3; i++) {
-            movementQueue.addLast(() -> enemy.setX(enemy.getX() + 60));
+            movementQueue.addLast(() -> enemy.setX(enemy.getX() + 20));
         }
-        blackScreenTexture = new Texture(Gdx.files.internal("black.jpg"));
+        blackScreenTexture = new Texture(Gdx.files.internal("MazeLevel\\black.jpg"));
         blackScreen = new Image(blackScreenTexture);
         blackScreen.setColor(blackScreen.getColor().r, blackScreen.getColor().g, blackScreen.getColor().b, 0.0f);
 
@@ -116,19 +119,19 @@ public class MazeLevel implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(Color.DARK_GRAY);
+        ScreenUtils.clear(Color.BLACK);
+        System.out.println(walls.getCount());
 
         //begin drawing objets
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        renderer.setView(mapCamera);
-        renderer.render();
-        game.batch.begin();
-        player.draw(game.batch);
-        enemy.draw(game.batch);
         if (!isPaused) {
+            renderer.setView(camera);
+            renderer.render();
+            game.batch.begin();
+            player.draw(game.batch);
+            enemy.draw(game.batch);
             camera.update();
             hudCamera.update();
-            mapCamera.update();
             game.batch.setProjectionMatrix(camera.combined);
             hudBatch.setProjectionMatrix(hudCamera.combined);
             update();
@@ -159,21 +162,31 @@ public class MazeLevel implements Screen {
 
         //player move inputs
         if(Gdx.input.isKeyPressed(Input.Keys.D) && canMove) {
-            player.setX(player.getX() + 20);
-            movementQueue.addLast(() -> enemy.setX(enemy.getX() + 20));
+            if (!blocked(player.getX() + 20, player.getY())) {
+                player.setX(player.getX() + 20);
+                movementQueue.addLast(() -> enemy.setX(enemy.getX() + 20));
+            }
         }
         if(Gdx.input.isKeyPressed(Input.Keys.A) && canMove) {
-            player.setX(player.getX() - 20);
-            movementQueue.addLast(() -> enemy.setX(enemy.getX() - 20));
+            if (!blocked(player.getX() - 20, player.getY())) {
+                player.setX(player.getX() - 20);
+                movementQueue.addLast(() -> enemy.setX(enemy.getX() - 20));
+            }
         }
         if(Gdx.input.isKeyPressed(Input.Keys.W) && canMove) {
-            player.setY(player.getY() + 20);
-            movementQueue.addLast(() -> enemy.setY(enemy.getY() + 20));
+            if (!blocked(player.getX(), player.getY() + 20)) {
+                player.setY(player.getY() + 20);
+                movementQueue.addLast(() -> enemy.setY(enemy.getY() + 20));
+            }
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.S) && canMove) {
-            player.setY(player.getY() - 20);
-            movementQueue.addLast(() -> enemy.setY(enemy.getY() - 20));
+        if(Gdx.input.isKeyPressed(Input.Keys.S) && canMove ) {
+            if (!blocked(player.getX(), player.getY() + 20)) {
+                player.setY(player.getY() - 20);
+                movementQueue.addLast(() -> enemy.setY(enemy.getY() - 20));
+            }
         }
+
+
 
         //enemy movement
         if (song.getPosition() > 5 && monsterCanMove) {
@@ -188,7 +201,7 @@ public class MazeLevel implements Screen {
         //death
         if (hit()) {
             song.stop();
-            game.setScreen(new MainMenuScreen(game));
+            game.setScreen(new GameOver(game, "MazeLevel"));
         }
 
 
@@ -241,6 +254,16 @@ public class MazeLevel implements Screen {
         } else {
             blackScreenTimer = false;
         }
+    }
+
+    boolean blocked(float x, float y) {
+        for (RectangleMapObject rect : walls.getByType(RectangleMapObject.class)) {
+            Rectangle rectangle = rect.getRectangle();
+            if (Intersector.overlaps(rectangle, new Rectangle().set(x, y, 8, 8))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

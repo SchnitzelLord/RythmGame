@@ -16,7 +16,7 @@ public class MazeHud {
     MazeHud(Start game) {
         beatSymbolTexture = new Texture(Gdx.files.internal("MazeLevel\\beat.png"));
         beatSymbol = new Image(beatSymbolTexture);
-        beatSymbol.setPosition(1920 / 2, 1080 / 2);
+        beatSymbol.setPosition(45, 10);
 
     }
 
