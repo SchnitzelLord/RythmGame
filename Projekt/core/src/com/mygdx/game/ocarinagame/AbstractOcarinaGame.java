@@ -189,7 +189,7 @@ public abstract class AbstractOcarinaGame implements Screen {
                 isRightKeyPressed() && direction == Arrow.Direction.RIGHT;
     }
 
-    protected boolean isMissPenaltyTriggered() {
+    protected boolean isMissPressPenaltyTriggered() {
         // Penalty for just pressing keys at random
         return isPenaltyOn && (isUpKeyPressed() || isLeftKeyPressed() || isDownKeyPressed() || isRightKeyPressed());
     }

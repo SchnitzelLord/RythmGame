@@ -3,7 +3,6 @@ package com.mygdx.game.ocarinagame;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -17,6 +16,8 @@ public class HUD implements Disposable {
 
     private final ScoreProgressBar progressBar;
 
+    // Constructor
+
     HUD(SpriteBatch spriteBatch, AbstractOcarinaGame game) {
         this.game = game;
 
@@ -25,23 +26,22 @@ public class HUD implements Disposable {
 
         // Create progress bar
         progressBar = new ScoreProgressBar(0, game.getFinishScore(), 1, 0.25f);
-        System.out.println("Finish Score: " + game.getFinishScore());
-        progressBar.setFillParent(true);
+        progressBar.setFillParent(false);
 
-        // Organize HUD in table
-        Table table = new Table();
-        table.center(); // center has coordinates (0, 0)
-        table.setFillParent(true);
-        table.setPosition(0, -game.getWorldHeight() + progressBar.getHeight());
-
-        table.add(progressBar).left().expandX();
-
-        stage.addActor(table);
+        stage.addActor(progressBar);
     }
+
+    // Getter
 
     public float getProgressBarHeight() {
         return progressBar.getHeight();
     }
+
+    public ScoreProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    // Functional methods
 
     void update() {
         progressBar.setValue(game.getScore());

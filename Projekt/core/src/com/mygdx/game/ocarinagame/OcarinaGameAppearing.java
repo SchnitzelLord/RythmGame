@@ -128,7 +128,7 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
             if (isInputEqualsDirection(direction)) {
                 score++;
                 removeArrowOfDirection(a.getDirection());
-            } else if (isMissPenaltyTriggered()) {
+            } else if (isMissPressPenaltyTriggered()) {
                 reduceScore();
             }
         }
