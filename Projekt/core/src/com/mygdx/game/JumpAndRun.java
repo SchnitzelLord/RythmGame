@@ -339,15 +339,24 @@ public class JumpAndRun implements Screen {
     }
 
     private boolean overlap (Array< ? extends Sprite> arr, Sprite sp) {
-        for (Sprite item : arr) {
-            if (overlap(item,sp)) return true;
+        if (arr == platforms) {
+            for (Platform item : (Array<Platform>)arr) {
+                Data data = item.overlap(player);
+                if (data.isOverlap()) return  data.isOverlap();
+
+            }
+        }else {
+            for (Sprite item : arr) {
+                if (overlap(item, sp)) return true;
+            }
         }
         return false;
     }
 
     private float checkPlatforms() {
         for (Platform platform : platforms) {
-            if (platform.overlap(player) && jumpTime == 0) return platform.getY()+platform.getHeight();
+            Data data = platform.overlap(player);
+            if (data.isOverlap() && jumpTime == 0) return  platform.getY()+ data.getY();
         }
         return -100; // return as a false
     }
@@ -393,7 +402,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnPlatform() {
         double random = Math.random();
-        Platform platform = Platform.createPlatform(Platform.Type.car1);
+        Platform platform = Platform.createPlatform(Platform.Type.carGrey);
         System.out.print(platform.getWidth());
         double randomy = Math.random();
         int y = (int) (30 + 250* randomy);
