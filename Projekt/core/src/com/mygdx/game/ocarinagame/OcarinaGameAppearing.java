@@ -55,7 +55,6 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
 
     // Overrides
 
-    // Already updates HUD and camera, checks for controls, draws arrows and background, spawn arrows
     @Override
     public void render(float delta) {
         // Clear screen, update HUD & camera

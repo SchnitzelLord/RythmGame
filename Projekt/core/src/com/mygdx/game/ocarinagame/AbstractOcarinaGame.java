@@ -22,8 +22,9 @@ public abstract class AbstractOcarinaGame implements Screen {
     // Game and screen sizes
     protected static final int SCREEN_WIDTH = 1920;
     protected static final int SCREEN_HEIGHT = 1080;
-    protected static final int WORLD_WIDTH = 135;
-    protected static final int WORLD_HEIGHT = WORLD_WIDTH * 9 / 16;
+    protected static final int WORLD_HEIGHT = 75;
+    protected static final int WORLD_WIDTH = WORLD_HEIGHT * 16 / 9;
+
 
     // General offset for float comparisons (for changing bpm at specific time)
     protected static final float TIME_RANGE_OFFSET = 0.001f;
