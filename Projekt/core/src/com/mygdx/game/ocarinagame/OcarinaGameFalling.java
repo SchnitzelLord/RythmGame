@@ -33,6 +33,9 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
         // Setup UI
         hud = new HUD(game.batch, this);
+        ScoreProgressBar progressBar = hud.getProgressBar();
+            // Position at top right corner
+        progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
 
         // Setup audio
         song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
@@ -53,7 +56,6 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
     // Overrides
 
-    // Already updates HUD and camera, checks for controls, draws arrows and background, spawn arrows
     @Override
     public void render(float delta) {
         // Clear screen, update HUD & camera
@@ -90,6 +92,7 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
         Sprite sprite = arrow.getSprite();
 
         // Position anchors at bottom left of sprite
+
         int offset = 4;
 
         switch (direction) {
