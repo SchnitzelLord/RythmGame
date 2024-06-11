@@ -311,7 +311,7 @@ public class JumpAndRun implements Screen {
             spawnWavetop();
         };
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
-        if(TimeUtils.nanoTime() - lastPlatformTime > 500000000 && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
+        if(TimeUtils.nanoTime() - lastPlatformTime > 5000000000L && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0) Gdx.app.exit();
     }
@@ -395,10 +395,9 @@ public class JumpAndRun implements Screen {
         double random = Math.random();
         Platform platform = Platform.createPlatform(Platform.Type.car1);
         System.out.print(platform.getWidth());
-        int y;
-        if (random < 0.3) y = (int) (100 +  150*Math.random());
-        else if (random < 0.6) y = (int) (400 +  150*Math.random());
-        else  y = (int) (700 +  150*Math.random());
+        double randomy = Math.random();
+        int y = (int) (30 + 250* randomy);
+
         boolean noOverlap = spawnSpriteSetup(platforms,platform,MAX_WIDTH,y,true);
         if (!noOverlap) spawnPlatform();
         lastPlatformTime = TimeUtils.nanoTime();
