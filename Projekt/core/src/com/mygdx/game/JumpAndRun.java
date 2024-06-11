@@ -43,7 +43,7 @@ public class JumpAndRun implements Screen {
     private Texture waveTexture;
     private Texture boosterTexture;
     private Texture platformTexture;
-    private Texture background1Texture;
+    private Texture backgroundTexture;
 
     // items-----------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ public class JumpAndRun implements Screen {
     private float debug_fallspeed;
     private int debug_remove;
 
-    public JumpAndRun(final Start game) {
+    private JumpAndRun(final Start game) {  // dont use this constructor use the one with levelId
         this.game = game;
         // initialise textures
         playerTexture = new Texture("characterSprite\\playerSprite.png");
@@ -88,7 +88,7 @@ public class JumpAndRun implements Screen {
         heartTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
         boosterTexture = new Texture("jumpAndRunSprites\\booster.png");
         zoneTexture = new Texture("jumpAndRunSprites\\heartsprite_test.png");
-        background1Texture = new Texture("jumpAndRunSprites\\image.png");
+
         debugBeatTexture = new Texture("jumpAndRunSprites\\debugBeat2.png");
 
         player = new Sprite(playerTexture, 64,64 );
@@ -122,8 +122,17 @@ public class JumpAndRun implements Screen {
         }
         // initialised the first two backgrounds
 
+
+
+    };
+
+    public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
+        this(game);
+        if (levelId == 1)backgroundTexture = new Texture("jumpAndRunSprites\\image.png");//if levelId == 1 set the background to the one for the second lvel
+        else backgroundTexture = new Texture("jumpAndRunSprites\\image.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
+
         backgrounds = new Array<>();
-        Sprite background = new Sprite(background1Texture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
+        Sprite background = new Sprite(backgroundTexture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
         spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
@@ -326,7 +335,7 @@ public class JumpAndRun implements Screen {
         if(random < 0.4) y = 0;
         else if (random < 0.8) y = (int) (200 +  waveSPawnVariantion*Math.random());
         else y = (int) (MAX_HEIGTH * random);
-        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y,true);
+        boolean noOverlap = spawnSpriteSetup(waves,wave,MAX_WIDTH,y,true);
         if (!noOverlap) spawnWavebot();
         lastWaveTime = TimeUtils.nanoTime();
     }
@@ -340,7 +349,7 @@ public class JumpAndRun implements Screen {
         else if  (random < 0.9) y = (int) (800 +  waveSPawnVariantion*Math.random());
         else y = (int) (MAX_HEIGTH * random);
 
-        boolean noOverlap = spawnSpritesetup(waves,wave,MAX_WIDTH,y,true);
+        boolean noOverlap = spawnSpriteSetup(waves,wave,MAX_WIDTH,y,true);
         if (!noOverlap) spawnWavetop();
         lastWaveTime = TimeUtils.nanoTime();
     }
@@ -352,7 +361,7 @@ public class JumpAndRun implements Screen {
         if (random < 0.33) booster.setY(0);
         else if (random < 0.66) y = (int) (450 +  100*Math.random()) ;
         else y = (int) (700 +  100*Math.random());
-        boolean noOverlap = spawnSpritesetup(boosters,booster,MAX_WIDTH,y,true);
+        boolean noOverlap = spawnSpriteSetup(boosters,booster,MAX_WIDTH,y,true);
         if (!noOverlap) spawnBooster();
         lastBoosterTime = TimeUtils.nanoTime();
     }
@@ -366,14 +375,14 @@ public class JumpAndRun implements Screen {
         if (random < 0.3) y = (int) (100 +  150*Math.random());
         else if (random < 0.6) y = (int) (400 +  150*Math.random());
         else  y = (int) (700 +  150*Math.random());
-        boolean noOverlap = spawnSpritesetup(platforms,platform,MAX_WIDTH,y,true);
+        boolean noOverlap = spawnSpriteSetup(platforms,platform,MAX_WIDTH,y,true);
         if (!noOverlap) spawnPlatform();
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
     private void spawnBackground() {
-        Sprite background = new Sprite(background1Texture,MAX_WIDTH,MAX_HEIGTH);
-        spawnSpritesetup(backgrounds,background,MAX_WIDTH,0,false);
+        Sprite background = new Sprite(backgroundTexture,MAX_WIDTH,MAX_HEIGTH);
+        spawnSpriteSetup(backgrounds,background,MAX_WIDTH,0,false);
     }
     private void spawnPowerup() {
         Powerup powerup;
@@ -385,12 +394,12 @@ public class JumpAndRun implements Screen {
         if (effect < 0.33) powerup = Powerup.createPowerup(Powerup.Power.moreJumps);
         else if (effect < 0.66)powerup = Powerup.createPowerup(Powerup.Power.live);
         else powerup = Powerup.createPowerup(Powerup.Power.shield);
-        boolean noOverlap = spawnSpritesetup(powerups,powerup,MAX_WIDTH,y,true);
+        boolean noOverlap = spawnSpriteSetup(powerups,powerup,MAX_WIDTH,y,true);
         if (!noOverlap) spawnPowerup();
         lastPowerupTime = TimeUtils.nanoTime();
     }
 
-    private <T extends Sprite> boolean spawnSpritesetup(Array<T> arr, T sp, int x, int y, boolean check) { // used to avoid code compilation try later to remove unsafe operation
+    private <T extends Sprite> boolean spawnSpriteSetup(Array<T> arr, T sp, int x, int y, boolean check) { // used to avoid code compilation try later to remove unsafe operation
         sp.setX(x);
         sp.setY(y);
         if (check) {
@@ -438,7 +447,7 @@ public class JumpAndRun implements Screen {
         boosterTexture.dispose();
         platformTexture.dispose();
         zoneTexture.dispose();
-        background1Texture.dispose();
+        backgroundTexture.dispose();
         song.dispose();
     }
 }
