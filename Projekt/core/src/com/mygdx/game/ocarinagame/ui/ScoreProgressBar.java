@@ -1,4 +1,4 @@
-package com.mygdx.game.ocarinagame;
+package com.mygdx.game.ocarinagame.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -7,13 +7,12 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 
 
-final class ScoreProgressBar extends ProgressBar implements Disposable {
+public final class ScoreProgressBar extends ProgressBar implements Disposable {
     private final Texture progressBarTexture;
     private final Texture progressBarEmptyTexture;
     private final Texture progressBarBorderTexture;

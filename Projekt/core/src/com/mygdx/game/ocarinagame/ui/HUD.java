@@ -1,4 +1,4 @@
-package com.mygdx.game.ocarinagame;
+package com.mygdx.game.ocarinagame.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -7,9 +7,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.ocarinagame.levels.AbstractOcarinaGame;
 
 
-final class HUD implements Disposable {
+public final class HUD implements Disposable {
     private final AbstractOcarinaGame game;
 
     private final Stage stage;
@@ -21,14 +22,14 @@ final class HUD implements Disposable {
 
     // Constructor
 
-    HUD(SpriteBatch spriteBatch, AbstractOcarinaGame game) {
+    public HUD(SpriteBatch spriteBatch, AbstractOcarinaGame game) {
         this.game = game;
 
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
         stage = new Stage(viewport, spriteBatch);
 
         // Create progress bar with default values
-        progressBar = new ScoreProgressBar(0, game.music.getTotalBeatCount(), 1, 0);;
+        progressBar = new ScoreProgressBar(0, 10, 1, 0);;
 
         stage.addActor(progressBar);
     }
@@ -41,14 +42,14 @@ final class HUD implements Disposable {
 
     // Functional methods
 
-    void update() {
+    public void update() {
         // Calculate offset for progress bar value since one pixel on the left will (and should) not be stretched
-        float pxPerScore = progressBar.getWidth() / game.music.getTotalBeatCount();
-        float scoreOffset = 1 / pxPerScore;
+        float pxPerValue = progressBar.getWidth() / progressBar.getMaxValue();
+        float scoreOffset = 1 / pxPerValue;
         progressBar.setValue(game.getScore() + scoreOffset);
     }
 
-    void draw() {
+    public void draw() {
         stage.draw();
         stage.act();
     }
@@ -61,6 +62,8 @@ final class HUD implements Disposable {
         if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
         progressBar.setValue(progress);
     }
+
+    // Overrides
 
     @Override
     public void dispose() {

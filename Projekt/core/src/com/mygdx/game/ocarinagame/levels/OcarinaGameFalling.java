@@ -1,4 +1,4 @@
-package com.mygdx.game.ocarinagame;
+package com.mygdx.game.ocarinagame.levels;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -9,6 +9,10 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.Start;
+import com.mygdx.game.ocarinagame.Arrow;
+import com.mygdx.game.ocarinagame.BeatMusic;
+import com.mygdx.game.ocarinagame.ui.HUD;
+import com.mygdx.game.ocarinagame.ui.ScoreProgressBar;
 
 import java.util.Iterator;
 

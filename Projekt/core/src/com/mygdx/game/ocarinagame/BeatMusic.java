@@ -50,11 +50,6 @@ public class BeatMusic implements Disposable {
 
     // Public function methods
 
-    @Override
-    public void dispose() {
-        song.dispose();
-    }
-
     public void play() {
         song.play();
     }
@@ -76,7 +71,16 @@ public class BeatMusic implements Disposable {
     }
 
     // Setter
+
     public void setBPM(float bpm) {
         this.bpm = bpm;
     }
+
+    // Overrides
+
+    @Override
+    public void dispose() {
+        song.dispose();
+    }
+
 }
