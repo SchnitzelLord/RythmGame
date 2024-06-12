@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 
 
-class ScoreProgressBar extends ProgressBar implements Disposable {
+final class ScoreProgressBar extends ProgressBar implements Disposable {
     private final Texture progressBarTexture;
     private final Texture progressBarEmptyTexture;
     private final Texture progressBarBorderTexture;

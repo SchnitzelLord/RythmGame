@@ -16,7 +16,7 @@ import com.mygdx.game.Conductor;
 import com.mygdx.game.PauseScreen;
 import com.mygdx.game.Start;
 
-public abstract class AbstractOcarinaGame implements Screen {
+abstract class AbstractOcarinaGame implements Screen {
     // Game and screen sizes
     protected static final int SCREEN_WIDTH = 1920;
     protected static final int SCREEN_HEIGHT = 1080;

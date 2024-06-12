@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 
-public class HUD implements Disposable {
+final class HUD implements Disposable {
     private final AbstractOcarinaGame game;
 
     private final Stage stage;
@@ -48,16 +48,18 @@ public class HUD implements Disposable {
         progressBar.setValue(game.getScore() + scoreOffset);
     }
 
-    void progressBarTest() {
+    void draw() {
+        stage.draw();
+        stage.act();
+    }
+
+    // Utility methods
+
+    private void progressBarTest() {
         // Test animation of progress bar by increasing value by time
         progress += (Gdx.graphics.getDeltaTime() * 5);
         if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
         progressBar.setValue(progress);
-    }
-
-    void draw() {
-        stage.draw();
-        stage.act();
     }
 
     @Override
