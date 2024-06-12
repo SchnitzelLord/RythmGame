@@ -11,8 +11,7 @@ import com.mygdx.game.Start;
 
 import java.util.Comparator;
 
-public class OcarinaGameAppearing extends AbstractOcarinaGame {
-    private static final float SPAWN_POSITION_OFFSET = 10;
+public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     private static final boolean IS_ARROW_POSITION_OFFSET_ACTIVE = false;
     private static final float ARROW_UPTIME = 0.5f;
     private static final float SPAWN_TIME_OFFSET = 0.35f;
@@ -22,6 +21,10 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
     private final Array<Arrow> downArrows;
     private final Array<Arrow> rightArrows;
 
+    // Background for better visibility of arrows
+    private final Texture blackBoxTexture;
+    private final Image blackBox;
+
     // Constructor
 
     public OcarinaGameAppearing(Start game) {
@@ -29,18 +32,25 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         // camera, viewpoint, textures, allArrows
         super(game);
 
+        // Change game state values
+        finishScore = 80;
+        beatStart = 13.117f;
+
         // Setup UI
         hud = new HUD(game.batch, this);
+        ScoreProgressBar progressBar = hud.getProgressBar();
+        // Position at top right corner
+        progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
 
         // Setup audio
-        song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
-        conductor = new Conductor(120, 0);
+        song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
+        conductor = new Conductor(110, 0);
         conductor.start();
         // First arrow spawns earlier than beat
         // Calculation for when next beat based on last beat
         // Offset therefore included in every beat
         // Offset necessary because of reaction time of player
-        conductor.lastBeat = SPAWN_TIME_OFFSET;
+        conductor.lastBeat = SPAWN_TIME_OFFSET + beatStart;
 
         // Initialize arrays
         upArrows = new Array<>();
@@ -51,6 +61,12 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         // Setup background
         backgroundTexture = new Texture("ocarina-game\\wake-up-background.png");
         background = new Image(backgroundTexture);
+
+        // Setup blackbox
+        blackBoxTexture = new Texture("ocarina-game\\black-box.png");
+        blackBox = new Image(blackBoxTexture);
+            // Center blackBox
+        blackBox.setPosition(0.5f * (WORLD_WIDTH - blackBox.getWidth()), 0.5f * (WORLD_HEIGHT - blackBox.getHeight()));
     }
 
     // Overrides
@@ -86,29 +102,29 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         int offsetFactor = IS_ARROW_POSITION_OFFSET_ACTIVE ? 1 : 0;
 
         // Coordinates anchor at bottem left
-        float screenCenterX = WORLD_WIDTH * 0.5f;
-        float screenCenterY = WORLD_HEIGHT * 0.5f;
+        float centerArrowX = 0.5f * (WORLD_WIDTH - arrowTexture.getWidth());
+        float centerArrowY = 0.5f * (WORLD_HEIGHT- arrowTexture.getHeight());
 
         // Setup spawnpoint depending on arrow direction and duplicates (if offset is active)
         switch (direction) {
             case UP:
                 float multUpOffset = arrowTexture.getHeight() * upArrows.size;
-                sprite.setPosition(screenCenterX, screenCenterY + SPAWN_POSITION_OFFSET + multUpOffset * offsetFactor);
+                sprite.setPosition(centerArrowX, centerArrowY + arrowTexture.getHeight() + ARROW_SPAWN_POSITION_OFFSET + multUpOffset * offsetFactor);
                 upArrows.add(arrow);
                 break;
             case DOWN:
                 float multDownOffset = arrowTexture.getHeight() * downArrows.size;
-                sprite.setPosition(screenCenterX, screenCenterY - SPAWN_POSITION_OFFSET - multDownOffset * offsetFactor);
+                sprite.setPosition(centerArrowX, centerArrowY - arrowTexture.getHeight() - ARROW_SPAWN_POSITION_OFFSET - multDownOffset * offsetFactor);
                 downArrows.add(arrow);
                 break;
             case LEFT:
                 float multLeftOffset = arrowTexture.getWidth() * leftArrows.size;
-                sprite.setPosition(screenCenterX - SPAWN_POSITION_OFFSET - multLeftOffset * offsetFactor, screenCenterY);
+                sprite.setPosition(centerArrowX - arrowTexture.getWidth() - ARROW_SPAWN_POSITION_OFFSET - multLeftOffset * offsetFactor, centerArrowY);
                 leftArrows.add(arrow);
                 break;
             case RIGHT:
                 float multRightOffset = arrowTexture.getWidth() * rightArrows.size;
-                sprite.setPosition(screenCenterX + SPAWN_POSITION_OFFSET + multRightOffset * offsetFactor, screenCenterY);
+                sprite.setPosition(centerArrowX + arrowTexture.getWidth() + ARROW_SPAWN_POSITION_OFFSET + multRightOffset * offsetFactor, centerArrowY);
                 rightArrows.add(arrow);
                 break;
         }
@@ -158,6 +174,7 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         background.draw(game.batch, 1.0f);
+        if (song.getPosition() >= beatStart) blackBox.draw(game.batch, 0.6f);
         game.batch.end();
 
         hud.draw();
