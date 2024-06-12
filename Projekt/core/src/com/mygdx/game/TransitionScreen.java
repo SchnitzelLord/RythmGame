@@ -31,13 +31,15 @@ public class TransitionScreen implements Screen {
     Image background;
     OrthographicCamera camera;
 
-    Timer timer = new Timer();
+    Timer timer;
 
     public TransitionScreen(final Start game, String screen) {
         this.game = game;
 
         this.nextScreen = screen;
         camera = new OrthographicCamera(1920, 1080);
+
+        timer = new Timer();
 
         generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -69,14 +71,16 @@ public class TransitionScreen implements Screen {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                if (nextScreen.equals("JumpAndRun")) {
+                if (nextScreen.equals("Homeway")) {
                     game.setScreen(new JumpAndRun(game));
                 } else if (nextScreen.equals("OcarinaLevel")) {
-                    game.setScreen(new MazeLevel(game));
+                    //game.setScreen(new (game));
                 } else if (nextScreen.equals("MazeLevel")) {
                     game.setScreen(new MazeLevel(game));
                 } else if (nextScreen.equals("WakeUp")) {
-                    //game.setScreen(new WakeUp());
+                    //game.setScreen(new ());
+                } else if (nextScreen.equals("WayThere")) {
+                    game.setScreen(new JumpAndRun(game));
                 }
 
             }

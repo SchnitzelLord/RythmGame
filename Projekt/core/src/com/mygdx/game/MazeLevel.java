@@ -220,7 +220,7 @@ public class MazeLevel implements Screen {
 
         if (finish()) {
             song.stop();
-            game.setScreen(new MainMenuScreen(game));
+            game.setScreen(new Credits(game));
         }
 
 
