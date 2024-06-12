@@ -356,7 +356,7 @@ public class JumpAndRun implements Screen {
     private float checkPlatforms() {
         for (Platform platform : platforms) {
             Data data = platform.overlap(player);
-            if (data.isOverlap() && jumpTime == 0) return  platform.getY()+ data.getY();
+            if (data.isOverlap() && jumpTime == 0) return data.getY();
         }
         return -100; // return as a false
     }
@@ -369,7 +369,7 @@ public class JumpAndRun implements Screen {
         else if (random < 0.8) y = (int) (200 +  waveSPawnVariantion*Math.random());
         else y = (int) (MAX_HEIGTH * random);
         boolean noOverlap = spawnSpriteSetup(waves,wave,MAX_WIDTH,y,true);
-        if (!noOverlap) spawnWavebot();
+        if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastWaveTime = TimeUtils.nanoTime();
     }
 
@@ -383,7 +383,7 @@ public class JumpAndRun implements Screen {
         else y = (int) (MAX_HEIGTH * random);
 
         boolean noOverlap = spawnSpriteSetup(waves,wave,MAX_WIDTH,y,true);
-        if (!noOverlap) spawnWavetop();
+        if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastWaveTime = TimeUtils.nanoTime();
     }
 
@@ -395,20 +395,20 @@ public class JumpAndRun implements Screen {
         else if (random < 0.66) y = (int) (450 +  100*Math.random()) ;
         else y = (int) (700 +  100*Math.random());
         boolean noOverlap = spawnSpriteSetup(boosters,booster,MAX_WIDTH,y,true);
-        if (!noOverlap) spawnBooster();
+        if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastBoosterTime = TimeUtils.nanoTime();
     }
 
 
     private void spawnPlatform() {
         double random = Math.random();
-        Platform platform = Platform.createPlatform(Platform.Type.carGrey);
+        Platform platform = Platform.createPlatform(Platform.Type.truck2);
         System.out.print(platform.getWidth());
         double randomy = Math.random();
         int y = (int) (30 + 250* randomy);
 
         boolean noOverlap = spawnSpriteSetup(platforms,platform,MAX_WIDTH,y,true);
-        if (!noOverlap) spawnPlatform();
+        if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastPlatformTime = TimeUtils.nanoTime();
     }
 
@@ -427,7 +427,7 @@ public class JumpAndRun implements Screen {
         else if (effect < 0.66)powerup = Powerup.createPowerup(Powerup.Power.live);
         else powerup = Powerup.createPowerup(Powerup.Power.shield);
         boolean noOverlap = spawnSpriteSetup(powerups,powerup,MAX_WIDTH,y,true);
-        if (!noOverlap) spawnPowerup();
+        if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastPowerupTime = TimeUtils.nanoTime();
     }
 
