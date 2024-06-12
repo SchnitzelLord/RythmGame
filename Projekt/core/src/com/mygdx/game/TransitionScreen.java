@@ -7,15 +7,23 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 
 public class TransitionScreen implements Screen {
     final Start game;
 
     String nextScreen;
+    Stage stage;
+    Label text;
+    Label.LabelStyle style;
 
+    //tool to create BitmapFont from font file
     FreeTypeFontGenerator generator;
     FreeTypeFontGenerator.FreeTypeFontParameter parameter;
     BitmapFont pixelFont;
@@ -30,15 +38,30 @@ public class TransitionScreen implements Screen {
 
         this.nextScreen = screen;
         camera = new OrthographicCamera(1920, 1080);
-        camera.position.set(1920 / 2, 1080 / 2, 0);
+
         generator = new FreeTypeFontGenerator(Gdx.files.internal("font\\PublicPixel.ttf"));
         parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 30;
         pixelFont = generator.generateFont(parameter);
-        backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
+
+        stage = new Stage(new FillViewport(1920, 1080, camera));
+        Gdx.input.setInputProcessor(stage);
+
+        style = new Label.LabelStyle(pixelFont, Color.WHITE);
+        if (nextScreen.equals("JumpAndRun")) {
+            text = new Label("Evade the Waves! \nJump - Space \nStomp - S \nWatch out for power ups", style);
+            backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
+        } else if (nextScreen.equals("MazeLevel")) {
+            text = new Label("Move to the beat \nMove - WASD \nExit the maze \nSurvive", style);
+            backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
+        } else if (nextScreen.equals("OcarinaLevel")) {
+            text = new Label("Press the buttons to the beat \nUp - W \nLeft - A \nDown - S \nRight - D", style);
+            backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
+        }
+        text.setAlignment(0);
+
         background = new Image(backgroundTexture);
-        background.setHeight(1080);
-        background.setWidth(1920);
+        background.setFillParent(true);
     }
 
     @Override
@@ -52,35 +75,29 @@ public class TransitionScreen implements Screen {
                     game.setScreen(new MazeLevel(game));
                 } else if (nextScreen.equals("MazeLevel")) {
                     game.setScreen(new MazeLevel(game));
+                } else if (nextScreen.equals("WakeUp")) {
+                    //game.setScreen(new WakeUp());
                 }
 
             }
         }, 5);
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.setDebug(true);
+        stage.addActor(background);
+        stage.addActor(table);
+
+
+        table.add(text).center();
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
-        game.batch.begin();
-        game.batch.setProjectionMatrix(camera.combined);
-        background.draw(game.batch, 1.0f);
-        if (nextScreen.equals("JumpAndRun")) {
-            pixelFont.draw(game.batch, "Evade the Waves!", 740, 800);
-            pixelFont.draw(game.batch, "Jump - SPACE", 780, 750);
-            pixelFont.draw(game.batch, "Stomp - S", 8000, 700);
-            pixelFont.draw(game.batch, "Watch out for power ups", 710, 650);
-
-        } else if (nextScreen.equals("MazeLevel")) {
-            pixelFont.draw(game.batch, "Move to the beat", 730, 800);
-            pixelFont.draw(game.batch, "Move - WASD", 790, 750);
-            pixelFont.draw(game.batch, "Exit the maze", 770, 700);
-            pixelFont.draw(game.batch, "Survive", 850, 650);
-        } else if (nextScreen.equals("OcarinaLevel")) {
-            pixelFont.draw(game.batch, "Press the buttons to the beat", 740, 800);
-            pixelFont.draw(game.batch, "Up - W \nLeft - A \nDown - S \nRight - D", 780, 750);
-        }
-        game.batch.end();
+        stage.act();
+        stage.draw();
     }
 
     @Override
@@ -107,5 +124,7 @@ public class TransitionScreen implements Screen {
     public void dispose() {
         generator.dispose();
         pixelFont.dispose();
+        stage.dispose();
+        backgroundTexture.dispose();
     }
 }

@@ -92,8 +92,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
-                newGame.remove();
-                newGame.setDisabled(true);
+                newGame.removeListener(this);
                 game.setScreen(new TransitionScreen(game, "MazeLevel"));
             }
         });
@@ -102,8 +101,7 @@ public class MainMenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
-                options.remove();
-                options.setDisabled(true);
+                options.removeListener(this);
                 game.setScreen(new OptionsMenu(game, null));
             }
         });

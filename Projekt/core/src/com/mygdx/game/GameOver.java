@@ -23,6 +23,7 @@ public class GameOver implements Screen {
     OrthographicCamera camera;
     Skin skin;
     Texture buttonTexture;
+    //level to be restarted
     String level;
 
 
@@ -46,7 +47,7 @@ public class GameOver implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.setDebug(true);
+        table.setDebug(false);
         stage.addActor(gameOverScreen);
         stage.addActor(table);
 
@@ -60,6 +61,7 @@ public class GameOver implements Screen {
         table.add(yesButton).width(180).height(100);
         table.add(noButton).width(180).height(100);
 
+        //restart right level, depending on parameter
         yesButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -69,6 +71,8 @@ public class GameOver implements Screen {
                     game.setScreen(new MazeLevel(game));
                 } else if (level.equals("MazeLevel")) {
                     game.setScreen(new MazeLevel(game));
+                } else if (level.equals("WakeUp")) {
+                    //game.setScreen(new WakeUP());
                 }
                 yesButton.remove();
             }
