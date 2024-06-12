@@ -84,6 +84,8 @@ public class OcarinaGameAppearing extends AbstractOcarinaGame {
         Sprite sprite = arrow.getSprite();
 
         int offsetFactor = IS_ARROW_POSITION_OFFSET_ACTIVE ? 1 : 0;
+
+        // Coordinates anchor at bottem left
         float screenCenterX = WORLD_WIDTH * 0.5f;
         float screenCenterY = WORLD_HEIGHT * 0.5f;
 

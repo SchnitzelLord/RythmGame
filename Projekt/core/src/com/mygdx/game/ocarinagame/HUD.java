@@ -1,6 +1,5 @@
 package com.mygdx.game.ocarinagame;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -49,7 +48,6 @@ public class HUD implements Disposable {
 //        progress += (Gdx.graphics.getDeltaTime() * 5);
 //        if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
 //        progressBar.setValue(progress);
-        System.out.println("Score: " + game.getScore());
     }
 
     void draw() {

@@ -18,7 +18,6 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
     // Arrow hit and spawn position
     private static final float HIT_POSITION = 2;
-    private final float ARROW_SPAWN_POSITION_Y = WORLD_HEIGHT * 2;
 
     // Hitzone
     private final Texture hitZoneTexture;
@@ -42,12 +41,12 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
         conductor = new Conductor(110, 0);
         conductor.start();
         // Set first beat time stamp
-        conductor.lastBeat = conductor.crochet;
+        conductor.lastBeat = 13.117f - conductor.crochet;
 
         // Setup hitZone
         hitZoneTexture = new Texture("ocarina-game\\hit-zone.png");
         hitZone = new Sprite(hitZoneTexture, hitZoneTexture.getWidth(), hitZoneTexture.getHeight());
-        hitZone.setPosition(0.5f * (WORLD_WIDTH - hitZone.getWidth()), HIT_POSITION);
+        hitZone.setPosition(0.5f * (WORLD_WIDTH - hitZone.getWidth()), HIT_POSITION );
 
         // Setup background
         backgroundTexture = new Texture("ocarina-game\\zelda-background.png");
@@ -68,9 +67,9 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
             draw();
 
-            if (canArrowSpawn()) spawnArrow();
+            if (canArrowSpawn() && song.isPlaying()) spawnArrow();
             moveArrowsDown(delta);
-            deleteArrowsReachingHitPosition();
+            deleteArrowsOutOfWorld();
 
             // If game is won, clear memory usage for textures and switch to next screen
             if (isGameWon()) {
@@ -97,16 +96,16 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
         switch (direction) {
             case LEFT:
-                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth() * 2 - offset, ARROW_SPAWN_POSITION_Y);
+                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth() * 2 - offset, WORLD_HEIGHT);
                 break;
             case UP:
-                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth(), ARROW_SPAWN_POSITION_Y);
+                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth(), WORLD_HEIGHT);
                 break;
             case DOWN:
-                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f, ARROW_SPAWN_POSITION_Y);
+                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f, WORLD_HEIGHT);
                 break;
             case RIGHT:
-                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f + sprite.getWidth() + offset, ARROW_SPAWN_POSITION_Y);
+                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f + sprite.getWidth() + offset, WORLD_HEIGHT);
                 break;
         }
     }
@@ -141,7 +140,10 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
     @Override
     protected boolean canArrowSpawn() {
-        float distance = ARROW_SPAWN_POSITION_Y - HIT_POSITION;
+        // Calculate distance from arrow to center of hitZone and time needed to reach it
+        // Coordinates anchor at bottom left
+        float hitZoneCenterPos = hitZone.getY() + (hitZone.getHeight() - arrowTexture.getHeight()) * 0.5f;
+        float distance = WORLD_HEIGHT - hitZoneCenterPos;
         float travelTime = (distance / SPEED) * Gdx.graphics.getDeltaTime();
 
         // Calculate time when next beat will happen
@@ -159,7 +161,7 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
     // Private function & utility methods
 
     private boolean isArrowInHitZone(Arrow arrow) {
-        return HIT_POSITION < arrow.getSprite().getY() && arrow.getSprite().getY() < HIT_POSITION + hitZone.getHeight() - arrowTexture.getHeight();
+        return hitZone.getY() <= arrow.getSprite().getY() && arrow.getSprite().getY() <= hitZone.getY() + hitZone.getHeight() - arrowTexture.getHeight();
     }
 
     private void moveArrowsDown(float delta) {
@@ -168,10 +170,10 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
         }
     }
 
-    private void deleteArrowsReachingHitPosition() {
+    private void deleteArrowsOutOfWorld() {
         for (Iterator<Arrow> it = allArrows.iterator(); it.hasNext(); ) {
             Sprite s = it.next().getSprite();
-            if (s.getY() < HIT_POSITION) {
+            if (s.getY() < -s.getHeight()) {
                 it.remove();
                 if (isPenaltyOn) reduceScore();
             }
