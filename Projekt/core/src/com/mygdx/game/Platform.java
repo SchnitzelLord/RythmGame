@@ -131,7 +131,7 @@ public class Platform extends Sprite {
         else if (random < 70) plat = createPlatform(Type.truck1);
         else if (random < 85) plat = createPlatform(Type.truck2);
         else plat = createPlatform(Type.truck3);
-        return createPlatform(Type.carGrey);
+        return plat;
     }
 
     private static Texture getTexture(Type type) {

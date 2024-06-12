@@ -112,12 +112,13 @@ public class JumpAndRun implements Screen {
         isPaused = false;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1920, 1080);
-        song = Gdx.audio.newMusic(Gdx.files.internal("Music\\testBeat.mp3"));
-        conductor = new Conductor(120, 0);
+
+
         shield = 0;
         conductor.start();
 
         fallSpeedChangeTime = 0;
+
 
         // initializing Arrays
 
@@ -143,12 +144,15 @@ public class JumpAndRun implements Screen {
         this(game);
         if (levelId == 0)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
         else backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunset.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
-
+        if (levelId == 0) song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
+        else song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
+        conductor = new Conductor(120, 0);
         backgrounds = new Array<>();
         Sprite background = new Sprite(backgroundTexture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
         spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
+        song.setOnCompletionListener((a)-> Gdx.app.exit());
     }
 
     @Override
@@ -184,7 +188,7 @@ public class JumpAndRun implements Screen {
             else if (counter/ 10 == 2)player_walk0.draw(game.batch);
             else if (counter/ 10 == 3)player_walk2.draw(game.batch);
 
-            counter++;
+            counter += 2;
             if (counter > 39) counter = 0;
 
 
@@ -409,6 +413,8 @@ public class JumpAndRun implements Screen {
         if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
         lastPlatformTime = TimeUtils.nanoTime();
     }
+
+
 
     private void spawnBackground() {
         Sprite background = new Sprite(backgroundTexture,MAX_WIDTH,MAX_HEIGTH);
