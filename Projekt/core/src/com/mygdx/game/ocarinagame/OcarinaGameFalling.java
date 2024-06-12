@@ -1,6 +1,7 @@
 package com.mygdx.game.ocarinagame;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -26,22 +27,25 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
     // Constructor
 
     public OcarinaGameFalling(Start game) {
-        // Setup basic game elements like
+        // Setup common game elements like
         // camera, viewpoint, textures, allArrows
         super(game);
+
+        // Setup audio
+        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
+        music = new BeatMusic(song, 110, 80, 13.117f, 56.338f, 58.984f);
+        song.dispose();
+        conductor = new Conductor(music.getBPM(), 0);
+        conductor.start();
+        // Set first beat time stamp
+        conductor.lastBeat = music.getBeatStart() - conductor.crochet;
 
         // Setup UI
         hud = new HUD(game.batch, this);
         ScoreProgressBar progressBar = hud.getProgressBar();
-            // Position at top right corner
+        // Position at top right corner
         progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
-
-        // Setup audio
-        song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
-        conductor = new Conductor(110, 0);
-        conductor.start();
-        // Set first beat time stamp
-        conductor.lastBeat = 13.117f - conductor.crochet;
+        progressBar.setRange(0, music.getTotalBeatCount());
 
         // Setup hitZone
         hitZoneTexture = new Texture("ocarina-game\\hit-zone.png");
@@ -61,20 +65,23 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         super.render(delta);
 
         if (isRunning) {
-
             // Check input and act upon them
             controls();
 
             draw();
 
-            if (canArrowSpawn() && song.isPlaying()) spawnArrow();
+            if (canArrowSpawn()) spawnArrow();
             moveArrowsDown(delta);
             deleteArrowsOutOfWorld();
 
-            // If game is won, clear memory usage for textures and switch to next screen
-            if (isGameWon()) {
-                dispose();
-                switchToScreen(new MainMenuScreen(game));
+            // If beat part of song has finished playing + 1s delay and
+            // if game is won and song has ended, clear memory usage for textures and switch to next screen
+            // (Use that song is not immediately stopping after beat part has ended)
+            if (music.getPosition() >= music.getBeatEnd() + 1) {
+                if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
+                    dispose();
+                    switchToScreen(new MainMenuScreen(game));
+                }
             }
         }
     }
@@ -111,8 +118,9 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
     @Override
     protected void setBPM(int bpm) {
         conductor = new Conductor(bpm, 0);
-        conductor.lastBeat = song.getPosition() + conductor.crochet;
+        conductor.lastBeat = music.getPosition() + conductor.crochet;
         conductor.start();
+        music.setBPM(bpm);
     }
 
     @Override
@@ -149,8 +157,8 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         conductor.nextBeatTime = conductor.lastBeat + conductor.crochet - travelTime;
 
         // Spawn arrow when nextBeatTime is reached
-        if (song.getPosition() >= conductor.nextBeatTime) {
-            conductor.lastBeat = song.getPosition();
+        if (music.getPosition() >= conductor.nextBeatTime && music.getPosition() <= music.getBeatEnd()) {
+            conductor.lastBeat = music.getPosition();
             return true;
         }
         return false;

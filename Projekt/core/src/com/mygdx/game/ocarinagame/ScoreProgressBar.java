@@ -19,6 +19,8 @@ class ScoreProgressBar extends ProgressBar implements Disposable {
     private final Texture progressBarBorderTexture;
     private final Image progressBarBorder;
 
+    // Constructor
+
     ScoreProgressBar(float min, float max, float stepSize, float animateDuration) {
         super(min, max, stepSize, false, new ProgressBarStyle());
 

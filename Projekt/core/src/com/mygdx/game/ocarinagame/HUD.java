@@ -27,8 +27,8 @@ public class HUD implements Disposable {
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
         stage = new Stage(viewport, spriteBatch);
 
-        // Create progress bar
-        progressBar = new ScoreProgressBar(0, game.getTotalBeatCount(), 1, 0);;
+        // Create progress bar with default values
+        progressBar = new ScoreProgressBar(0, game.music.getTotalBeatCount(), 1, 0);;
 
         stage.addActor(progressBar);
     }
@@ -43,7 +43,7 @@ public class HUD implements Disposable {
 
     void update() {
         // Calculate offset for progress bar value since one pixel on the left will (and should) not be stretched
-        float pxPerScore = progressBar.getWidth() / game.getTotalBeatCount();
+        float pxPerScore = progressBar.getWidth() / game.music.getTotalBeatCount();
         float scoreOffset = 1 / pxPerScore;
         progressBar.setValue(game.getScore() + scoreOffset);
     }

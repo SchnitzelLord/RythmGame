@@ -3,7 +3,6 @@ package com.mygdx.game.ocarinagame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,7 +23,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected static final int WORLD_HEIGHT = 75;
     protected static final int WORLD_WIDTH = WORLD_HEIGHT * 16 / 9;
 
-
     // Offsets
     protected static final float TIME_RANGE_OFFSET = 0.001f; // for float comparisons (changing bpm at specific time)
     protected static final float ARROW_SPAWN_POSITION_OFFSET = 3;
@@ -36,15 +34,13 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     protected HUD hud;
     protected Conductor conductor;
-    protected Music song;
+    protected BeatMusic music;
 
     // Game state with default values
     protected boolean isPenaltyOn;
-    protected int totalBeatCount;
     protected boolean isRunning;
     protected int score;
     protected int lastArrowDirectionInt;
-    protected float beatStart;
 
     // Textures
     protected final Texture arrowTexture;
@@ -52,7 +48,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected Image background;
 
     protected final Array<Arrow> allArrows;
-
 
     // Constructor
 
@@ -74,11 +69,9 @@ public abstract class AbstractOcarinaGame implements Screen {
 
         // Default values for game state
         isPenaltyOn = false;
-        totalBeatCount = 50;
         isRunning = false;
         score = 0;
         lastArrowDirectionInt = -1;
-        beatStart = 0;
     }
 
     // Getter
@@ -103,10 +96,6 @@ public abstract class AbstractOcarinaGame implements Screen {
         return score;
     }
 
-    public int getTotalBeatCount() {
-        return totalBeatCount;
-    }
-
     // Overrides of functionality methods
 
     @Override
@@ -122,8 +111,8 @@ public abstract class AbstractOcarinaGame implements Screen {
     @Override
     public void show() {
         isRunning = true;
-        song.setVolume(Start.volume);
-        song.play();
+        music.setVolume(Start.volume);
+        music.play();
     }
 
     @Override
@@ -149,7 +138,7 @@ public abstract class AbstractOcarinaGame implements Screen {
     @Override
     public void dispose() {
         isRunning = false;
-        song.dispose();
+        music.dispose();
         arrowTexture.dispose();
         backgroundTexture.dispose();
         hud.dispose();
@@ -165,7 +154,7 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     protected abstract boolean canArrowSpawn();
 
-    // Functionality & utility methods
+    // Functionality & utility methods for subclasses
 
     protected void reduceScore() {
         // Reduce score only if player has any score points, no negative score
@@ -183,7 +172,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         sprite.setRotation(dirInt * 90); // counter-clock rotation, beginning with up-arrow
         Arrow.Direction direction = Arrow.Direction.fromInt(dirInt);
 
-        Arrow a = new Arrow(sprite, direction, song.getPosition());
+        Arrow a = new Arrow(sprite, direction, music.getPosition());
         setupArrowSpawnPosition(a);
         allArrows.add(a);
 
@@ -226,18 +215,22 @@ public abstract class AbstractOcarinaGame implements Screen {
         return Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN);
     }
 
-    protected boolean isGameWon() {
-        return score >= totalBeatCount;
+    protected boolean isGamePerfectlyWon() {
+        return score >= music.getTotalBeatCount();
+    }
+
+    protected boolean isGameWonInPercentage(float percentage) {
+        return score >= music.getTotalBeatCount() * (percentage / 100);
     }
 
     protected void switchToScreen(Screen screen) {
         isRunning = false;
-        song.pause();
+        music.pause();
         game.setScreen(screen);
     }
 
     protected void drawArrows() {
-        // Setup SpriteBatch and draw sprites
+        // Setup SpriteBatch and draw arrows
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 

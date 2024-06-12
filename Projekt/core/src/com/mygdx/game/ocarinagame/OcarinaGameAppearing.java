@@ -1,12 +1,11 @@
 package com.mygdx.game.ocarinagame;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.Start;
@@ -14,46 +13,45 @@ import com.mygdx.game.Start;
 import java.util.Comparator;
 
 public final class OcarinaGameAppearing extends AbstractOcarinaGame {
+    // Constant game states
     private static final boolean IS_ARROW_POSITION_OFFSET_ACTIVE = false;
-    private static final float ARROW_UPTIME = 0.5f;
+    private static final float ARROW_UPTIME = 0.75f;
     private static final float SPAWN_TIME_OFFSET = 0.35f;
 
+    // Storage for every arrow direction
     private final Array<Arrow> upArrows;
     private final Array<Arrow> leftArrows;
     private final Array<Arrow> downArrows;
     private final Array<Arrow> rightArrows;
 
     // Background for better visibility of arrows
-    private final Texture blackBoxTexture;
-    private final Image blackBox;
+    private final Texture whiteBoxTexture;
+    private final Image whiteBox;
 
     // Constructor
 
     public OcarinaGameAppearing(Start game) {
-        // Setup basic game elements like
+        // Setup common game elements like
         // camera, viewpoint, textures, allArrows
         super(game);
 
-        // Change game state values
-        totalBeatCount = 10;
-        beatStart = 13.117f;
+        // Setup audio
+        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
+        music = new BeatMusic(song, 110, 80, 13.177f, 56.338f, 58.984f);
+        conductor = new Conductor(music.getBPM(), 0);
+        conductor.start();
+        // First arrow spawns earlier than beat
+        // Calculation for when next beat based on last beat
+        // Offset therefore included in every beat
+        // Offset necessary because of reaction time of player
+        conductor.lastBeat = SPAWN_TIME_OFFSET + music.getBeatStart();
 
         // Setup UI
         hud = new HUD(game.batch, this);
         ScoreProgressBar progressBar = hud.getProgressBar();
         // Position at top right corner
         progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
-
-        // Setup audio
-        song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
-        song.setLooping(false);
-        conductor = new Conductor(110, 0);
-        conductor.start();
-        // First arrow spawns earlier than beat
-        // Calculation for when next beat based on last beat
-        // Offset therefore included in every beat
-        // Offset necessary because of reaction time of player
-        conductor.lastBeat = SPAWN_TIME_OFFSET + beatStart;
+        progressBar.setRange(0, music.getTotalBeatCount());
 
         // Initialize arrays
         upArrows = new Array<>();
@@ -66,10 +64,10 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         background = new Image(backgroundTexture);
 
         // Setup blackbox
-        blackBoxTexture = new Texture("ocarina-game\\black-box.png");
-        blackBox = new Image(blackBoxTexture);
+        whiteBoxTexture = new Texture("ocarina-game\\white-box.png");
+        whiteBox = new Image(whiteBoxTexture);
             // Center blackBox
-        blackBox.setPosition(0.5f * (WORLD_WIDTH - blackBox.getWidth()), 0.5f * (WORLD_HEIGHT - blackBox.getHeight()));
+        whiteBox.setPosition(0.5f * (WORLD_WIDTH - whiteBox.getWidth()), 0.5f * (WORLD_HEIGHT - whiteBox.getHeight()));
     }
 
     // Overrides
@@ -84,15 +82,19 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
 
             draw();
 
-            if (canArrowSpawn()) spawnArrow();
+            if (canArrowSpawn() && music.getPosition() < music.getBeatEnd()) spawnArrow();
 
             // Remove arrow after certain amount of time
             removeAfterUptime();
 
-            // If game is won or song has ended, clear memory usage for textures and switch to next screen
-            if (isGameWon() || song.getPosition() > 58) {
-                dispose();
-                switchToScreen(new MainMenuScreen(game));
+            // If beat part of song has finished playing + 1s delay and
+            // if game is won and song has ended, clear memory usage for textures and switch to next screen
+            // (Use that song is not immediately stopping after beat part has ended)
+            if (music.getPosition() >= music.getBeatEnd() + 1) {
+                if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
+                    dispose();
+                    switchToScreen(new MainMenuScreen(game));
+                }
             }
         }
     }
@@ -104,11 +106,11 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
 
         int offsetFactor = IS_ARROW_POSITION_OFFSET_ACTIVE ? 1 : 0;
 
-        // Coordinates anchor at bottem left
+        // Coordinates anchor at bottom left
         float centerArrowX = 0.5f * (WORLD_WIDTH - arrowTexture.getWidth());
         float centerArrowY = 0.5f * (WORLD_HEIGHT- arrowTexture.getHeight());
 
-        // Setup spawnpoint depending on arrow direction and duplicates (if offset is active)
+        // Setup spawnpoint depending on arrow direction (and duplicates if offset is active)
         switch (direction) {
             case UP:
                 float multUpOffset = arrowTexture.getHeight() * upArrows.size;
@@ -136,8 +138,9 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     @Override
     protected void setBPM(int bpm) {
         conductor = new Conductor(bpm, 0);
-        conductor.lastBeat = SPAWN_TIME_OFFSET + song.getPosition();
+        conductor.lastBeat = SPAWN_TIME_OFFSET + music.getPosition();
         conductor.start();
+        music.setBPM(bpm);
     }
 
     @Override
@@ -163,8 +166,8 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         conductor.nextBeatTime = conductor.lastBeat + conductor.crochet;
 
         // Spawn arrow when nextBeatTime is reached
-        if (song.getPosition() >= conductor.nextBeatTime) {
-            conductor.lastBeat = song.getPosition();
+        if (music.getPosition() >= conductor.nextBeatTime) {
+            conductor.lastBeat = music.getPosition();
             return true;
         }
         return false;
@@ -177,7 +180,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         background.draw(game.batch, 1.0f);
-        if (song.getPosition() >= beatStart) blackBox.draw(game.batch, 0.6f);
+        if (music.getPosition() >= music.getBeatStart()) whiteBox.draw(game.batch, 0.5f);
         game.batch.end();
 
         hud.draw();
@@ -187,7 +190,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
 
     private void removeAfterUptime() {
         for (Arrow currArrow : allArrows) {
-            if (song.getPosition() - currArrow.getSpawnTime() > ARROW_UPTIME) {
+            if (music.getPosition() - currArrow.getSpawnTime() > ARROW_UPTIME) {
                 removeArrowOfDirection(currArrow.getDirection());
                 if (isPenaltyOn) reduceScore();
             }
