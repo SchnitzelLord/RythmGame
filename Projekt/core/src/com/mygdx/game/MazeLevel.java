@@ -39,6 +39,7 @@ public class MazeLevel implements Screen {
     Texture leftWalk;
     Texture rightWalk;
     Texture upWalk;
+    Texture downWalk;
     Texture monsterTexture;
 
     private boolean isPaused;
@@ -83,6 +84,7 @@ public class MazeLevel implements Screen {
         leftWalk = new Texture(Gdx.files.internal("MazeLevel\\leftWalk.png"));
         rightWalk = new Texture(Gdx.files.internal("MazeLevel\\rightWalk.png"));
         upWalk = new Texture(Gdx.files.internal("MazeLevel\\upWalk.png"));
+        downWalk = new Texture(Gdx.files.internal("MazeLevel\\downWalk.png")); 
         monsterTexture = new Texture(Gdx.files.internal("MazeLevel\\monster.png"));
         player = new Sprite(leftWalk);
         player.setX(15);
@@ -194,6 +196,7 @@ public class MazeLevel implements Screen {
         }
         if(Gdx.input.isKeyPressed(Input.Keys.S)) {
             if (!blocked(player.getX(), player.getY() - 30 * Gdx.graphics.getDeltaTime())) {
+                player.setTexture(downWalk);
                 move = player.getY() - 30 * Gdx.graphics.getDeltaTime();
                 player.setY(move);
                 float enemyPos = player.getY();
