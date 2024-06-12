@@ -1,8 +1,8 @@
 package com.mygdx.game.ocarinagame;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
@@ -28,7 +28,7 @@ public class HUD implements Disposable {
         stage = new Stage(viewport, spriteBatch);
 
         // Create progress bar
-        progressBar = new ScoreProgressBar(0, game.getFinishScore(), 1, 0);;
+        progressBar = new ScoreProgressBar(0, game.getTotalBeatCount(), 1, 0);;
 
         stage.addActor(progressBar);
     }
@@ -42,12 +42,17 @@ public class HUD implements Disposable {
     // Functional methods
 
     void update() {
-        // Calculate offset for progress bar value since some pixel on the left will (and should) not be stretched
-        int pxPerScore = MathUtils.round((1.0f / game.getFinishScore()) * progressBar.getWidth());
-        progressBar.setValue(game.getScore() + pxPerScore);
-//        progress += (Gdx.graphics.getDeltaTime() * 5);
-//        if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
-//        progressBar.setValue(progress);
+        // Calculate offset for progress bar value since one pixel on the left will (and should) not be stretched
+        float pxPerScore = progressBar.getWidth() / game.getTotalBeatCount();
+        float scoreOffset = 1 / pxPerScore;
+        progressBar.setValue(game.getScore() + scoreOffset);
+    }
+
+    void progressBarTest() {
+        // Test animation of progress bar by increasing value by time
+        progress += (Gdx.graphics.getDeltaTime() * 5);
+        if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
+        progressBar.setValue(progress);
     }
 
     void draw() {

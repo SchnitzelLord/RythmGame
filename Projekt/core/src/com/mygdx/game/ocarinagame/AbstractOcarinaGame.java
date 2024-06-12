@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
@@ -27,8 +25,9 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected static final int WORLD_WIDTH = WORLD_HEIGHT * 16 / 9;
 
 
-    // General offset for float comparisons (for changing bpm at specific time)
-    protected static final float TIME_RANGE_OFFSET = 0.001f;
+    // Offsets
+    protected static final float TIME_RANGE_OFFSET = 0.001f; // for float comparisons (changing bpm at specific time)
+    protected static final float ARROW_SPAWN_POSITION_OFFSET = 3;
 
     // Game elements
     protected final Start game;
@@ -40,11 +39,12 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected Music song;
 
     // Game state with default values
-    protected boolean isPenaltyOn = true;
-    protected int finishScore = 50;
-    protected boolean isRunning = false;
-    protected int score = 0;
-    protected int lastArrowDirectionInt = -1;
+    protected boolean isPenaltyOn;
+    protected int totalBeatCount;
+    protected boolean isRunning;
+    protected int score;
+    protected int lastArrowDirectionInt;
+    protected float beatStart;
 
     // Textures
     protected final Texture arrowTexture;
@@ -71,6 +71,14 @@ public abstract class AbstractOcarinaGame implements Screen {
         arrowTexture = new Texture("ocarina-game\\arrow-up.png");
 
         allArrows = new Array<>();
+
+        // Default values for game state
+        isPenaltyOn = false;
+        totalBeatCount = 50;
+        isRunning = false;
+        score = 0;
+        lastArrowDirectionInt = -1;
+        beatStart = 0;
     }
 
     // Getter
@@ -95,8 +103,8 @@ public abstract class AbstractOcarinaGame implements Screen {
         return score;
     }
 
-    public int getFinishScore() {
-        return finishScore;
+    public int getTotalBeatCount() {
+        return totalBeatCount;
     }
 
     // Overrides of functionality methods
@@ -219,7 +227,7 @@ public abstract class AbstractOcarinaGame implements Screen {
     }
 
     protected boolean isGameWon() {
-        return score >= finishScore;
+        return score >= totalBeatCount;
     }
 
     protected void switchToScreen(Screen screen) {

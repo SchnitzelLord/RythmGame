@@ -11,13 +11,13 @@ import com.mygdx.game.Start;
 
 import java.util.Iterator;
 
-public class OcarinaGameFalling extends AbstractOcarinaGame {
+public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
     // Game state constants
     private static final float SPEED = 75;
 
     // Arrow hit and spawn position
-    private static final float HIT_POSITION = 2;
+    private static final float HIT_POSITION = 1;
 
     // Hitzone
     private final Texture hitZoneTexture;
@@ -92,20 +92,18 @@ public class OcarinaGameFalling extends AbstractOcarinaGame {
 
         // Position anchors at bottom left of sprite
 
-        int offset = 4;
-
         switch (direction) {
             case LEFT:
-                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth() * 2 - offset, WORLD_HEIGHT);
+                sprite.setPosition((WORLD_WIDTH - ARROW_SPAWN_POSITION_OFFSET) * 0.5f - sprite.getWidth() * 2 - ARROW_SPAWN_POSITION_OFFSET, WORLD_HEIGHT);
                 break;
             case UP:
-                sprite.setPosition((WORLD_WIDTH - offset) * 0.5f - sprite.getWidth(), WORLD_HEIGHT);
+                sprite.setPosition((WORLD_WIDTH - ARROW_SPAWN_POSITION_OFFSET) * 0.5f - sprite.getWidth(), WORLD_HEIGHT);
                 break;
             case DOWN:
-                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f, WORLD_HEIGHT);
+                sprite.setPosition((WORLD_WIDTH + ARROW_SPAWN_POSITION_OFFSET) * 0.5f, WORLD_HEIGHT);
                 break;
             case RIGHT:
-                sprite.setPosition((WORLD_WIDTH + offset) * 0.5f + sprite.getWidth() + offset, WORLD_HEIGHT);
+                sprite.setPosition((WORLD_WIDTH + ARROW_SPAWN_POSITION_OFFSET) * 0.5f + sprite.getWidth() + ARROW_SPAWN_POSITION_OFFSET, WORLD_HEIGHT);
                 break;
         }
     }

@@ -28,7 +28,7 @@ class ScoreProgressBar extends ProgressBar implements Disposable {
         progressBarBorderTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-border.png"));
 
         // Prevent left side from stretching to retain roundness of border
-        NinePatch progressBarNP = new NinePatch(progressBarTexture, 2, 0, 0, 0);
+        NinePatch progressBarNP = new NinePatch(progressBarTexture, 1, 0, 0, 0);
 
         // Set texture of progressbar for when it's filled and when it's empty
         getStyle().background = new TextureRegionDrawable(new TextureRegion(progressBarEmptyTexture));
