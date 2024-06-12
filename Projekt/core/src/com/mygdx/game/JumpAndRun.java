@@ -217,9 +217,8 @@ public class JumpAndRun implements Screen {
             jumpTime = 20;
             jumps -= 1;
 
-        } else if (jumpTime <= 0) {
-            float fallspeed = fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
-            move = player.getY() - fallspeed;
+        } else if (jumpTime <= 0) { // player character falls when this is active
+            move = player.getY() - fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
             debug_fallspeed = - fallSpeedMod * 600 * Gdx.graphics.getDeltaTime();
             float checkPlatform = checkPlatforms();
 
@@ -227,14 +226,14 @@ public class JumpAndRun implements Screen {
                 if (jumps < 2)jumps = 2;
                 move = checkPlatform;
                 fallSpeedMod = 1;
-            } else if (move < 0) {
-                move = 0;
+            } else if (move < 10) { // < 10 because 10 as the lower boundary looks nicer with the background then 0
+                move = 10;
                 fallSpeedMod = 1;
             }
             player.setY(move);
-            if (player.getY() == 0 && jumps < 2)jumps = 2; // when the player has hit the ground he can jump again
+            if (player.getY() == 10 && jumps < 2)jumps = 2; // when the player has hit the ground he can jump again
 
-        } else {
+        } else { // when the player characters moves up
             jumpTime -= 1;
             move = player.getY() + 800 * Gdx.graphics.getDeltaTime();
             if (move + player.getHeight() > MAX_HEIGTH) move = MAX_HEIGTH-player.getHeight();
@@ -311,7 +310,7 @@ public class JumpAndRun implements Screen {
             spawnWavetop();
         };
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
-        if(TimeUtils.nanoTime() - lastPlatformTime > 5000000000L && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
+        if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000L && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0) Gdx.app.exit();
     }
@@ -341,8 +340,7 @@ public class JumpAndRun implements Screen {
     private boolean overlap (Array< ? extends Sprite> arr, Sprite sp) {
         if (arr == platforms) {
             for (Platform item : (Array<Platform>)arr) {
-                Data data = item.overlap(player);
-                if (data.isOverlap()) return  data.isOverlap();
+                if (item.checkIfspritesOverlap(sp)) return  true;
 
             }
         }else {
@@ -402,10 +400,10 @@ public class JumpAndRun implements Screen {
 
     private void spawnPlatform() {
         double random = Math.random();
-        Platform platform = Platform.createPlatform(Platform.Type.truck2);
+        Platform platform = Platform.createRandomPlatform();
         System.out.print(platform.getWidth());
-        double randomy = Math.random();
-        int y = (int) (30 + 250* randomy);
+        double randomY = Math.random();
+        int y = (int) (30 + 250* randomY);
 
         boolean noOverlap = spawnSpriteSetup(platforms,platform,MAX_WIDTH,y,true);
         if (!noOverlap) return; // cancel when overlap otherwise stack overflow error sometimes
@@ -414,7 +412,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnBackground() {
         Sprite background = new Sprite(backgroundTexture,MAX_WIDTH,MAX_HEIGTH);
-        spawnSpriteSetup(backgrounds,background,MAX_WIDTH,0,false);
+        spawnSpriteSetup(backgrounds,background,MAX_WIDTH-1,0,false); // Maxwidth -1 one because it seems to reduce the amount of times where the blue background "flickers" through the background image
     }
     private void spawnPowerup() {
         Powerup powerup;
