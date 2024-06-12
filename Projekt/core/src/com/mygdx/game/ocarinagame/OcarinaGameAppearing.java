@@ -78,7 +78,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         super.render(delta);
 
         if (isRunning) {
-            controls();
+            controlsAction();
 
             draw();
 
@@ -87,15 +87,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
             // Remove arrow after certain amount of time
             removeAfterUptime();
 
-            // If beat part of song has finished playing + 1s delay and
-            // if game is won and song has ended, clear memory usage for textures and switch to next screen
-            // (Use that song is not immediately stopping after beat part has ended)
-            if (music.getPosition() >= music.getBeatEnd() + 1) {
-                if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
-                    dispose();
-                    switchToScreen(new MainMenuScreen(game));
-                }
-            }
+            gameEndAction();
         }
     }
 
@@ -144,7 +136,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     }
 
     @Override
-    protected void controls() {
+    protected void controlsAction() {
         // Check for every arrow if correct key has been pressed
         for (Arrow a : allArrows) {
             Arrow.Direction direction = a.getDirection();
@@ -171,6 +163,19 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void gameEndAction() {
+        // If beat part of song has finished playing + 1s delay and
+        // if game is won and song has ended, clear memory usage for textures and switch to next screen
+        // (Use that song is not immediately stopping after beat part has ended)
+        if (music.getPosition() >= music.getBeatEnd() + 1) {
+            if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
+                dispose();
+                switchToScreen(new MainMenuScreen(game));
+            }
+        }
     }
 
     // Private function & utility methods

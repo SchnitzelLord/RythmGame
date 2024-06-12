@@ -66,7 +66,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
         if (isRunning) {
             // Check input and act upon them
-            controls();
+            controlsAction();
 
             draw();
 
@@ -74,15 +74,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             moveArrowsDown(delta);
             deleteArrowsOutOfWorld();
 
-            // If beat part of song has finished playing + 1s delay and
-            // if game is won and song has ended, clear memory usage for textures and switch to next screen
-            // (Use that song is not immediately stopping after beat part has ended)
-            if (music.getPosition() >= music.getBeatEnd() + 1) {
-                if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
-                    dispose();
-                    switchToScreen(new MainMenuScreen(game));
-                }
-            }
+            gameEndAction();
         }
     }
 
@@ -124,7 +116,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
     }
 
     @Override
-    protected void controls() {
+    protected void controlsAction() {
         pauseGameOnEscape();
 
         // Look for any arrows that have reached hitZone and remember them
@@ -162,6 +154,19 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void gameEndAction() {
+        // If beat part of song has finished playing + 1s delay and
+        // if game is won and song has ended, clear memory usage for textures and switch to next screen
+        // (Use that song is not immediately stopping after beat part has ended)
+        if (music.getPosition() >= music.getBeatEnd() + 1) {
+            if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
+                dispose();
+                switchToScreen(new MainMenuScreen(game));
+            }
+        }
     }
 
     // Private function & utility methods

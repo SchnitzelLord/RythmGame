@@ -150,9 +150,11 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     protected abstract void setBPM(int bpm);
 
-    protected abstract void controls();
+    protected abstract void controlsAction();
 
     protected abstract boolean canArrowSpawn();
+
+    protected abstract void gameEndAction();
 
     // Functionality & utility methods for subclasses
 
