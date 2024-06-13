@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Conductor;
-import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.Start;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
@@ -46,7 +45,11 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         // Set first beat time stamp with delay since beat begins immediately
         conductor.lastBeat = music.getBeatStart() - conductor.crochet + DELAY;
 
+        // Timer to switch to another screen depending on result after GAME_OVER_DELAY
+        delayedGameOverWinCheck(music.getSongLength());
+
         // Setup UI
+        // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
         hud = new HUD(game.batch, this);
         ScoreProgressBar progressBar = hud.getProgressBar();
         // Position at top right corner
@@ -80,8 +83,6 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             if (canArrowSpawn()) spawnArrow();
             moveArrowsDown(delta);
             deleteArrowsOutOfWorld();
-
-            gameOverAction();
         }
     }
 
@@ -160,19 +161,6 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             return true;
         }
         return false;
-    }
-
-    @Override
-    protected void gameOverAction() {
-        // If beat part of song has finished playing + 1s delay and
-        // if game is won and song has ended, clear memory usage for textures and switch to next screen
-        // (Use that song is not immediately stopping after beat part has ended)
-        if (music.getPosition() >= music.getBeatEnd() + 1) {
-            if (hasWinRateBeenReached()) {
-                dispose();
-                switchToScreen(new MainMenuScreen(game));
-            }
-        }
     }
 
     // Private function & utility methods

@@ -97,5 +97,4 @@ public class BeatMusic implements Disposable {
     public void dispose() {
         song.dispose();
     }
-
 }
