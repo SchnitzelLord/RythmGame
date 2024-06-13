@@ -18,18 +18,20 @@ public final class ScoreProgressBar extends ProgressBar implements Disposable {
     private final Texture progressBarBorderTexture;
     private final Image progressBarBorder;
 
+    private static final int TEXTURE_OFFSET = 16;
+
     // Constructor
 
     ScoreProgressBar(float min, float max, float stepSize, float animateDuration) {
         super(min, max, stepSize, false, new ProgressBarStyle());
 
         // Setup textures for progress bar
-        progressBarTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar.png"));
-        progressBarEmptyTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-empty.png"));
-        progressBarBorderTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-border.png"));
+        progressBarTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-fhd.png"));
+        progressBarEmptyTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-empty-fhd.png"));
+        progressBarBorderTexture = new Texture(Gdx.files.internal("ocarina-game/progress-bar-border-fhd.png"));
 
         // Prevent left side from stretching to retain roundness of border
-        NinePatch progressBarNP = new NinePatch(progressBarTexture, 1, 0, 0, 0);
+        NinePatch progressBarNP = new NinePatch(progressBarTexture, TEXTURE_OFFSET, 0, 0, 0);
 
         // Set texture of progressbar for when it's filled and when it's empty
         getStyle().background = new TextureRegionDrawable(new TextureRegion(progressBarEmptyTexture));
@@ -47,6 +49,14 @@ public final class ScoreProgressBar extends ProgressBar implements Disposable {
         progressBarBorder.setPosition(getX(), getY());
         progressBarBorder.setZIndex(1);
     }
+
+    // Getter
+
+    public int getTextureOffset() {
+        return TEXTURE_OFFSET;
+    }
+
+    // Overrides
 
     @Override
     public void dispose() {
