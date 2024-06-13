@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
+import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.PauseScreen;
 import com.mygdx.game.Start;
 import com.mygdx.game.ocarinagame.Arrow;
@@ -27,11 +29,12 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected static final int WORLD_WIDTH = WORLD_HEIGHT * 16 / 9;
 
     // Offsets
-    protected static final float TIME_RANGE_OFFSET = 0.001f; // for float comparisons (changing bpm at specific time)
+    protected static final float FLOAT_COMPARE_OFFSET = 0.01f; // for float comparisons (changing bpm at specific time)
     protected static final float ARROW_SPAWN_POSITION_OFFSET = 3;
 
     // Game state constants
     protected static final float WIN_RATE = 0.5f;
+    protected static final float GAME_OVER_DELAY = 5;
 
     // Game elements
     protected final Start game;
@@ -118,7 +121,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     public void show() {
         isRunning = true;
         music.setVolume(Start.volume);
-        music.play();
     }
 
     @Override
@@ -133,12 +135,14 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     @Override
     public void resume() {
-
+        isRunning = true;
+        music.play();
     }
 
     @Override
     public void hide() {
-
+        isRunning = false;
+        music.pause();
     }
 
     @Override
@@ -159,8 +163,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected abstract void controlsAction();
 
     protected abstract boolean canArrowSpawn();
-
-    protected abstract void gameOverAction();
 
     // Functionality & utility methods for subclasses
 
@@ -248,5 +250,19 @@ public abstract class AbstractOcarinaGame implements Screen {
         }
 
         game.batch.end();
+    }
+
+    // Check whether game has been won or not after song is over + GAME_OVER_DELAY
+    // and switch screen accordingly
+    protected void delayedGameOverWinCheck(float songLength) {
+        new Timer().scheduleTask(new Timer.Task() {
+            @Override
+            public void run() {
+                if (hasWinRateBeenReached())
+                    switchToScreen(new MainMenuScreen(game));
+                else {}
+                dispose();
+            }
+        }, songLength + GAME_OVER_DELAY);
     }
 }
