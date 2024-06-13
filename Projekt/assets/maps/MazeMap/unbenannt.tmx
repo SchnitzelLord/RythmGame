@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="5" height="5" tilewidth="125" tileheight="125" infinite="0" nextlayerid="7" nextobjectid="35">
+ <editorsettings>
+  <export target="Map.tmx" format="tmx"/>
+ </editorsettings>
+ <tileset firstgid="1" source="ground.tsx"/>
+ <tileset firstgid="2" source="path.tsx"/>
+ <tileset firstgid="3" source="L.tsx"/>
+ <tileset firstgid="4" source="P.tsx"/>
+ <tileset firstgid="5" source="Q.tsx"/>
+ <tileset firstgid="6" source="U.tsx"/>
+ <tileset firstgid="7" source="V.tsx"/>
+ <tileset firstgid="8" source="W.tsx"/>
+ <tileset firstgid="9" source="X.tsx"/>
+ <tileset firstgid="10" source="Y.tsx"/>
+ <tileset firstgid="11" source="R.tsx"/>
+ <tileset firstgid="12" source="S.tsx"/>
+ <tileset firstgid="13" source="T.tsx"/>
+ <tileset firstgid="14" source="M.tsx"/>
+ <tileset firstgid="15" source="N.tsx"/>
+ <tileset firstgid="16" source="O.tsx"/>
+ <tileset firstgid="17" source="H.tsx"/>
+ <tileset firstgid="18" source="I.tsx"/>
+ <tileset firstgid="19" source="J.tsx"/>
+ <tileset firstgid="20" source="C.tsx"/>
+ <tileset firstgid="21" source="ground2.tsx"/>
+ <layer id="2" name="Path" width="5" height="5">
+  <data encoding="csv">
+21,21,20,21,21,
+21,21,17,18,19,
+2,3,14,15,16,
+4,5,11,12,13,
+6,7,8,9,10
+</data>
+ </layer>
+ <layer id="1" name="ground" width="5" height="5">
+  <data encoding="csv">
+0,0,0,0,0,
+0,0,0,0,0,
+1,0,0,0,0,
+0,0,0,0,0,
+0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="3" name="Walls">
+  <object id="1" x="-0.666667" y="-0.666667" width="280" height="252.667"/>
+  <object id="2" x="0.181818" y="252.545" width="161.091" height="21.0909"/>
+  <object id="3" x="112.182" y="274" width="49.0909" height="70.9091"/>
+  <object id="4" x="0.181818" y="293.273" width="92" height="331.636"/>
+  <object id="5" x="92.3636" y="612" width="378.182" height="12.9091"/>
+  <object id="6" x="471.818" y="543.636" width="80.9091" height="81.2727"/>
+  <object id="7" x="552.545" y="595.636" width="72.3636" height="29.0909"/>
+  <object id="8" x="572.364" y="311.273" width="52.5455" height="264.545"/>
+  <object id="9" x="609.818" y="141.273" width="15.0909" height="170"/>
+  <object id="10" x="352.545" y="0" width="272" height="140"/>
+  <object id="11" x="279.455" y="0.181818" width="31.8182" height="26.3636"/>
+  <object id="12" x="310.909" y="0.181818" width="41.4545" height="11.2727"/>
+  <object id="13" x="330.909" y="11.6364" width="21.8182" height="14.9091"/>
+  <object id="14" x="301.091" y="46" width="51.2727" height="93.6364"/>
+  <object id="15" x="181.091" y="273.273" width="99.4545" height="70.9091"/>
+  <object id="16" x="242.182" y="252.182" width="38.7273" height="20.9091"/>
+  <object id="17" x="301.091" y="158.909" width="212.727" height="105.818"/>
+  <object id="18" x="416.545" y="351.273" width="35.4545" height="240.909"/>
+  <object id="19" x="417.273" y="264.545" width="97.2727" height="86.3636"/>
+  <object id="20" x="534.727" y="311.636" width="17.8182" height="231.091"/>
+  <object id="21" x="514.909" y="310.364" width="19.4545" height="214.182"/>
+  <object id="22" x="471.091" y="350.545" width="43.2727" height="172.364"/>
+  <object id="23" x="532.364" y="159.091" width="58.9091" height="132.182"/>
+  <object id="24" x="111.455" y="364.182" width="74.1818" height="227.818"/>
+  <object id="25" x="300.182" y="283.455" width="97.4545" height="91.6364"/>
+  <object id="26" x="343.091" y="375.455" width="53.4545" height="7.45455"/>
+  <object id="27" x="186" y="375.636" width="139.091" height="7.45455"/>
+  <object id="28" x="186" y="362.727" width="114.545" height="12.7273"/>
+  <object id="29" x="344.727" y="402.182" width="52.1818" height="190.545"/>
+  <object id="30" x="204.364" y="525.273" width="140.364" height="67.2727"/>
+  <object id="31" x="205.273" y="402.182" width="119.273" height="122.364"/>
+  <object id="32" x="-3.25" y="273.25" width="3" height="20.375"/>
+ </objectgroup>
+ <objectgroup id="6" name="Goal">
+  <object id="34" x="622" y="585.75"/>
+ </objectgroup>
+</map>
