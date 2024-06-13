@@ -112,16 +112,12 @@ public class JumpAndRun implements Screen {
         player.setX(MAX_WIDTH / 2- 32);
         player.setY(MAX_HEIGTH / 2);
 
-
         isPaused = false;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1920, 1080);
 
-
         shield = 0;
         fallSpeedChangeTime = 0;
-
-
         // initializing Arrays
 
         hearts = new Array<>();
@@ -136,18 +132,21 @@ public class JumpAndRun implements Screen {
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
         // initialised the first two backgrounds
-
-
-
     };
 
     public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
         this(game);
         if (levelId == 1)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
         else backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunset.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
-        if (levelId == 0) song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
-        else song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
-        conductor = new Conductor(120, 0);
+        if (levelId == 1) {
+            song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Way_to_Uni_full.mp3"));
+            conductor = new Conductor(120, 0);
+        }
+        else {
+            song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
+            conductor = new Conductor(103, 0);
+        }
+
         backgrounds = new Array<>();
         Sprite background = new Sprite(backgroundTexture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
@@ -156,7 +155,6 @@ public class JumpAndRun implements Screen {
         if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
         else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
         conductor.start();
-
         this.levelId = levelId;
     }
 
@@ -166,7 +164,6 @@ public class JumpAndRun implements Screen {
         song.setVolume(Start.volume);
         song.play();
         game.batch.setProjectionMatrix(camera.combined);
-
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -299,7 +296,6 @@ public class JumpAndRun implements Screen {
                 else if(powerup.getPower() == Powerup.Power.live) {
                     if (lives < 5) lives++;
                 };
-
             }
         }
 
@@ -326,7 +322,10 @@ public class JumpAndRun implements Screen {
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0)  {
             if (levelId == 1) game.setScreen(new GameOver(game, "Homeway"));
-            else game.setScreen(new GameOver(game, "WayThere"));
+            else {
+                game.setScreen(new GameOver(game, "WayThere"));
+                song.stop();
+            }
         };
     }
 
