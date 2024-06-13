@@ -1,1 +1,5 @@
-test file
+Source Code is in the Package: Projekt\core\src\com\mygdx\game
+Game can be launched by running: Projekt\desktop\src\com\mygdx\game\DesktopLauncher.java
+Controls explained before every Level
+Escape pauses the game during a Level
+Have fun!

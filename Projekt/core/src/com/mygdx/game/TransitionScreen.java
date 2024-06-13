@@ -90,7 +90,7 @@ public class TransitionScreen implements Screen {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.setDebug(true);
+        table.setDebug(false);
         stage.addActor(background);
         stage.addActor(table);
 
