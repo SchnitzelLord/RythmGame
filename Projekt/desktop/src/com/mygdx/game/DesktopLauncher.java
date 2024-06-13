@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle("Day By Day");
 		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		config.addIcon("Menus\\DayByDay.png", Files.FileType.Internal);
 		//config.setWindowedMode(1280, 720);
 		new Lwjgl3Application(new Start(), config);
 	}
