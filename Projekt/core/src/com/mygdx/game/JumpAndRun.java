@@ -29,8 +29,8 @@ public class JumpAndRun implements Screen {
     // sprite sizes
     private static final int boosterWidth = 100;
     private static final int boosterHeigth = 100;
-    private static final int waveWidth = 64;
-    private static final int waveHeigth = 64;
+    private static final int waveWidth = 63;
+    private static final int waveHeigth = 36;
     private static final int waveSPawnVariantion = 150;
 
     // Textures -----------------------------------------------------------------------
@@ -40,12 +40,13 @@ public class JumpAndRun implements Screen {
     private Texture playerTexture0;
     private Texture playerTexture1;
     private Texture playerTexture2;
-    Texture debugBeatTexture;
+    private Texture debugBeatTexture;
     private Texture heartTexture;
-    private Texture zoneTexture;
-    private Texture waveTexture;
+    private Texture waveTexture0;
+    private Texture waveTexture1;
+    private Texture waveTexture2;
+    private Texture waveTexture3;
     private Texture boosterTexture;
-    private Texture platformTexture;
     private Texture backgroundTexture;
 
     // items-----------------------------------------------------------------------
@@ -65,7 +66,7 @@ public class JumpAndRun implements Screen {
 
     // variables used in the game logic
 
-    private int lives = 10;
+    private int lives = 5;
     private int jumps = 2;
     private int jumpTime;
     private int fallSpeedChangeTime;
@@ -94,16 +95,20 @@ public class JumpAndRun implements Screen {
         playerTexture0 = new Texture("characterSprite\\player0.png");
         playerTexture1 = new Texture("characterSprite\\player0.png");
         playerTexture2 = new Texture("characterSprite\\player1.png");
-        waveTexture = new Texture("characterSprite\\playerSprite.png");
+        waveTexture0 = new Texture("jumpAndRunSprites\\wave0.png");
+        waveTexture1 = new Texture("jumpAndRunSprites\\wave1.png");
+        waveTexture2 = new Texture("jumpAndRunSprites\\wave2.png");
+        waveTexture3 = new Texture("jumpAndRunSprites\\wave3.png");
         heartTexture = new Texture("jumpAndRunSprites\\heartsprite.png");
         boosterTexture = new Texture("jumpAndRunSprites\\booster2.png");
 
         debugBeatTexture = new Texture("jumpAndRunSprites\\debugBeat2.png");
 
-        player = new Sprite(playerTexture, 64,64 ); // used for the game logic is not visable
-        player_walk0 = new Sprite(playerTexture0, 64,64 ); // standing frame
-        player_walk1 = new Sprite(playerTexture1, 64,64 ); // one step frame
-        player_walk2 = new Sprite(playerTexture2, 64,64 ); // other step
+        player = new Sprite(playerTexture, 128 ,128  ); // used for the game logic is not visable
+        player_walk0 = new Sprite(playerTexture0, 128 ,128  ); // standing frame
+        player_walk1 = new Sprite(playerTexture1, 128 ,128 ); // one step frame
+        player_walk2 = new Sprite(playerTexture2, 128 ,128 ); // other step
+
         player.setX(MAX_WIDTH / 2- 32);
         player.setY(MAX_HEIGTH / 2);
 
@@ -149,8 +154,8 @@ public class JumpAndRun implements Screen {
         backgrounds.add(background);
         spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
-        if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
-        else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
+        if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
+        else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
         conductor.start();
 
         this.levelId = levelId;
@@ -176,6 +181,7 @@ public class JumpAndRun implements Screen {
         // draw point zone
 
         if (!isPaused) {
+            camera.update();
             update(); // update the conductor
             draw(backgrounds,waves, powerups,platforms,boosters,platforms);
 
@@ -292,7 +298,7 @@ public class JumpAndRun implements Screen {
                 if(powerup.getPower() == Powerup.Power.moreJumps)jumps = 3;
                 else if(powerup.getPower() == Powerup.Power.shield)shield = 1;
                 else if(powerup.getPower() == Powerup.Power.live) {
-                    if (lives < 10) lives++;
+                    if (lives < 5) lives++;
                 };
 
             }
@@ -326,8 +332,7 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        float offset =  + Gdx.graphics.getDeltaTime() * itemSpeed - Gdx.graphics.getDeltaTime() * 64;   // the first part is so that the waves middle arrives on beat at MaxWidth/2 and the other is so that when the player doges the wave the beat arrives
-        if (song.getPosition() - offset   >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset <= conductor.lastBeat + conductor.crochet  + 0.3f) {
+        if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition()<= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
         } else {
@@ -369,9 +374,21 @@ public class JumpAndRun implements Screen {
         return -100; // return as a false
     }
 
+    private Sprite randomWave() {
+        Sprite wave;
+        double random = Math.random() * 100;
+        if (random < 25) wave = new Sprite(waveTexture0,waveWidth,waveHeigth);
+        else if (random < 50) wave = new Sprite(waveTexture1,waveWidth,waveHeigth);
+        else if (random < 75) wave = new Sprite(waveTexture2,waveWidth,waveHeigth);
+        else wave = new Sprite(waveTexture3,waveWidth,waveHeigth);
+        return wave;
+    }
+
+
+
     private void spawnWavebot() {
         double random = Math.random();
-        Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
+        Sprite wave = randomWave();
         int y;
         if(random < 0.4) y = 0;
         else if (random < 0.8) y = (int) (200 +  waveSPawnVariantion*Math.random());
@@ -383,7 +400,7 @@ public class JumpAndRun implements Screen {
 
     private void spawnWavetop() {
         double random = Math.random();
-        Sprite wave = new Sprite(waveTexture,waveWidth,waveHeigth);
+        Sprite wave = randomWave();
         int y;
         if (random < 0.5) y = (int) (450 +  100*Math.random());
         else if  (random < 0.7) y = (int) (800 +  waveSPawnVariantion*Math.random());
@@ -482,7 +499,6 @@ public class JumpAndRun implements Screen {
 
     @Override
     public void resume() {
-
     }
 
     @Override
@@ -492,13 +508,21 @@ public class JumpAndRun implements Screen {
     @Override
     public void dispose() {
         playerTexture.dispose();
-        playerTexture.dispose();
-        waveTexture.dispose();
+        waveTexture0.dispose();
         heartTexture.dispose();
         boosterTexture.dispose();
-        platformTexture.dispose();
-        zoneTexture.dispose();
         backgroundTexture.dispose();
         song.dispose();
+        playerTexture0.dispose();
+        playerTexture1.dispose();
+        playerTexture2.dispose();
+        debugBeatTexture.dispose();
+        heartTexture.dispose();
+        waveTexture0.dispose();
+        waveTexture1.dispose();
+        waveTexture2.dispose();
+        waveTexture3.dispose();
+        boosterTexture.dispose();
+        backgroundTexture.dispose();
     }
 }
