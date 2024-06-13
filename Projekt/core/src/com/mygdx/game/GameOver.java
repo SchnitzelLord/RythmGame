@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.ocarinagame.levels.OcarinaGameAppearing;
+import com.mygdx.game.ocarinagame.levels.OcarinaGameFalling;
 
 public class GameOver implements Screen {
 
@@ -68,11 +70,11 @@ public class GameOver implements Screen {
                 if (level.equals("WayThere")) {
                     game.setScreen(new JumpAndRun(game,0));
                 } else if (level.equals("OcarinaLevel")) {
-                    game.setScreen(new MazeLevel(game));
+                    game.setScreen(new OcarinaGameFalling(game));
                 } else if (level.equals("MazeLevel")) {
                     game.setScreen(new MazeLevel(game));
                 } else if (level.equals("WakeUp")) {
-                    //game.setScreen(new WakeUP());
+                    game.setScreen(new OcarinaGameAppearing(game));
                 } else if (level.equals("Homeway")) {
                     game.setScreen(new JumpAndRun(game,0));
                 }

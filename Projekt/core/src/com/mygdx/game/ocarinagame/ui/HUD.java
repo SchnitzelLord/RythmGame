@@ -26,6 +26,7 @@ public final class HUD implements Disposable {
 
     private ProgressBar scoreProgressBar;
     private ProgressBar progressBar;
+    private boolean hasSongFinished;
     private final Array<Sprite> hearts;
 
     private final Texture heartTexture;
@@ -67,7 +68,11 @@ public final class HUD implements Disposable {
     }
 
     public void updateProgress() {
-        progressBar.setValue(game.getMusic().getSong().getPosition() + getRenderOffset(progressBar));
+        if (game.getMusic().getSong().getPosition() >= game.getMusic().getBeatEnd()) hasSongFinished = true;
+        if (!hasSongFinished)
+            progressBar.setValue(game.getMusic().getSong().getPosition() + getRenderOffset(progressBar));
+        else
+            progressBar.setValue(progressBar.getMaxValue());
     }
 
     public void draw() {
@@ -128,7 +133,8 @@ public final class HUD implements Disposable {
     @Override
     public void dispose() {
         stage.dispose();
-        scoreProgressBar.dispose();
+        if (isScoreProgressBarActive) scoreProgressBar.dispose();
+        if (isProgressBarActive) progressBar.dispose();
         heartTexture.dispose();
     }
 }

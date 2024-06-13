@@ -29,7 +29,7 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     // Offsets
     protected static final float FLOAT_COMPARE_OFFSET = 0.01f; // for float comparisons (changing bpm at specific time)
-    protected static final float ARROW_SPAWN_POSITION_OFFSET = 3;
+    protected static final float ARROW_SPAWN_POSITION_OFFSET = 10;
 
     // Game state constants
     protected static final float WIN_RATE = 0.5f;

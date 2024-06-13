@@ -20,11 +20,11 @@ import java.util.Iterator;
 public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
     // Game state constants
-    private static final float SPEED = 75;
+    private static final float SPEED = 1075;
     private static final float DELAY = 3;
 
     // Arrow hit and spawn position
-    private static final float HIT_POSITION = 1;
+    private static final float HIT_POSITION = 10;
 
     // Hitzone
     private final Texture hitZoneTexture;
@@ -59,12 +59,12 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         hud.getProgressBar().setRange(0, music.getSongLength());
 
         // Setup hitZone
-        hitZoneTexture = new Texture("ocarina-game\\hit-zone.png");
+        hitZoneTexture = new Texture("ocarina-game\\hit-zone-fhd.png");
         hitZone = new Sprite(hitZoneTexture, hitZoneTexture.getWidth(), hitZoneTexture.getHeight());
         hitZone.setPosition(0.5f * (WORLD_WIDTH - hitZone.getWidth()), HIT_POSITION );
 
         // Setup background
-        backgroundTexture = new Texture("ocarina-game\\zelda-background.png");
+        backgroundTexture = new Texture("ocarina-game\\zelda-background-fhd.png");
         background = new Image(backgroundTexture);
     }
 
@@ -129,7 +129,8 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
     @Override
     protected void controlsAction() {
-        pauseGameOnEscape();
+        // Pause menu still buggy, henceforth it is deactivated
+        // pauseGameOnEscape();
 
         // Look for any arrows that have reached hitZone and remember them
         Array<Arrow> arrowsInHitZone = new Array<>();
