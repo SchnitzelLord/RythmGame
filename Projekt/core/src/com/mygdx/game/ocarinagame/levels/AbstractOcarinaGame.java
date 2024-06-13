@@ -30,6 +30,9 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected static final float TIME_RANGE_OFFSET = 0.001f; // for float comparisons (changing bpm at specific time)
     protected static final float ARROW_SPAWN_POSITION_OFFSET = 3;
 
+    // Game state constants
+    protected static final float WIN_RATE = 0.5f;
+
     // Game elements
     protected final Start game;
     protected final OrthographicCamera camera;
@@ -39,7 +42,7 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected Conductor conductor;
     protected BeatMusic music;
 
-    // Game state with default values
+    // Game state
     protected boolean isPenaltyOn;
     protected boolean isRunning;
     protected int score;
@@ -50,6 +53,7 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected Texture backgroundTexture;
     protected Image background;
 
+    // Collections
     protected final Array<Arrow> allArrows;
 
     // Constructor
@@ -105,7 +109,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     public void render(float delta) {
         if (isRunning) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
             camera.update();
             hud.update();
         }
@@ -157,7 +160,7 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     protected abstract boolean canArrowSpawn();
 
-    protected abstract void gameEndAction();
+    protected abstract void gameOverAction();
 
     // Functionality & utility methods for subclasses
 
@@ -220,12 +223,13 @@ public abstract class AbstractOcarinaGame implements Screen {
         return Gdx.input.isKeyJustPressed(Input.Keys.S) || Gdx.input.isKeyJustPressed(Input.Keys.DOWN);
     }
 
+    // For differentiating full score win with "acceptable" win
     protected boolean isGamePerfectlyWon() {
         return score >= music.getTotalBeatCount();
     }
 
-    protected boolean isGameWonInPercentage(float percentage) {
-        return score >= music.getTotalBeatCount() * (percentage / 100);
+    protected boolean hasWinRateBeenReached() {
+        return score >= music.getTotalBeatCount() * WIN_RATE;
     }
 
     protected void switchToScreen(Screen screen) {

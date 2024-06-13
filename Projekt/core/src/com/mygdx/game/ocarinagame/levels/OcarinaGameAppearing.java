@@ -55,7 +55,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         ScoreProgressBar progressBar = hud.getProgressBar();
         // Position at top right corner
         progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
-        progressBar.setRange(0, music.getTotalBeatCount());
+        progressBar.setRange(0, music.getTotalBeatCount() * WIN_RATE);
 
         // Initialize arrays
         upArrows = new Array<>();
@@ -91,7 +91,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
             // Remove arrow after certain amount of time
             removeAfterUptime();
 
-            gameEndAction();
+            gameOverAction();
         }
     }
 
@@ -170,12 +170,12 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     }
 
     @Override
-    protected void gameEndAction() {
+    protected void gameOverAction() {
         // If beat part of song has finished playing + 1s delay and
         // if game is won and song has ended, clear memory usage for textures and switch to next screen
         // (Use that song is not immediately stopping after beat part has ended)
         if (music.getPosition() >= music.getBeatEnd() + 1) {
-            if (isGamePerfectlyWon() || isGameWonInPercentage(50)) {
+            if (hasWinRateBeenReached()) {
                 dispose();
                 switchToScreen(new MainMenuScreen(game));
             }
