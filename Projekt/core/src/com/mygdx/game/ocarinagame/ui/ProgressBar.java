@@ -6,13 +6,12 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 
 
-public final class ScoreProgressBar extends ProgressBar implements Disposable {
+public final class ProgressBar extends com.badlogic.gdx.scenes.scene2d.ui.ProgressBar implements Disposable {
     private final Texture progressBarTexture;
     private final Texture progressBarEmptyTexture;
     private final Texture progressBarBorderTexture;
@@ -22,7 +21,7 @@ public final class ScoreProgressBar extends ProgressBar implements Disposable {
 
     // Constructor
 
-    ScoreProgressBar(float min, float max, float stepSize, float animateDuration) {
+    ProgressBar(float min, float max, float stepSize, float animateDuration) {
         super(min, max, stepSize, false, new ProgressBarStyle());
 
         // Setup textures for progress bar

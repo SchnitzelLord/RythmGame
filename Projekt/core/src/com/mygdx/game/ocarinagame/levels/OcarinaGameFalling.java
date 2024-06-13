@@ -13,7 +13,7 @@ import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
 import com.mygdx.game.ocarinagame.ui.HUD;
-import com.mygdx.game.ocarinagame.ui.ScoreProgressBar;
+import com.mygdx.game.ocarinagame.ui.ProgressBar;
 
 import java.util.Iterator;
 
@@ -53,8 +53,10 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         // Setup UI
         // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
         hud = new HUD(game.batch, this);
-        ScoreProgressBar progressBar = hud.getProgressBar();
-        progressBar.setRange(0, music.getTotalBeatCount() * WIN_RATE);
+        // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
+        // hud.getScoreProgressBar().setRange(0, music.getTotalBeatCount() * WIN_RATE);
+        // Progressbar fills according to progress in song
+        hud.getProgressBar().setRange(0, music.getSongLength());
 
         // Setup hitZone
         hitZoneTexture = new Texture("ocarina-game\\hit-zone.png");

@@ -15,6 +15,8 @@ import com.mygdx.game.ocarinagame.levels.AbstractOcarinaGame;
 
 public final class HUD implements Disposable {
     private static final int POSITION_OFFSET = 20;
+    private static final boolean isProgressBarActive = true;
+    private static final boolean isScoreProgressBarActive = false;
 
     private final AbstractOcarinaGame game;
     private final SpriteBatch spriteBatch;
@@ -22,7 +24,8 @@ public final class HUD implements Disposable {
     private final Stage stage;
     private final Viewport viewport;
 
-    private final ScoreProgressBar progressBar;
+    private ProgressBar scoreProgressBar;
+    private ProgressBar progressBar;
     private final Array<Sprite> hearts;
 
     private final Texture heartTexture;
@@ -38,10 +41,7 @@ public final class HUD implements Disposable {
         viewport = new FillViewport(game.getWorldWidth(), game.getWorldHeight(), new OrthographicCamera());
         stage = new Stage(viewport, spriteBatch);
 
-        // Create progress bar with default values
-        progressBar = new ScoreProgressBar(0, 10, 1, 0);;
-        // Position at top right corner
-        progressBar.setPosition(game.getScreenWidth() - progressBar.getWidth() - POSITION_OFFSET, game.getScreenHeight() - progressBar.getHeight() - POSITION_OFFSET);
+        createProgressBars();
 
         stage.addActor(progressBar);
 
@@ -52,17 +52,22 @@ public final class HUD implements Disposable {
 
     // Getter
 
-    public ScoreProgressBar getProgressBar() {
+    public ProgressBar getScoreProgressBar() {
+        return scoreProgressBar;
+    }
+
+    public ProgressBar getProgressBar() {
         return progressBar;
     }
 
     // Functional methods
 
-    public void update() {
-        // Calculate offset for progress bar value since TEXTURE_OFFSET pixel on the left will (and should) not be stretched
-        float pxPerValue = progressBar.getWidth() / progressBar.getMaxValue();
-        float scoreOffset = progressBar.getTextureOffset() / pxPerValue;
-        progressBar.setValue(game.getScore() + scoreOffset);
+    public void updateScore() {
+        scoreProgressBar.setValue(game.getScore() + getRenderOffset(scoreProgressBar));
+    }
+
+    public void updateProgress() {
+        progressBar.setValue(game.getMusic().getSong().getPosition() + getRenderOffset(progressBar));
     }
 
     public void draw() {
@@ -78,6 +83,29 @@ public final class HUD implements Disposable {
 
     // Utility methods
 
+    private float getRenderOffset(ProgressBar progressBar) {
+        // Calculate offset for progress bar value since TEXTURE_OFFSET pixel on the left will (and should) not be stretched
+        float pxPerValue = progressBar.getWidth() / progressBar.getMaxValue();
+        float offset = progressBar.getTextureOffset() / pxPerValue;
+        return offset;
+    }
+
+    private void createProgressBars() {
+        if (isScoreProgressBarActive) {
+            // Create progress bar for score with default values
+            scoreProgressBar = new ProgressBar(0, 10, 1, 0);
+            // Position at top right corner
+            scoreProgressBar.setPosition(game.getScreenWidth() - scoreProgressBar.getWidth() - POSITION_OFFSET, game.getScreenHeight() - scoreProgressBar.getHeight() - POSITION_OFFSET);
+        }
+
+        if (isProgressBarActive) {
+            // Create progress bar for progress with default values
+            progressBar = new ProgressBar(0, 10, 0.1f, 0.25f);
+            // Position at top right corner
+            progressBar.setPosition(game.getScreenWidth() - progressBar.getWidth() - POSITION_OFFSET, game.getScreenHeight() - progressBar.getHeight() - POSITION_OFFSET);
+        }
+    }
+
     private void addHeartBar() {
         float positionOffset = 10;
         for (int i = 0;i < game.getLives(); i++) {
@@ -91,8 +119,8 @@ public final class HUD implements Disposable {
     private void progressBarTest() {
         // Test animation of progress bar by increasing value by time
         progress += (Gdx.graphics.getDeltaTime() * 5);
-        if (progress >= getProgressBar().getMaxValue()+1) progress = 0;
-        progressBar.setValue(progress);
+        if (progress >= getScoreProgressBar().getMaxValue()+1) progress = 0;
+        scoreProgressBar.setValue(progress);
     }
 
     // Overrides
@@ -100,7 +128,7 @@ public final class HUD implements Disposable {
     @Override
     public void dispose() {
         stage.dispose();
-        progressBar.dispose();
+        scoreProgressBar.dispose();
         heartTexture.dispose();
     }
 }

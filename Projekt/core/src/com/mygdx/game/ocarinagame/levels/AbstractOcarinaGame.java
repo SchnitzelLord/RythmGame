@@ -105,6 +105,10 @@ public abstract class AbstractOcarinaGame implements Screen {
         return SCREEN_HEIGHT;
     }
 
+    public BeatMusic getMusic() {
+        return music;
+    }
+
     public int getLives() {
         return lives;
     }
@@ -120,7 +124,8 @@ public abstract class AbstractOcarinaGame implements Screen {
         if (isRunning) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             camera.update();
-            hud.update();
+            //hud.updateScore();
+            hud.updateProgress();
         }
     }
 

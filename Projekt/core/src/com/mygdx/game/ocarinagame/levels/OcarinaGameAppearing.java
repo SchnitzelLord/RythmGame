@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.GameOver;
 import com.mygdx.game.Start;
@@ -14,7 +13,7 @@ import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
 import com.mygdx.game.ocarinagame.ui.HUD;
-import com.mygdx.game.ocarinagame.ui.ScoreProgressBar;
+import com.mygdx.game.ocarinagame.ui.ProgressBar;
 
 import java.util.Comparator;
 
@@ -57,10 +56,12 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "OcarinaLevel"));
 
         // Setup UI
-        // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
+
         hud = new HUD(game.batch, this);
-        ScoreProgressBar progressBar = hud.getProgressBar();
-        progressBar.setRange(0, music.getTotalBeatCount() * WIN_RATE);
+        // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
+        // hud.getScoreProgressBar().setRange(0, music.getTotalBeatCount() * WIN_RATE);
+        // Progressbar fills according to progress in song
+        hud.getProgressBar().setRange(0, music.getSongLength());
 
         // Initialize arrays
         upArrows = new Array<>();
