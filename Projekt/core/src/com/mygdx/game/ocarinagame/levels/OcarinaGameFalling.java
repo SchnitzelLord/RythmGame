@@ -83,6 +83,9 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             if (canArrowSpawn()) spawnArrow();
             moveArrowsDown(delta);
             deleteArrowsOutOfWorld();
+
+            // If all live has been lost, restart game
+            if (lives == 0) game.setScreen(new GameOver(game, "OcarinaLevel"));
         }
     }
 
