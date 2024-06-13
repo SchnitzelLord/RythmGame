@@ -133,7 +133,6 @@ public class JumpAndRun implements Screen {
         for (int i = 0;i < 10; i++) {
             Sprite heart = new Sprite(heartTexture,64,64);
             hearts.add(heart);
-            heart.setX(10 + (i* heart.getWidth()) +10 );
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
         // initialised the first two backgrounds

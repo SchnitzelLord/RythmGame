@@ -14,7 +14,6 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
-import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.PauseScreen;
 import com.mygdx.game.Start;
 import com.mygdx.game.ocarinagame.Arrow;
@@ -25,8 +24,8 @@ public abstract class AbstractOcarinaGame implements Screen {
     // Game and screen sizes
     protected static final int SCREEN_WIDTH = 1920;
     protected static final int SCREEN_HEIGHT = 1080;
-    protected static final int WORLD_HEIGHT = 75;
-    protected static final int WORLD_WIDTH = WORLD_HEIGHT * 16 / 9;
+    protected static final int WORLD_HEIGHT = 1080;
+    protected static final int WORLD_WIDTH = 1920;
 
     // Offsets
     protected static final float FLOAT_COMPARE_OFFSET = 0.01f; // for float comparisons (changing bpm at specific time)
@@ -46,10 +45,12 @@ public abstract class AbstractOcarinaGame implements Screen {
     protected BeatMusic music;
 
     // Game state
+    protected boolean areLivesActive;
     protected boolean isPenaltyOn;
     protected boolean isRunning;
     protected int score;
     protected int lastArrowDirectionInt;
+    protected static int lives;
 
     // Textures
     protected final Texture arrowTexture;
@@ -73,7 +74,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         viewport.apply(true);
 
         // Setup textures
-        arrowTexture = new Texture("ocarina-game\\arrow-up.png");
+        arrowTexture = new Texture("ocarina-game\\arrow-up-fhd.png");
 
         allArrows = new Array<>();
 
@@ -82,6 +83,8 @@ public abstract class AbstractOcarinaGame implements Screen {
         isRunning = false;
         score = 0;
         lastArrowDirectionInt = -1;
+        lives = 3;
+        areLivesActive = true;
     }
 
     // Getter
@@ -100,6 +103,10 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     public int getScreenHeight() {
         return SCREEN_HEIGHT;
+    }
+
+    public int getLives() {
+        return lives;
     }
 
     public int getScore() {
@@ -171,6 +178,10 @@ public abstract class AbstractOcarinaGame implements Screen {
         if (score > 0) score--;
     }
 
+    protected void reduceLives() {
+        if (lives > 0) lives--;
+    }
+
     protected void spawnArrow() {
         Sprite sprite = new Sprite(arrowTexture, arrowTexture.getWidth(), arrowTexture.getHeight());
         // Choose random direction for arrow
@@ -197,9 +208,9 @@ public abstract class AbstractOcarinaGame implements Screen {
                 isRightKeyPressed() && direction == Arrow.Direction.RIGHT;
     }
 
-    protected boolean isMissPressPenaltyTriggered() {
-        // Penalty for just pressing keys at random
-        return isPenaltyOn && (isUpKeyPressed() || isLeftKeyPressed() || isDownKeyPressed() || isRightKeyPressed());
+    protected boolean isAnyDirectionKeyPressed() {
+        // Check if any direction key has been pressed
+        return isUpKeyPressed() || isLeftKeyPressed() || isDownKeyPressed() || isRightKeyPressed();
     }
 
     protected void pauseGameOnEscape() {
@@ -254,13 +265,14 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     // Check whether game has been won or not after song is over + GAME_OVER_DELAY
     // and switch screen accordingly
-    protected void delayedGameOverWinCheck(float songLength) {
+    protected void delayedSongOverSwitchScreen(float songLength, Screen winScreen, Screen loseScreen) {
         new Timer().scheduleTask(new Timer.Task() {
             @Override
             public void run() {
                 if (hasWinRateBeenReached())
-                    switchToScreen(new MainMenuScreen(game));
-                else {}
+                    switchToScreen(winScreen);
+                else
+                    switchToScreen(loseScreen);
                 dispose();
             }
         }, songLength + GAME_OVER_DELAY);

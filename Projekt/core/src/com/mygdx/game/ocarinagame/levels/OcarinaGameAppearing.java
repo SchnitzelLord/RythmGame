@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
-import com.mygdx.game.MainMenuScreen;
+import com.mygdx.game.GameOver;
 import com.mygdx.game.Start;
 import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
@@ -54,14 +54,12 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         conductor.lastBeat = SPAWN_TIME_OFFSET + music.getBeatStart();
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedGameOverWinCheck(music.getSongLength());
+        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "OcarinaLevel"));
 
         // Setup UI
         // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
         hud = new HUD(game.batch, this);
         ScoreProgressBar progressBar = hud.getProgressBar();
-        // Position at top right corner
-        progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
         progressBar.setRange(0, music.getTotalBeatCount() * WIN_RATE);
 
         // Initialize arrays
@@ -71,11 +69,11 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         rightArrows = new Array<>();
 
         // Setup background
-        backgroundTexture = new Texture("ocarina-game\\wake-up-background.png");
+        backgroundTexture = new Texture("ocarina-game\\wake-up-background-fhd.png");
         background = new Image(backgroundTexture);
 
         // Setup blackbox
-        whiteBoxTexture = new Texture("ocarina-game\\white-box.png");
+        whiteBoxTexture = new Texture("ocarina-game\\white-box-fhd.png");
         whiteBox = new Image(whiteBoxTexture);
             // Center blackBox
         whiteBox.setPosition(0.5f * (WORLD_WIDTH - whiteBox.getWidth()), 0.5f * (WORLD_HEIGHT - whiteBox.getHeight()));
@@ -104,6 +102,9 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
 
             // Remove arrow after certain amount of time
             removeAfterUptime();
+
+            // If all live has been lost, restart game
+            if (lives == 0) game.setScreen(new TransitionScreen(game,"WakeUp"));
         }
     }
 
@@ -160,8 +161,9 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
             if (isInputEqualsDirection(direction)) {
                 score++;
                 removeArrowOfDirection(a.getDirection());
-            } else if (isMissPressPenaltyTriggered()) {
-                reduceScore();
+            } else if (isAnyDirectionKeyPressed()) {
+                if (isPenaltyOn) reduceScore();
+                if (areLivesActive) reduceLives();
             }
         }
 
@@ -253,17 +255,5 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     private void transferPositionFromTo(Arrow arrow1, Arrow arrow2) {
         Sprite arr1 = arrow1.getSprite();
         arrow2.getSprite().setPosition(arr1.getX(), arr1.getY());
-    }
-
-    protected void delayedGameOverWinCheck(float songLength) {
-        new Timer().scheduleTask(new Timer.Task() {
-            @Override
-            public void run() {
-                if (hasWinRateBeenReached())
-                    switchToScreen(new TransitionScreen(game,"WayThere"));
-                else {}
-                dispose();
-            }
-        }, songLength + GAME_OVER_DELAY);
     }
 }

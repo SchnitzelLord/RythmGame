@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
+import com.mygdx.game.GameOver;
 import com.mygdx.game.Start;
 import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
@@ -48,14 +48,12 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         conductor.lastBeat = music.getBeatStart() - conductor.crochet + DELAY;
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedGameOverWinCheck(music.getSongLength());
+        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"MazeLevel"), new GameOver(game, "WakeUp"));
 
         // Setup UI
         // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
         hud = new HUD(game.batch, this);
         ScoreProgressBar progressBar = hud.getProgressBar();
-        // Position at top right corner
-        progressBar.setPosition(WORLD_WIDTH - progressBar.getWidth() - 3, WORLD_HEIGHT - progressBar.getHeight() - 3);
         progressBar.setRange(0, music.getTotalBeatCount() * WIN_RATE);
 
         // Setup hitZone
@@ -139,8 +137,9 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             if (isArrowInHitZone(arrow) && isInputEqualsDirection(arrow.getDirection())) {
                 score++;
                 allArrows.removeValue(arrow, true);
-            } else if (isMissPressPenaltyTriggered()) {
-                reduceScore();
+            } else if (isAnyDirectionKeyPressed()) {
+                if (isPenaltyOn) reduceScore();
+                if (areLivesActive) reduceLives();
             }
         }
     }
@@ -200,17 +199,5 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         hud.draw();
 
         drawArrows();
-    }
-
-    protected void delayedGameOverWinCheck(float songLength) {
-        new Timer().scheduleTask(new Timer.Task() {
-            @Override
-            public void run() {
-                if (hasWinRateBeenReached())
-                    switchToScreen(new TransitionScreen(game,"MazeLevel"));
-                else {}
-                dispose();
-            }
-        }, songLength + GAME_OVER_DELAY);
     }
 }
