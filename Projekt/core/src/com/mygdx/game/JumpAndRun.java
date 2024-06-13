@@ -149,8 +149,8 @@ public class JumpAndRun implements Screen {
         backgrounds.add(background);
         spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
-        song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"MazeLevel")));
-
+        if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
+        else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
         conductor.start();
 
         this.levelId = levelId;

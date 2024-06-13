@@ -93,7 +93,7 @@ public class MainMenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 backgroundMusic.stop();
                 newGame.removeListener(this);
-                game.setScreen(new TransitionScreen(game, "MazeLevel"));
+                game.setScreen(new TransitionScreen(game, "WakeUp"));
             }
         });
 

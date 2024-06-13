@@ -6,8 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
+import com.mygdx.game.MainMenuScreen;
 import com.mygdx.game.Start;
+import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
 import com.mygdx.game.ocarinagame.ui.HUD;
@@ -250,5 +253,17 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     private void transferPositionFromTo(Arrow arrow1, Arrow arrow2) {
         Sprite arr1 = arrow1.getSprite();
         arrow2.getSprite().setPosition(arr1.getX(), arr1.getY());
+    }
+
+    protected void delayedGameOverWinCheck(float songLength) {
+        new Timer().scheduleTask(new Timer.Task() {
+            @Override
+            public void run() {
+                if (hasWinRateBeenReached())
+                    switchToScreen(new TransitionScreen(game,"WayThere"));
+                else {}
+                dispose();
+            }
+        }, songLength + GAME_OVER_DELAY);
     }
 }

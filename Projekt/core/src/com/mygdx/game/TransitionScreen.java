@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.mygdx.game.ocarinagame.levels.OcarinaGameAppearing;
+import com.mygdx.game.ocarinagame.levels.OcarinaGameFalling;
 
 public class TransitionScreen implements Screen {
     final Start game;
@@ -50,13 +52,13 @@ public class TransitionScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         style = new Label.LabelStyle(pixelFont, Color.WHITE);
-        if (nextScreen.equals("JumpAndRun")) {
+        if (nextScreen.equals("WayThere")||nextScreen.equals("Homeway")) {
             text = new Label("Evade the Waves! \nJump - Space \nStomp - S \nWatch out for power ups", style);
             backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         } else if (nextScreen.equals("MazeLevel")) {
             text = new Label("Move to the beat \nMove - WASD \nExit the maze \nSurvive", style);
             backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
-        } else if (nextScreen.equals("OcarinaLevel")) {
+        } else if (nextScreen.equals("OcarinaLevel")||nextScreen.equals("WakeUp")) {
             text = new Label("Press the buttons to the beat \nUp - W \nLeft - A \nDown - S \nRight - D", style);
             backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         }
@@ -72,15 +74,15 @@ public class TransitionScreen implements Screen {
             @Override
             public void run() {
                 if (nextScreen.equals("Homeway")) {
-                    game.setScreen(new JumpAndRun(game));
+                    game.setScreen(new JumpAndRun(game,0));
                 } else if (nextScreen.equals("OcarinaLevel")) {
-                    //game.setScreen(new (game));
+                    game.setScreen(new OcarinaGameFalling(game));
                 } else if (nextScreen.equals("MazeLevel")) {
                     game.setScreen(new MazeLevel(game));
                 } else if (nextScreen.equals("WakeUp")) {
-                    //game.setScreen(new ());
+                    game.setScreen(new OcarinaGameAppearing(game));
                 } else if (nextScreen.equals("WayThere")) {
-                    game.setScreen(new JumpAndRun(game));
+                    game.setScreen(new JumpAndRun(game,1));
                 }
 
             }
