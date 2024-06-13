@@ -31,8 +31,6 @@ public class JumpAndRun implements Screen {
     private static final int boosterHeigth = 100;
     private static final int waveWidth = 64;
     private static final int waveHeigth = 64;
-    private static final int platformWidth = 100;
-    private static final int platformHeigth = 10;
     private static final int waveSPawnVariantion = 150;
 
     // Textures -----------------------------------------------------------------------
@@ -87,6 +85,7 @@ public class JumpAndRun implements Screen {
     private boolean canSpawn;
     private float debug_fallspeed;
     private int debug_remove;
+    private int levelId;
 
     private JumpAndRun(final Start game) {  // dont use this constructor use the one with levelId
         this.game = game;
@@ -115,8 +114,6 @@ public class JumpAndRun implements Screen {
 
 
         shield = 0;
-        conductor.start();
-
         fallSpeedChangeTime = 0;
 
 
@@ -142,7 +139,7 @@ public class JumpAndRun implements Screen {
 
     public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
         this(game);
-        if (levelId == 0)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
+        if (levelId == 1)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
         else backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunset.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
         if (levelId == 0) song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
         else song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
@@ -152,7 +149,11 @@ public class JumpAndRun implements Screen {
         backgrounds.add(background);
         spawnBackground(); //
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
-        song.setOnCompletionListener((a)-> Gdx.app.exit());
+        song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"MazeLevel")));
+
+        conductor.start();
+
+        this.levelId = levelId;
     }
 
     @Override
@@ -160,6 +161,8 @@ public class JumpAndRun implements Screen {
         setIsPaused(false);
         song.setVolume(Start.volume);
         song.play();
+        game.batch.setProjectionMatrix(camera.combined);
+
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -188,7 +191,7 @@ public class JumpAndRun implements Screen {
             else if (counter/ 10 == 2)player_walk0.draw(game.batch);
             else if (counter/ 10 == 3)player_walk2.draw(game.batch);
 
-            counter += 2;
+            counter += 3;
             if (counter > 39) counter = 0;
 
 
@@ -210,7 +213,7 @@ public class JumpAndRun implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.S)) {
             jumpTime = 0;
             jumps = 0;
-            fallSpeedMod = 3;
+            fallSpeedMod = 2;
             fallSpeedChangeTime = 20;
         }
 
@@ -316,7 +319,10 @@ public class JumpAndRun implements Screen {
         if(TimeUtils.nanoTime() - lastBoosterTime > 10000000000L  && canSpawn) spawnBooster();
         if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000L && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
-        if (lives <= 0) Gdx.app.exit();
+        if (lives <= 0)  {
+            if (levelId == 1) game.setScreen(new GameOver(game, "Homeway"));
+            else game.setScreen(new GameOver(game, "WayThere"));
+        };
     }
 
     public void update() {

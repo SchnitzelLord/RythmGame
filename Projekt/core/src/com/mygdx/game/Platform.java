@@ -57,17 +57,13 @@ public class Platform extends Sprite {
         }
 
         else if (getType() == Type.carGreen) {
-            if (checkHitbox(50,550,90,80,player)) return new Data(true, player.getY());
+            if (checkHitbox(50,550,100,80,player)) return new Data(true, player.getY());
             return new Data(false, 0);
         }
         else if (getType() == Type.truck1) {
-            /*
-            I did it the other way in comparison with the others because it is easier for two platforms in one
-             when testing I noticed the values for the boundaries are not the same as if i would look them up in gimp,
-             so I tested them until they feel right
-             */
-            if (checkHitbox(40,150,(int)getHeight() - 205,(int)getHeight() - 220,player)) return new Data(true, player.getY());
-            else if (checkHitbox(200,600,(int)getHeight() - 280,(int)getHeight() - 295,player)) return new Data(true, player.getY());
+
+            if (checkHitbox(40,150,(int)getHeight() - 20,(int)getHeight() - 220,player)) return new Data(true, player.getY());
+            else if (checkHitbox(200,600,(int)getHeight() - 280,(int)getHeight() - 300,player)) return new Data(true, player.getY());
             new Data(false,0);
         }
         else if (getType() == Type.truck2) {
