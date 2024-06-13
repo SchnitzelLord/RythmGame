@@ -138,9 +138,15 @@ public class JumpAndRun implements Screen {
         this(game);
         if (levelId == 1)backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunrise.png");//if levelId == 0 set the background to the one for the first level
         else backgroundTexture = new Texture("jumpAndRunSprites\\Background_Sunset.png"); // other case when it isn't the first level levelId == 1 not used because it could cause crashes defaults to first level
-        if (levelId == 0) song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
-        else song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
-        conductor = new Conductor(120, 0);
+        if (levelId == 1) {
+            song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Way_to_Uni_full.mp3"));
+            conductor = new Conductor(120, 0);
+        }
+        else {
+            song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Homeway_120bpm.mp3"));
+            conductor = new Conductor(103, 0);
+        }
+
         backgrounds = new Array<>();
         Sprite background = new Sprite(backgroundTexture,0,0,MAX_WIDTH,MAX_HEIGTH);// had a problem where the second spawned bugged when not created similar to the first (srX doesnt seem to do anything)
         backgrounds.add(background);
