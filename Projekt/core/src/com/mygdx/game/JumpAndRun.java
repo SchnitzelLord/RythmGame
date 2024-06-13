@@ -112,16 +112,12 @@ public class JumpAndRun implements Screen {
         player.setX(MAX_WIDTH / 2- 32);
         player.setY(MAX_HEIGTH / 2);
 
-
         isPaused = false;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1920, 1080);
 
-
         shield = 0;
         fallSpeedChangeTime = 0;
-
-
         // initializing Arrays
 
         hearts = new Array<>();
@@ -133,13 +129,9 @@ public class JumpAndRun implements Screen {
         for (int i = 0;i < 10; i++) {
             Sprite heart = new Sprite(heartTexture,64,64);
             hearts.add(heart);
-            heart.setX(10 + (i* heart.getWidth()) +10 );
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
         // initialised the first two backgrounds
-
-
-
     };
 
     public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
@@ -157,7 +149,6 @@ public class JumpAndRun implements Screen {
         if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
         else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
         conductor.start();
-
         this.levelId = levelId;
     }
 
@@ -167,7 +158,6 @@ public class JumpAndRun implements Screen {
         song.setVolume(Start.volume);
         song.play();
         game.batch.setProjectionMatrix(camera.combined);
-
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -300,7 +290,6 @@ public class JumpAndRun implements Screen {
                 else if(powerup.getPower() == Powerup.Power.live) {
                     if (lives < 5) lives++;
                 };
-
             }
         }
 
