@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.Conductor;
@@ -118,7 +119,6 @@ public abstract class AbstractOcarinaGame implements Screen {
     public void show() {
         isRunning = true;
         music.setVolume(Start.volume);
-        music.play();
     }
 
     @Override
@@ -133,12 +133,14 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     @Override
     public void resume() {
-
+        isRunning = true;
+        music.play();
     }
 
     @Override
     public void hide() {
-
+        isRunning = false;
+        music.pause();
     }
 
     @Override

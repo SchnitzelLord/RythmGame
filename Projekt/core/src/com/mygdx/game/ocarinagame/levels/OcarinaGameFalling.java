@@ -20,6 +20,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
     // Game state constants
     private static final float SPEED = 75;
+    private static final float DELAY = 3;
 
     // Arrow hit and spawn position
     private static final float HIT_POSITION = 1;
@@ -36,13 +37,14 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         super(game);
 
         // Setup audio
-        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
-        music = new BeatMusic(song, 110, 80, 13.117f, 56.338f, 58.984f);
+        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\zelda_fight_150bpm.mp3"));
+        music = new BeatMusic(song, 150, 0, 37.144f, 37.878f);
+        music.playMusicAfterSec(DELAY);
         song.dispose();
         conductor = new Conductor(music.getBPM(), 0);
         conductor.start();
-        // Set first beat time stamp
-        conductor.lastBeat = music.getBeatStart() - conductor.crochet;
+        // Set first beat time stamp with delay since beat begins immediately
+        conductor.lastBeat = music.getBeatStart() - conductor.crochet + DELAY;
 
         // Setup UI
         hud = new HUD(game.batch, this);
@@ -74,6 +76,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
 
             draw();
 
+            // Spawn, move and delete arrows
             if (canArrowSpawn()) spawnArrow();
             moveArrowsDown(delta);
             deleteArrowsOutOfWorld();
@@ -94,7 +97,6 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         Sprite sprite = arrow.getSprite();
 
         // Position anchors at bottom left of sprite
-
         switch (direction) {
             case LEFT:
                 sprite.setPosition((WORLD_WIDTH - ARROW_SPAWN_POSITION_OFFSET) * 0.5f - sprite.getWidth() * 2 - ARROW_SPAWN_POSITION_OFFSET, WORLD_HEIGHT);
@@ -176,7 +178,9 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
     // Private function & utility methods
 
     private boolean isArrowInHitZone(Arrow arrow) {
-        return hitZone.getY() <= arrow.getSprite().getY() && arrow.getSprite().getY() <= hitZone.getY() + hitZone.getHeight() - arrowTexture.getHeight();
+        int offset = 2;
+        return hitZone.getY() - offset <= arrow.getSprite().getY() &&
+                arrow.getSprite().getY() <= hitZone.getY() + offset + hitZone.getHeight() - arrowTexture.getHeight();
     }
 
     private void moveArrowsDown(float delta) {

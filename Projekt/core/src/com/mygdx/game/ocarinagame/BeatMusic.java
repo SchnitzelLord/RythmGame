@@ -2,6 +2,7 @@ package com.mygdx.game.ocarinagame;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Timer;
 
 public class BeatMusic implements Disposable {
     private final Music song;
@@ -20,6 +21,11 @@ public class BeatMusic implements Disposable {
         this.beatStart = beatStart;
         this.beatEnd = beatEnd;
         this.songLength = songLength;
+    }
+
+    // Calculates totalBeatCount by dividing beat time with time per beat
+    public BeatMusic(Music song, float bpm, float beatStart, float beatEnd, float songLength) {
+        this(song, bpm, (int) ((beatEnd - beatStart) / (60 / bpm)), beatStart, beatEnd, songLength);
     }
 
     // Getter
@@ -68,6 +74,15 @@ public class BeatMusic implements Disposable {
 
     public boolean isPlaying() {
         return song.isPlaying();
+    }
+
+    public void playMusicAfterSec(float seconds) {
+        new Timer().scheduleTask(new Timer.Task() {
+            @Override
+            public void run() {
+                song.play();
+            }
+        }, seconds);
     }
 
     // Setter

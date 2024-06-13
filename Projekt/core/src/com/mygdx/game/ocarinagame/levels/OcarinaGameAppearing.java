@@ -40,8 +40,9 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         super(game);
 
         // Setup audio
-        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\Wake_Up_110bpm.mp3"));
-        music = new BeatMusic(song, 110, 80, 13.177f, 56.338f, 58.984f);
+        Music song = Gdx.audio.newMusic(Gdx.files.internal("Music\\wake_up_110bpm.mp3"));
+        music = new BeatMusic(song, 110, 13.177f, 56.338f, 58.984f);
+        song.dispose();
         conductor = new Conductor(music.getBPM(), 0);
         conductor.start();
         // First arrow spawns earlier than beat
@@ -75,6 +76,13 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     }
 
     // Overrides
+
+
+    @Override
+    public void show() {
+        super.show();
+        music.play();
+    }
 
     @Override
     public void render(float delta) {
