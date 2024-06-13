@@ -38,8 +38,7 @@ public class Powerup extends Sprite {
                 break;
             case live: texture = new Texture("jumpAndRunSprites\\heartsprite.png"); // for testing jump_placeholder.png
                 break;
-            case live: texture = new Texture("jumpAndRunSprites\\heartsprite_test.png"); // for testing jump_placeholder.png
-                break;
+
         }
         return  texture;
     }

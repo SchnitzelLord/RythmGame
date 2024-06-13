@@ -66,7 +66,7 @@ public class GameOver implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if (level.equals("WayThere")) {
-                    game.setScreen(new JumpAndRun(game));
+                    game.setScreen(new JumpAndRun(game,0));
                 } else if (level.equals("OcarinaLevel")) {
                     game.setScreen(new MazeLevel(game));
                 } else if (level.equals("MazeLevel")) {
@@ -74,7 +74,7 @@ public class GameOver implements Screen {
                 } else if (level.equals("WakeUp")) {
                     //game.setScreen(new WakeUP());
                 } else if (level.equals("Homeway")) {
-                    game.setScreen(new JumpAndRun(game));
+                    game.setScreen(new JumpAndRun(game,0));
                 }
                 yesButton.remove();
             }
