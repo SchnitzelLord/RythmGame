@@ -84,7 +84,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         score = 0;
         lastArrowDirectionInt = -1;
         lives = 3;
-        areLivesActive = true;
+        areLivesActive = false;
     }
 
     // Getter
