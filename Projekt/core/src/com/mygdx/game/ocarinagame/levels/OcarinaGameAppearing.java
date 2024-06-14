@@ -53,7 +53,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         conductor.lastBeat = SPAWN_TIME_OFFSET + music.getBeatStart();
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "OcarinaLevel"));
+        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "WakeUp"));
 
         // Setup UI
 
