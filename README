@@ -1,3 +1,4 @@
+Does not properly work on Linux, only on Windows!
 Source Code is in the Package: Projekt\core\src\com\mygdx\game
 Game can be launched by running: Projekt\desktop\src\com\mygdx\game\DesktopLauncher.java
 Controls explained before every Level
