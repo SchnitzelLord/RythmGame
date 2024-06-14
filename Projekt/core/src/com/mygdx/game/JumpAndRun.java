@@ -85,8 +85,7 @@ public class JumpAndRun implements Screen {
     private long lastPowerupTime;
     private boolean canSpawn;
     private float debug_fallspeed;
-    private float offset =  (float) (MAX_WIDTH / 2) /((1/60) * itemSpeed);// offset of the distance to the player devided by how much itemsmoves per second (assuming 60 fps)
-    // it is used for the timing delay
+    private boolean songstarted;
     private int debug_remove;
     private int levelId;
 
@@ -157,7 +156,8 @@ public class JumpAndRun implements Screen {
         else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
 
         conductor.start();
-        conductor.lastBeat -= offset;
+        spawnWavebot();
+        spawnWavetop(); // spawn initial waves to sync with the music
 
         this.levelId = levelId;
     }
@@ -166,7 +166,6 @@ public class JumpAndRun implements Screen {
     public void show() {
         setIsPaused(false);
         song.setVolume(Start.volume);
-        song.play();
         game.batch.setProjectionMatrix(camera.combined);
     }
 
@@ -182,7 +181,7 @@ public class JumpAndRun implements Screen {
 
         if (!isPaused) {
             camera.update();
-            update(); // update the conductor
+            if (songstarted)update(); // update the conductor
             draw(backgrounds,waves, powerups,platforms,boosters,platforms);
 
             setplayerCords(player,player_walk0,player_walk1,player_walk2);
@@ -260,6 +259,11 @@ public class JumpAndRun implements Screen {
             wave.setX(wave.getX() - itemSpeed * Gdx.graphics.getDeltaTime());
             if(wave.getX() + wave.getWidth()< 0) iter.remove();
 
+            if (!songstarted && wave.getX() <= (float) MAX_WIDTH /2 + 5) {
+                songstarted = true;
+                song.play();
+            }
+
             if(overlap(wave)) {
                 iter.remove();
                 if (shield > 0) shield -=1;
@@ -334,7 +338,7 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        if (song.getPosition()- offset>= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset<= conductor.lastBeat + conductor.crochet  + 0.3f) {
+        if (song.getPosition()>= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition()<= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
         } else {
