@@ -48,7 +48,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         conductor.lastBeat = music.getBeatStart() - conductor.crochet + DELAY;
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"MazeLevel"), new GameOver(game, "WakeUp"));
+        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"MazeLevel"), new GameOver(game, "OcarinaLevel"));
 
         // Setup UI
         // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
