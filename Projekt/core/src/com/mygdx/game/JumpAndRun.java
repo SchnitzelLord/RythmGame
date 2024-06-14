@@ -321,11 +321,11 @@ public class JumpAndRun implements Screen {
         if(TimeUtils.nanoTime() - lastPlatformTime > 1000000000L && (Math.random() > 0.5)  && canSpawn) spawnPlatform();
         if(TimeUtils.nanoTime() - lastPowerupTime > 10000000000L && (Math.random() > 0.75)  && canSpawn) spawnPowerup();
         if (lives <= 0)  {
-            if (levelId == 1) game.setScreen(new GameOver(game, "Homeway"));
-            else {
-                game.setScreen(new GameOver(game, "WayThere"));
-                song.stop();
-            }
+            if (levelId == 1) game.setScreen(new GameOver(game, "WayThere"));
+            else game.setScreen(new GameOver(game, "Homeway"));
+
+            song.stop();
+            dispose();
         };
     }
 
