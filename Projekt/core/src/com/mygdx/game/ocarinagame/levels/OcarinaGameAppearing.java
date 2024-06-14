@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.GameOver;
 import com.mygdx.game.Start;
@@ -13,7 +14,6 @@ import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
 import com.mygdx.game.ocarinagame.ui.HUD;
-import com.mygdx.game.ocarinagame.ui.ProgressBar;
 
 import java.util.Comparator;
 
@@ -32,6 +32,9 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
     // Background for better visibility of arrows
     private final Texture whiteBoxTexture;
     private final Image whiteBox;
+
+    // Timer for delayed game over
+    private final Timer timer;
 
     // Constructor
 
@@ -53,7 +56,7 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
         conductor.lastBeat = SPAWN_TIME_OFFSET + music.getBeatStart();
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "WakeUp"));
+        timer = delayedSongOverSwitchScreenTimer(music.getSongLength(), new TransitionScreen(game,"WayThere"), new GameOver(game, "WakeUp"));
 
         // Setup UI
 
@@ -104,9 +107,10 @@ public final class OcarinaGameAppearing extends AbstractOcarinaGame {
             // Remove arrow after certain amount of time
             removeAfterUptime();
 
-            // If all live has been lost, restart game
+            // If all lives have been lost, restart game
             if (lives == 0) {
                 switchToScreen(new GameOver(game, "WakeUp"));
+                timer.clear();
                 dispose();
             }
         }

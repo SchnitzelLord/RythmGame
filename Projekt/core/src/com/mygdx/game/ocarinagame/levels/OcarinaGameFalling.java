@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.mygdx.game.Conductor;
 import com.mygdx.game.GameOver;
 import com.mygdx.game.Start;
@@ -13,7 +14,6 @@ import com.mygdx.game.TransitionScreen;
 import com.mygdx.game.ocarinagame.Arrow;
 import com.mygdx.game.ocarinagame.BeatMusic;
 import com.mygdx.game.ocarinagame.ui.HUD;
-import com.mygdx.game.ocarinagame.ui.ProgressBar;
 
 import java.util.Iterator;
 
@@ -29,6 +29,9 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
     // Hitzone
     private final Texture hitZoneTexture;
     private final Sprite hitZone;
+
+    // Timer for delayed Game Over
+    private final Timer timer;
 
     // Constructor
 
@@ -48,7 +51,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
         conductor.lastBeat = music.getBeatStart() - conductor.crochet + DELAY;
 
         // Timer to switch to another screen depending on result after GAME_OVER_DELAY
-        delayedSongOverSwitchScreen(music.getSongLength(), new TransitionScreen(game,"MazeLevel"), new GameOver(game, "OcarinaLevel"));
+        timer = delayedSongOverSwitchScreenTimer(music.getSongLength(), new TransitionScreen(game,"MazeLevel"), new GameOver(game, "OcarinaLevel"));
 
         // Setup UI
         // Progressbar max is set to WIN_RATE * totalBeatCount, e.g. is progress bar full then the game is won
@@ -89,6 +92,7 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             // If all live has been lost, restart game
             if (lives == 0) {
                 switchToScreen(new GameOver(game, "OcarinaLevel"));
+                timer.clear();
                 dispose();
             }
         }
@@ -146,10 +150,12 @@ public final class OcarinaGameFalling extends AbstractOcarinaGame {
             if (isArrowInHitZone(arrow) && isInputEqualsDirection(arrow.getDirection())) {
                 score++;
                 allArrows.removeValue(arrow, true);
-            } else if (isAnyDirectionKeyPressed()) {
-                if (isPenaltyOn) reduceScore();
-                if (areLivesActive) reduceLives();
             }
+        }
+
+        if (arrowsInHitZone.isEmpty() && isAnyDirectionKeyPressed()) {
+            if (isPenaltyOn) reduceScore();
+            if (areLivesActive) reduceLives();
         }
     }
 

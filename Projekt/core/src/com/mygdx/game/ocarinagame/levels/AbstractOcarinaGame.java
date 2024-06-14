@@ -84,7 +84,7 @@ public abstract class AbstractOcarinaGame implements Screen {
         score = 0;
         lastArrowDirectionInt = -1;
         lives = 3;
-        areLivesActive = false;
+        areLivesActive = true;
     }
 
     // Getter
@@ -270,8 +270,9 @@ public abstract class AbstractOcarinaGame implements Screen {
 
     // Check whether game has been won or not after song is over + GAME_OVER_DELAY
     // and switch screen accordingly
-    protected void delayedSongOverSwitchScreen(float songLength, Screen winScreen, Screen loseScreen) {
-        new Timer().scheduleTask(new Timer.Task() {
+    protected Timer delayedSongOverSwitchScreenTimer(float songLength, Screen winScreen, Screen loseScreen) {
+        Timer timer = new Timer();
+        timer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
                 if (hasWinRateBeenReached())
@@ -281,5 +282,6 @@ public abstract class AbstractOcarinaGame implements Screen {
                 dispose();
             }
         }, songLength + GAME_OVER_DELAY);
+        return timer;
     }
 }
