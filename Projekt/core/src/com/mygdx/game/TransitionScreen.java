@@ -56,7 +56,7 @@ public class TransitionScreen implements Screen {
             text = new Label("Evade the Waves! \nJump - Space \nStomp - S \nWatch out for power ups", style);
             backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         } else if (nextScreen.equals("MazeLevel")) {
-            text = new Label("Move to the beat \nMove - WASD \nExit the maze \nSurvive", style);
+            text = new Label("Exit the maze \nMove - WASD \nSurvive", style);
             backgroundTexture = new Texture(Gdx.files.internal("Menus\\background.png"));
         } else if (nextScreen.equals("OcarinaLevel")||nextScreen.equals("WakeUp")) {
             text = new Label("Press the buttons to the beat \nUp - W \nLeft - A \nDown - S \nRight - D", style);
