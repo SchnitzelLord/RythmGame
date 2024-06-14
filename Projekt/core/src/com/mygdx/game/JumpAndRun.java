@@ -85,6 +85,8 @@ public class JumpAndRun implements Screen {
     private long lastPowerupTime;
     private boolean canSpawn;
     private float debug_fallspeed;
+    private float offset =  (float) (MAX_WIDTH / 2) /((1/60) * itemSpeed);// offset of the distance to the player devided by how much itemsmoves per second (assuming 60 fps)
+    // it is used for the timing delay
     private int debug_remove;
     private int levelId;
 
@@ -131,7 +133,6 @@ public class JumpAndRun implements Screen {
             hearts.add(heart);
             heart.setY(MAX_HEIGTH - heart.getHeight() * 2);
         }
-        // initialised the first two backgrounds
     };
 
     public JumpAndRun(final Start game, int levelId) { // levelId sets the background, thus it is used to distinguish the two levels (0 = Way to uni 1 = way back)
@@ -154,7 +155,10 @@ public class JumpAndRun implements Screen {
         debugBeat = new Sprite(debugBeatTexture,10,0,5,1080);
         if(levelId == 1) song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"Homeway")));
         else song.setOnCompletionListener((a)-> game.setScreen(new TransitionScreen(game,"OcarinaLevel")));
+
         conductor.start();
+        conductor.lastBeat -= offset;
+
         this.levelId = levelId;
     }
 
@@ -330,7 +334,7 @@ public class JumpAndRun implements Screen {
     }
 
     public void update() {
-        if (song.getPosition() >= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition()<= conductor.lastBeat + conductor.crochet  + 0.3f) {
+        if (song.getPosition()- offset>= conductor.lastBeat + conductor.crochet - 0.3f && song.getPosition() - offset<= conductor.lastBeat + conductor.crochet  + 0.3f) {
             canSpawn = true;
             conductor.lastBeat += conductor.crochet;
         } else {
